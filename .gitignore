@@ -1,9 +1,14 @@
 # Django / Python
 backend/venv/
 backend/__pycache__/
+backend/config/__pycache__/
 backend/*.pyc
 backend/db.sqlite3
 backend/.env
+backend/**/migrations/
+!backend/**/migrations/__init__.py
+**/__pycache__/
+*.pyc
 
 # React / Node.js
 frontend/node_modules/
