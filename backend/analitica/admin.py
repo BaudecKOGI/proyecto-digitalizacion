@@ -1,3 +1,4 @@
 from django.contrib import admin
+from analitica.models import MetricaProyecto
 
-# Register your models here.
+admin.site.register(MetricaProyecto)
