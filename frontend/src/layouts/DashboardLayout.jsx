@@ -6,8 +6,8 @@ import { Outlet } from "react-router-dom";
 
 import { AuthGuard } from "@/components/auth/auth-guard";
 
-import { MainNav } from "./main-nav";
-import { SideNav } from "./side-nav";
+import { MainNav } from "../components/dashboard/layout/main-nav";
+import { SideNav } from "../components/dashboard/layout/side-nav";
 
 export function Layout({ children }) {
 	return (
