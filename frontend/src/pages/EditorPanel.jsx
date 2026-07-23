@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { LoginView } from '../views/LoginView';
 import { HubView } from '../views/HubView';
-import { DashboardView } from '../views/DashboardView';
+import { DashboardView } from '../views/editor/DashboardView';
 import '../styles/editor-panel.css'; // Tus estilos del admin
 
 export default function EditorPanel() {

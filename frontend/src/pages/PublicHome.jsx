@@ -1,13 +1,13 @@
 import { useState } from 'react';
-import Navbar from '../components/common/Navbar';
-import SideNav from '../components/common/SideNav';
-import Footer from '../components/common/Footer';
-import GalleryScreen from '../components/common/GalleryScreen';
-import Hero from '../components/sections/Hero';
-import AssemblySection from '../components/sections/AssemblySection';
-import DualitySection from '../components/sections/DualitySection';
-import Showcase3D from '../components/showcase/Showcase3D';
-import ShowcaseSoftware from '../components/showcase/ShowcaseSoftware';
+import Navbar from '../components/landing/common/PublicNavbar';
+import SideNav from '../components/landing/common/SideNav';
+import Footer from '../components/landing/common/PublicFooter';
+import GalleryScreen from '../components/landing/common/GalleryScreen';
+import Hero from '../components/landing/sections/Hero';
+import AssemblySection from '../components/landing/sections/AssemblySection';
+import DualitySection from '../components/landing/sections/DualitySection';
+import Showcase3D from '../components/landing/showcase/Showcase3D';
+import ShowcaseSoftware from '../components/landing/showcase/ShowcaseSoftware';
 import { fetchProyectos3D, fetchProyectosSoftware } from '../services/api';
 
 const SECTIONS = [

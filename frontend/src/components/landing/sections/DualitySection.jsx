@@ -1,5 +1,5 @@
 import React from 'react';
-import useReveal from "../../hooks/useReveal"; // Asegúrate de importar el hook
+import useReveal from "../../../hooks/useReveal"; // Asegúrate de importar el hook
 
 export default function DualitySection() {
   useReveal(); // Ejecuta la animación de scroll
