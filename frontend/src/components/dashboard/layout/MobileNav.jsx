@@ -10,10 +10,10 @@ import { Link as RouterLink, useLocation } from "react-router-dom";
 
 import { paths } from "@/paths";
 import { isNavItemActive } from "@/lib/is-nav-item-active";
-import { Logo } from "@/components/core/logo";
+import { Logo } from "@/components/core/Logo";
 
 import { navItems } from "./config";
-import { navIcons } from "./nav-icons";
+import { navIcons } from "./NavIcons";
 
 export function MobileNav({ open, onClose }) {
 	const location = useLocation();

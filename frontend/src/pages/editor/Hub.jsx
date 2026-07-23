@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-export const HubView = ({ onSelectMode }) => {
+export const Hub = () => {
+  const navigate = useNavigate();
   const [activeSide, setActiveSide] = useState('3d');
 
   return (
@@ -13,7 +15,7 @@ export const HubView = ({ onSelectMode }) => {
         <div
           className={`half side-3d ${activeSide === '3d' ? 'hot' : 'dim'}`}
           onMouseEnter={() => setActiveSide('3d')}
-          onClick={() => onSelectMode('3d')}
+          onClick={() => navigate('/editor/3d')}
         >
           <div className="grid-bg"></div>
           <div className="half-content">
@@ -31,7 +33,7 @@ export const HubView = ({ onSelectMode }) => {
         <div
           className={`half side-dig ${activeSide === 'dig' ? 'hot' : 'dim'}`}
           onMouseEnter={() => setActiveSide('dig')}
-          onClick={() => onSelectMode('dig')}
+          onClick={() => navigate('/editor/software')}
         >
           <div className="grid-bg"></div>
           <div className="half-content">

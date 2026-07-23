@@ -2,13 +2,13 @@ import * as React from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 
-// === IMPORTS DE ESTILOS ===
-import "./styles/index.css"; // 🎨 Estilos globales de la Landing Page
-import "@/styles/global.css"; // 🎨 Estilos globales del Dashboard / Admin
+// Estilos globales
+import "./styles/index.css"; //Para la landing page
+import "@/styles/global.css"; //Para el dashboard
 
-// === IMPORTS DE CONTEXTOS Y COMPONENTES ===
+// importación de contextos y providers
 import { UserProvider } from "@/contexts/user-context";
-import { ThemeProvider } from "@/components/core/theme-provider/theme-provider";
+import { ThemeProvider } from "@/components/core/theme-provider/ThemeProvider";
 import App from "./App";
 
 const rootElement = document.getElementById("root");

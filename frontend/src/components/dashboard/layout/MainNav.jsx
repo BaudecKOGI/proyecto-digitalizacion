@@ -14,8 +14,8 @@ import { UsersIcon } from "@phosphor-icons/react/dist/ssr/Users";
 
 import { usePopover } from "@/hooks/use-popover";
 
-import { MobileNav } from "./mobile-nav";
-import { UserPopover } from "./user-popover";
+import { MobileNav } from "./MobileNav";
+import { UserPopover } from "./UserPopover";
 
 export function MainNav() {
 	const [openNav, setOpenNav] = React.useState(false);

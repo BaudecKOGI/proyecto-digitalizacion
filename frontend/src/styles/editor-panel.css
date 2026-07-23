@@ -1,3 +1,13 @@
+<<<<<<< HEAD
+=======
+.editor-layout {
+  --bg: #12151b;
+  --panel: #1b1f27;
+  --line: #2a2f3a;
+  --text: #eceff4;
+  --muted: #8a93a3;
+}
+>>>>>>> 9717558b43d09cb1072b1c7dac6ec0c91986f0e5
 :root {
   /* =========================================
      PALETA DE COLORES (Basado en image_a8747b.jpg)
@@ -21,6 +31,10 @@
 
   /* VARIABLES DINÁMICAS (Cambian por JS según el modo) */
   --accent: var(--c3d);
+<<<<<<< HEAD
+=======
+  
+>>>>>>> 9717558b43d09cb1072b1c7dac6ec0c91986f0e5
   --accent-dim: var(--c3d-dim);
   --text-muted: var(--c3d-base-text);
 }

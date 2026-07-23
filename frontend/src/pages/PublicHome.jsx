@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import Navbar from '../components/landing/common/PublicNavbar';
-import SideNav from '../components/landing/common/SideNav';
-import Footer from '../components/landing/common/PublicFooter';
-import GalleryScreen from '../components/landing/common/GalleryScreen';
+
+import Navbar from '../components/landing/navigation/PublicNavbar';
+import SideNav from '../components/landing/navigation/SideNav';
+import Footer from '../components/landing/navigation/PublicFooter';
+import GalleryScreen from '../components/landing/navigation/GalleryScreen';
 import Hero from '../components/landing/sections/Hero';
 import AssemblySection from '../components/landing/sections/AssemblySection';
 import StatsSection from '../components/landing/sections/StatsSection';

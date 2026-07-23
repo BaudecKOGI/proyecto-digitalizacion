@@ -31,7 +31,10 @@ export default function Showcase3D({ onOpenGallery }) {
           </div>
 
           <div className="reveal relative w-full overflow-hidden rounded-sm bg-bg">
-            <div className="aspect-[4/3] w-full bg-[url('https://fablab.ucontinental.edu.pe/wp-content/uploads/2022/10/banner_principal.jpg')] bg-cover bg-center transition-transform duration-1000 hover:scale-105"></div>
+            <div 
+              className="aspect-[4/3] w-full bg-cover bg-center transition-transform duration-1000 hover:scale-105"
+              style={{ backgroundImage: "url('https://images.unsplash.com/photo-1581092334651-ddf26d9a09d0?auto=format&fit=crop&q=80')" }}
+            ></div>
             
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-bg/70 backdrop-blur-sm opacity-0 transition-opacity hover:opacity-100">
               <svg className="mb-4 h-12 w-12 text-c3d" fill="none" viewBox="0 0 24 24" stroke="currentColor">

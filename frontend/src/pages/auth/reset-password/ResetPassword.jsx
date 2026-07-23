@@ -1,6 +1,6 @@
 import * as React from "react";
-import { GuestGuard } from "@/components/auth/guest-guard";
-import { ResetPasswordForm } from "@/components/auth/reset-password-form";
+import { GuestGuard } from "@/components/auth/GuestGuard";
+import { ResetPasswordForm } from "@/components/auth/ResetPasswordForm";
 
 export default function Page() {
 	return (
