@@ -37,6 +37,10 @@ body {
   font-family: 'Inter', system-ui, sans-serif;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 .mono {
   font-family: 'JetBrains Mono', monospace;
 }

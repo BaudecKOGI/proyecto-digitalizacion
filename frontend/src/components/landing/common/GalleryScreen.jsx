@@ -1,13 +1,8 @@
 import { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 /**
  * Modal de pantalla completa para listar proyectos de una categoría.
- *
- * type: '3d' | 'software'  -> decide qué campos mostrar en cada tarjeta
- * fetchFn: función de src/services/api.js que trae los proyectos
- *
- * Mientras el backend no esté listo (o no haya proyectos publicados),
- * se muestra un estado vacío prolijo en vez de contenido inventado.
  */
 export default function GalleryScreen({
   id,
@@ -22,7 +17,8 @@ export default function GalleryScreen({
   const [status, setStatus] = useState('idle'); // idle | loading | success | error
   const [proyectos, setProyectos] = useState([]);
 
-  const colorClass = type === '3d' ? 'c3d' : 'cdig';
+  const colorClass = type === '3d' ? 'text-c3d' : 'text-cdig';
+  const bgHoverClass = type === '3d' ? 'hover:border-c3d hover:shadow-md' : 'hover:border-cdig hover:shadow-md';
 
   useEffect(() => {
     if (!active || status !== 'idle') return;
@@ -41,58 +37,150 @@ export default function GalleryScreen({
 
   const showEmptyState = status !== 'success' || proyectos.length === 0;
 
+  const modalVariants = {
+    hidden: { opacity: 0, y: "100%" },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] }
+    },
+    exit: {
+      opacity: 0,
+      y: "100%",
+      transition: { duration: 0.4, ease: "easeIn" }
+    }
+  };
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1, delayChildren: 0.3 }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
+  };
+
   return (
-    <div id={id} className={`app-screen ${active ? 'active' : ''}`}>
-      <div className="flex items-center justify-between border-b border-line px-[8vw] py-6">
-        <button onClick={onClose} className="gallery-back flex items-center gap-2 font-mono text-[11.5px] tracking-wide">
-          ← Volver al inicio
-        </button>
-        <div className="font-mono text-[11px] text-muted">FAB LAB UNIVERSITARIO</div>
-      </div>
-
-      <div className="gallery-head px-[8vw] pb-10 pt-16">
-        <div className={`tag ${colorClass} mb-4 font-mono text-[11px] uppercase tracking-[2px]`}>{tag}</div>
-        <h2 className="max-w-xl text-[clamp(28px,4vw,46px)] font-bold font-display">{title}</h2>
-        <p className="mt-4 max-w-md text-[14.5px] leading-relaxed text-muted">{description}</p>
-      </div>
-
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-6 px-[8vw] pb-24">
-        {status === 'loading' && (
-          <div className="col-span-full py-8 text-center font-mono text-[11.5px] tracking-wide text-muted">
-            Cargando proyectos…
+    <AnimatePresence>
+      {active && (
+        <motion.div
+          id={id}
+          variants={modalVariants}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          className="fixed inset-0 z-[200] overflow-y-auto bg-bg"
+        >
+          <div className="sticky top-0 z-10 flex items-center justify-between bg-bg/90 px-[8vw] py-8 backdrop-blur-md">
+            <div className="font-sans text-[11px] font-extrabold uppercase tracking-widest text-text">FAB LAB REPOSITORY</div>
+            <button
+              onClick={onClose}
+              className="group flex h-10 w-10 items-center justify-center rounded-full bg-panel text-text transition-all hover:bg-line"
+            >
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M1 1l12 12M13 1L1 13" />
+              </svg>
+            </button>
           </div>
-        )}
 
-        {showEmptyState && status !== 'loading' && (
-          <>
-            {[0, 1, 2].map((i) => (
-              <div key={i} className="skeleton-card flex aspect-[4/3] items-center justify-center">
-                <svg className="ph-icon" width="34" height="34" viewBox="0 0 24 24" fill="none">
-                  <rect x="3" y="3" width="18" height="18" stroke={`var(--${colorClass})`} strokeWidth="1.4" />
-                </svg>
-              </div>
-            ))}
-            <div className="col-span-full py-6 text-center font-mono text-[11.5px] tracking-wide text-muted">
-              {status === 'error'
-                ? 'No se pudo conectar con el servidor todavía.'
-                : 'Los proyectos publicados aparecerán aquí.'}
-            </div>
-          </>
-        )}
+          <div className="px-[8vw] pb-12 pt-12">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+              className={`mb-6 font-sans text-[11px] font-extrabold uppercase tracking-[0.2em] ${colorClass}`}
+            >
+              {tag}
+            </motion.div>
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="max-w-2xl font-display text-[clamp(40px,5vw,64px)] font-bold leading-[1.05] tracking-tight text-text"
+            >
+              {title}
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="mt-6 max-w-xl text-[16px] leading-relaxed text-muted"
+            >
+              {description}
+            </motion.p>
+          </div>
 
-        {status === 'success' &&
-          proyectos.map((p) => (
-            <div key={p.id} className="project-card overflow-hidden">
-              <div className="thumb aspect-[4/3] w-full bg-cover bg-center" style={{
-                backgroundImage: `url(${type === '3d' ? p.imagen_miniatura : p.imagen_portada || ''})`
-              }} />
-              <div className="p-4">
-                <h3 className="text-sm font-semibold">{p.titulo}</h3>
-                <p className="meta mt-1 font-mono text-[11px]">{p.autor_nombre} · {p.carrera}</p>
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-x-12 gap-y-16 px-[8vw] pb-32"
+          >
+            {status === 'loading' && (
+              <div className="col-span-full py-24 text-center font-sans text-[11px] font-bold uppercase tracking-widest text-muted">
+                <motion.div
+                  animate={{ opacity: [0.3, 1, 0.3] }}
+                  transition={{ repeat: Infinity, duration: 1.5 }}
+                >
+                  Sincronizando proyectos...
+                </motion.div>
               </div>
-            </div>
-          ))}
-      </div>
-    </div>
+            )}
+
+            {showEmptyState && status !== 'loading' && (
+              <>
+                {[0, 1, 2].map((i) => (
+                  <motion.div variants={itemVariants} key={i} className="flex aspect-[4/3] w-full items-center justify-center bg-panel">
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ repeat: Infinity, duration: 10, ease: "linear" }}
+                    >
+                      <svg className="opacity-10" width="34" height="34" viewBox="0 0 24 24" fill="none">
+                        <rect x="3" y="3" width="18" height="18" stroke="currentColor" strokeWidth="1.4" />
+                      </svg>
+                    </motion.div>
+                  </motion.div>
+                ))}
+                <div className="col-span-full py-12 text-center font-sans text-[13px] font-semibold text-muted">
+                  {status === 'error'
+                    ? 'Error de conexión con el repositorio principal.'
+                    : 'Aún no hay proyectos publicados en esta categoría.'}
+                </div>
+              </>
+            )}
+
+            {status === 'success' &&
+              proyectos.map((p) => (
+                <motion.div
+                  variants={itemVariants}
+                  key={p.id}
+                  className="group cursor-pointer"
+                >
+                  <div className="relative aspect-[4/3] w-full overflow-hidden bg-panel mb-6">
+                    <div
+                      className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-105"
+                      style={{ backgroundImage: `url(${type === '3d' ? p.imagen_miniatura : p.imagen_portada || ''})` }}
+                    />
+                  </div>
+                  <div>
+                    <h3 className={`font-display text-2xl font-bold text-text transition-colors ${type === '3d' ? 'group-hover:text-c3d' : 'group-hover:text-cdig'}`}>
+                      {p.titulo}
+                    </h3>
+                    <div className="mt-3 flex items-center gap-2 font-sans text-[11px] font-bold uppercase tracking-widest text-muted">
+                      <span>{p.autor_nombre}</span>
+                      <span className="h-1 w-1 rounded-full bg-muted/50"></span>
+                      <span>{p.carrera}</span>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

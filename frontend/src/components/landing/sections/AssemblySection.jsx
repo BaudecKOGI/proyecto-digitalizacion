@@ -1,147 +1,30 @@
-import { useEffect, useRef } from 'react';
-
-// Piezas dispersas: posición inicial (--sx/--sy en px), rotación inicial y color.
-const PIECES_3D = [
-  { sx: -320, sy: -140, sr: -70, path: 'rect', size: 46 },
-  { sx: 300, sy: -190, sr: 60, path: 'circle', size: 40 },
-  { sx: -260, sy: 180, sr: 40, path: 'house', size: 44 },
-];
-
-const PIECES_DIG = [
-  { sx: 340, sy: 150, sr: -50, path: 'brackets', size: 42 },
-  { sx: -150, sy: -260, sr: 35, path: 'window', size: 38 },
-  { sx: 150, sy: 260, sr: -30, path: 'target', size: 40 },
-];
-
-function PieceIcon({ path, ...props }) {
-  switch (path) {
-    case 'rect':
-      return (
-        <svg {...props} viewBox="0 0 24 24" fill="none">
-          <rect x="3" y="3" width="18" height="18" stroke="currentColor" strokeWidth="1.4" />
-          <path d="M3 9h18M9 3v18" stroke="currentColor" strokeWidth="1" />
-        </svg>
-      );
-    case 'circle':
-      return (
-        <svg {...props} viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="1.4" />
-          <circle cx="12" cy="12" r="2.4" fill="currentColor" />
-        </svg>
-      );
-    case 'house':
-      return (
-        <svg {...props} viewBox="0 0 24 24" fill="none">
-          <path d="M4 20 L4 10 L12 4 L20 10 L20 20 Z" stroke="currentColor" strokeWidth="1.4" />
-        </svg>
-      );
-    case 'brackets':
-      return (
-        <svg {...props} viewBox="0 0 24 24" fill="none">
-          <path d="M8 6 L2 12 L8 18 M16 6 L22 12 L16 18" stroke="currentColor" strokeWidth="1.5" />
-        </svg>
-      );
-    case 'window':
-      return (
-        <svg {...props} viewBox="0 0 24 24" fill="none">
-          <rect x="3" y="5" width="18" height="14" rx="1" stroke="currentColor" strokeWidth="1.4" />
-          <path d="M3 9h18" stroke="currentColor" strokeWidth="1.2" />
-        </svg>
-      );
-    case 'target':
-      return (
-        <svg {...props} viewBox="0 0 24 24" fill="none">
-          <path d="M12 2v4M12 18v4M2 12h4M18 12h4" stroke="currentColor" strokeWidth="1.4" />
-          <circle cx="12" cy="12" r="4.5" stroke="currentColor" strokeWidth="1.4" />
-        </svg>
-      );
-    default:
-      return null;
-  }
-}
+import React from 'react';
 
 export default function AssemblySection() {
-  const sectionRef = useRef(null);
-  const stickyRef = useRef(null);
-
-  useEffect(() => {
-    const section = sectionRef.current;
-    const sticky = stickyRef.current;
-    if (!section || !sticky) return;
-
-    let ticking = false;
-
-    function update() {
-      const rect = section.getBoundingClientRect();
-      const total = section.offsetHeight - window.innerHeight;
-      const scrolled = -rect.top;
-      let p = total > 0 ? scrolled / total : 0;
-      p = Math.min(1, Math.max(0, p));
-      sticky.style.setProperty('--p', p);
-
-      const phase1 = p < 0.45 ? 1 : Math.max(0, 1 - (p - 0.45) / 0.15);
-      const phase2 = p > 0.6 ? Math.min(1, (p - 0.6) / 0.2) : 0;
-      sticky.style.setProperty('--phase1', phase1);
-      sticky.style.setProperty('--phase2', phase2);
-    }
-
-    function onScroll() {
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          update();
-          ticking = false;
-        });
-        ticking = true;
-      }
-    }
-
-    update();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
   return (
-    <section id="assembly" ref={sectionRef} className="blueprint-bg relative h-[320vh] px-[8vw]">
-      <div
-        ref={stickyRef}
-        className="assembly-sticky sticky top-0 flex h-screen items-center justify-center overflow-hidden"
-        style={{ '--p': 0 }}
-      >
-        <p className="assembly-phrase phase-1 font-display" style={{ top: '14%' }}>
-          Cada proyecto empieza como piezas sueltas.
-        </p>
+    <section id="assembly" className="flex min-h-[50vh] overflow-hidden border-b border-line p-0">
+      <div className="flex w-full flex-col md:flex-row">
 
-        {PIECES_3D.map((piece, i) => (
-          <PieceIcon
-            key={`3d-${i}`}
-            path={piece.path}
-            className="assembly-piece"
-            width={piece.size}
-            height={piece.size}
-            style={{ '--sx': `${piece.sx}px`, '--sy': `${piece.sy}px`, '--sr': piece.sr, '--piece-color': 'var(--c3d)' }}
-          />
-        ))}
-
-        {PIECES_DIG.map((piece, i) => (
-          <PieceIcon
-            key={`dig-${i}`}
-            path={piece.path}
-            className="assembly-piece"
-            width={piece.size}
-            height={piece.size}
-            style={{ '--sx': `${piece.sx}px`, '--sy': `${piece.sy}px`, '--sr': piece.sr, '--piece-color': 'var(--cdig)' }}
-          />
-        ))}
-
-        <div className="assembly-core">
-          <div className="mark">
-            <span className="font-mono">FL</span>
-          </div>
+        {/* Left: White side with heading */}
+        <div className="flex flex-[2] flex-col justify-center bg-bg px-[8vw] py-24 md:py-32">
+          <h2 className="font-display text-[clamp(40px,4.5vw,72px)] font-bold leading-[1.05] tracking-tight text-text">
+            Innovación <br />
+            y Fabricación <br />
+            <span className="text-c3d">Digital.</span>
+          </h2>
         </div>
 
-        <p className="assembly-phrase phase-2 font-display" style={{ bottom: '14%' }}>
-          …hasta que todas las piezas encajan.
-        </p>
+        {/* Right: Full teal panel */}
+        <div className="flex flex-[3] flex-col justify-center bg-c3d px-[6vw] py-24 md:py-32">
+          <p className="font-sans text-[clamp(16px,2vw,22px)] font-medium leading-relaxed text-white">
+            En el Fab Lab de la Universidad Continental convertimos ideas abstractas en realidades tangibles.
+          </p>
+          <p className="mt-6 text-[15px] leading-relaxed text-white/75">
+            Desde el modelado 3D de alta precisión anatómica e industrial, hasta el desarrollo de arquitecturas de software eficientes.
+            Este catálogo interactivo es un testamento al talento y la capacidad técnica de nuestra comunidad académica.
+          </p>
+        </div>
+
       </div>
     </section>
   );
