@@ -5,7 +5,7 @@ import Typography from "@mui/material/Typography";
 import { Outlet, Link as RouterLink } from "react-router-dom";
 
 import { paths } from "@/paths";
-import { DynamicLogo } from "@/components/core/logo";
+import { DynamicLogo } from "@/components/core/Logo";
 import Spline from "@splinetool/react-spline";
 
 export function Layout({ children }) {

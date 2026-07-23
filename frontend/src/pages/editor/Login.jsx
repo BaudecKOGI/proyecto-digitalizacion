@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-export const LoginView = ({ onLogin }) => {
+export const Login = () => {
+  const navigate = useNavigate();
   const [user, setUser] = useState('editor');
   const [pass, setPass] = useState('••••••••');
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onLogin();
+    navigate('/editor/hub');
   };
 
   return (

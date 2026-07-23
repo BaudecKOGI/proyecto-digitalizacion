@@ -1,8 +1,20 @@
 import React, { useState } from 'react';
 import { User, LogOut, ChevronDown, Sun, Moon } from 'lucide-react';
 
-export const EditorNavbar = ({ isDarkMode, toggleTheme }) => {
+export const EditorNavbar = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Lógica del Modo Oscuro
+  const toggleTheme = () => {
+    const newTheme = !isDarkMode;
+    setIsDarkMode(newTheme);
+    if (newTheme) {
+      document.body.classList.add('dark');
+    } else {
+      document.body.classList.remove('dark');
+    }
+  };
 
   return (
     <header style={{

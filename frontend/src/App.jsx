@@ -1,33 +1,65 @@
 import * as React from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 
-// === IMPORTS: TUS RUTAS (Públicas y Editor) ===
+// Importacion de las rutas del editor y la landing page
 import PublicHome from './pages/PublicHome';
-import EditorPanel from './pages/EditorPanel';
+import EditorLayout from './layouts/EditorLayout';
+import { Login as EditorLogin } from './pages/editor/Login';
+import { Hub as EditorHub } from './pages/editor/Hub';
+import { Overview as EditorOverview } from './pages/editor/Overview';
+import { ProjectsList as EditorProjectsList } from './pages/editor/ProjectsList';
+import { NewProject as EditorNewProject } from './pages/editor/NewProject';
+import { Profile as EditorProfile } from './pages/editor/Profile';
 
-// === IMPORTS: RUTAS DE TU COMPAÑERO (Dashboard Admin) ===
-import SignInPage from "@/pages/auth/sign-in/sign-in";
-import ResetPasswordPage from "@/pages/auth/reset-password/reset-password";
-import AccountPage from "@/pages/dashboard/account/account";
-import DashboardOverviewPage from "@/pages/dashboard/dashboard";
-import Disenos3DPage from "@/pages/dashboard/disenos-3d";
-import PrevisualizacionPage from "@/pages/dashboard/previsualizacion";
-import ProyectosDigitalesPage from "@/pages/dashboard/proyectos-digitales";
+// Importaciones del dashboard y la autenticación del Admin
+import SignInPage from "@/pages/auth/sign-in/SignIn";
+import ResetPasswordPage from "@/pages/auth/reset-password/ResetPassword";
+import AccountPage from "@/pages/dashboard/account/Account";
+import DashboardOverviewPage from "@/pages/dashboard/Dashboard";
+import Disenos3DPage from "@/pages/dashboard/Disenos3d";
+import PrevisualizacionPage from "@/pages/dashboard/Previsualizacion";
+import ProyectosDigitalesPage from "@/pages/dashboard/ProyectosDigitales";
 
-// === IMPORTS: LAYOUTS DE TU COMPAÑERO ===
-import { Layout as AuthLayout } from "@/components/auth/layout";
-import { Layout as DashboardLayout } from "@/components/dashboard/layout/layout";
+// Imortación de los layouts para la autenticación y el dashboard
+import { Layout as AuthLayout } from "@/layouts/AuthLayout";
+import { Layout as DashboardLayout } from "@/layouts/DashboardLayout";
 
 export default function App() {
   return (
     <Routes>
-      {/* 🌍 1. RUTA PÚBLICA (Tu Landing Page) */}
+      {/* Ruta del landing page */}
       <Route path="/" element={<PublicHome />} />
 
-      {/* ✏️ 2. RUTA DEL EDITOR (Tu panel) */}
-      <Route path="/editor" element={<EditorPanel />} />
+      {/* Ruta del editor o encargado */}
+      <Route path="/editor">
+        {/* Rutas sin el Sidebar/Navbar */}
+        <Route index element={<Navigate to="login" replace />} />
+        <Route path="login" element={<EditorLogin />} />
+        <Route path="hub" element={<EditorHub />} />
 
-      {/* 🔐 3. RUTAS DE AUTENTICACIÓN (De tu compañero) */}
+        {/* Rutas CON el Sidebar/Navbar (el EditorLayout) */}
+        <Route element={<EditorLayout />}>
+          {/* Rutas 3D */}
+          <Route path="3d">
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<EditorOverview isDig={false} projectsCount={0} />} />
+            <Route path="proyectos" element={<EditorProjectsList mode="3d" projects={[]} />} />
+            <Route path="nuevo" element={<EditorNewProject />} />
+            <Route path="perfil" element={<EditorProfile />} />
+          </Route>
+          
+          {/* Rutas Digitales */}
+          <Route path="software">
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<EditorOverview isDig={true} projectsCount={0} />} />
+            <Route path="proyectos" element={<EditorProjectsList mode="dig" projects={[]} />} />
+            <Route path="nuevo" element={<EditorNewProject />} />
+            <Route path="perfil" element={<EditorProfile />} />
+          </Route>
+        </Route>
+      </Route>
+
+      {/* Ruta de autenticación del Admin */}
       <Route path="/auth">
         <Route element={<AuthLayout />}>
           <Route path="sign-in" element={<SignInPage />} />
@@ -35,7 +67,7 @@ export default function App() {
         </Route>
       </Route>
 
-      {/* 🛠️ 4. RUTAS DEL PANEL ADMIN (De tu compañero) */}
+      {/* Rutas del panel del Admin o dashboard */}
       <Route path="/dashboard">
         <Route element={<DashboardLayout />}>
           <Route index element={<DashboardOverviewPage />} />
@@ -46,7 +78,7 @@ export default function App() {
         </Route>
       </Route>
 
-      {/* ⚠️ CATCH-ALL: Si el usuario escribe una ruta que no existe, regresa al inicio */}
+      {/*CATCH-ALL: Si el usuario escribe una ruta que no existe, regresa al inicio */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
