@@ -1,5 +1,5 @@
 import React from 'react';
-import useReveal from "../../hooks/useReveal";
+import useReveal from "../../../hooks/useReveal";
 
 export default function Showcase3D({ onOpenGallery }) {
   useReveal();

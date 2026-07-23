@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import useReveal from "../../../hooks/useReveal"; // Asegúrate de importar el hook
 
 export default function DualitySection() {
   const sectionVariants = {
