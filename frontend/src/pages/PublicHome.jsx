@@ -5,6 +5,7 @@ import Footer from '../components/common/Footer';
 import GalleryScreen from '../components/common/GalleryScreen';
 import Hero from '../components/sections/Hero';
 import AssemblySection from '../components/sections/AssemblySection';
+import StatsSection from '../components/sections/StatsSection';
 import DualitySection from '../components/sections/DualitySection';
 import Showcase3D from '../components/showcase/Showcase3D';
 import ShowcaseSoftware from '../components/showcase/ShowcaseSoftware';
@@ -22,11 +23,12 @@ export default function PublicHome() {
   const [activeGallery, setActiveGallery] = useState(null);
 
   return (
-    <div className="blueprint-bg min-h-screen bg-bg text-text">
+    <div className="min-h-screen bg-bg text-text">
       <Navbar />
       <SideNav sections={SECTIONS} />
 
       <Hero />
+      <StatsSection />
       <AssemblySection />
       <DualitySection />
       <Showcase3D onOpenGallery={() => setActiveGallery('3d')} />
