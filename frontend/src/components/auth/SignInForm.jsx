@@ -48,7 +48,7 @@ export function SignInForm() {
 		async (values) => {
 			setIsPending(true);
 
-			const { error } = await authClient.signInWithPassword(values);
+			const { data, error } = await authClient.signInWithPassword(values);
 
 			if (error) {
 				setError("root", { type: "server", message: error });
@@ -59,7 +59,11 @@ export function SignInForm() {
 			// Refresh the auth state
 			await checkSession?.();
 
-			navigate(paths.dashboard.overview);
+			if (data?.user?.rol === "PROF" || data?.user?.rol === "EDITOR") {
+				navigate("/editor/hub");
+			} else {
+				navigate(paths.dashboard.overview);
+			}
 		},
 		[checkSession, navigate, setError]
 	);

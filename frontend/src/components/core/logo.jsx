@@ -9,7 +9,7 @@ const HEIGHT = 60;
 const WIDTH = 60;
 
 export function Logo({ height = HEIGHT, width = WIDTH, color = "dark" }) {
-	const url = color === "light" ? "/assets/logo-continental-blanco.png" : "/assets/logo-continental-negro.png";
+	const url = color === "light" ? "/assets/continental-blanco.png" : "/assets/logo-continental-negro.png";
 	return (
 		<Box
 			alt="FAB LAB Logo"

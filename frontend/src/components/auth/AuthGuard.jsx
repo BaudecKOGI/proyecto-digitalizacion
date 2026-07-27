@@ -6,7 +6,7 @@ import { paths } from "@/paths";
 import { logger } from "@/lib/default-logger";
 import { useUser } from "@/hooks/use-user";
 
-export function AuthGuard({ children }) {
+export function AuthGuard({ children, requiredRole }) {
 	const navigate = useNavigate();
 	const { user, error, isLoading } = useUser();
 	const [isChecking, setIsChecking] = React.useState(true);
@@ -25,6 +25,24 @@ export function AuthGuard({ children }) {
 			logger.debug("[AuthGuard]: User is not logged in, redirecting to sign in");
 			navigate(paths.auth.signIn, { replace: true });
 			return;
+		}
+
+		// Validación estricta por rol (ej. ADMIN vs PROF/EDITOR)
+		if (requiredRole) {
+			const userRol = (user.rol || "").toUpperCase();
+			const allowedRoles = Array.isArray(requiredRole)
+				? requiredRole.map((r) => r.toUpperCase())
+				: [requiredRole.toUpperCase()];
+
+			if (!allowedRoles.includes(userRol)) {
+				logger.debug(`[AuthGuard]: User role ${userRol} not allowed for ${requiredRole}`);
+				if (userRol === "PROF" || userRol === "EDITOR") {
+					navigate("/editor/hub", { replace: true });
+				} else {
+					navigate(paths.dashboard.overview, { replace: true });
+				}
+				return;
+			}
 		}
 
 		setIsChecking(false);

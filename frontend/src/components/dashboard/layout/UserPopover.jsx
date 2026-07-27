@@ -1,5 +1,6 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
+import Avatar from "@mui/material/Avatar";
 import Divider from "@mui/material/Divider";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import MenuItem from "@mui/material/MenuItem";
@@ -17,7 +18,7 @@ import { logger } from "@/lib/default-logger";
 import { useUser } from "@/hooks/use-user";
 
 export function UserPopover({ anchorEl, onClose, open }) {
-	const { checkSession } = useUser();
+	const { user, checkSession } = useUser();
 
 	const navigate = useNavigate();
 
@@ -49,20 +50,22 @@ export function UserPopover({ anchorEl, onClose, open }) {
 			open={open}
 			slotProps={{ paper: { sx: { width: "240px" } } }}
 		>
-			<Box sx={{ p: "16px 20px " }}>
-				<Typography variant="subtitle1">Jonel Villanueva</Typography>
-				<Typography color="text.secondary" variant="body2">
-					jonel.villanueva@joarvi.io
-				</Typography>
+			<Box sx={{ p: "16px 20px", display: "flex", alignItems: "center", gap: 1.5 }}>
+				<Avatar
+					src={user?.avatar || "/assets/avatar_jonel.png"}
+					sx={{ width: 44, height: 44, bgcolor: "primary.main", fontWeight: 700 }}
+				>
+					{(user?.name || "A").charAt(0).toUpperCase()}
+				</Avatar>
+				<Box sx={{ minWidth: 0 }}>
+					<Typography variant="subtitle1" noWrap>{user?.name || user?.firstName || "Usuario"}</Typography>
+					<Typography color="text.secondary" variant="body2" noWrap>
+						{user?.email || "correo@continental.edu.pe"}
+					</Typography>
+				</Box>
 			</Box>
 			<Divider />
 			<MenuList disablePadding sx={{ p: "8px", "& .MuiMenuItem-root": { borderRadius: 1 } }}>
-				<MenuItem component={RouterLink} to={paths.dashboard.cuenta} onClick={onClose}>
-					<ListItemIcon>
-						<GearSixIcon fontSize="var(--icon-fontSize-md)" />
-					</ListItemIcon>
-					Configuración
-				</MenuItem>
 				<MenuItem component={RouterLink} to={paths.dashboard.cuenta} onClick={onClose}>
 					<ListItemIcon>
 						<UserIcon fontSize="var(--icon-fontSize-md)" />

@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom'; // Agregamos useLocation
+import { AuthGuard } from '@/components/auth/AuthGuard';
 import { EditorSidebar } from '../components/editor/EditorSidebar';
 import { EditorNavbar } from '../components/editor/EditorNavbar';
 import '../styles/editor-panel.css';
@@ -16,19 +17,22 @@ export default function EditorLayout() {
   }, [location.pathname]); // Se vuelve a ejecutar cada vez que cambias de página
 
   return (
-    <div className="shell">
-      {/* 1. Ponemos el Sidebar fijo a la izquierda */}
-      <EditorSidebar />
+    <AuthGuard requiredRole={["PROF", "EDITOR"]}>
+      <div className="shell">
+        {/* 1. Ponemos el Sidebar fijo a la izquierda */}
+        <EditorSidebar />
 
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-        {/* 2. Ponemos el Navbar fijo arriba */}
-        <EditorNavbar />
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          {/* 2. Ponemos el Navbar fijo arriba */}
+          <EditorNavbar />
 
-        {/* 3. Aquí es donde ocurre la magia */}
-        <div className="content">
-          <Outlet />
+          {/* 3. Aquí es donde ocurre la magia */}
+          <div className="content">
+            <Outlet />
+          </div>
         </div>
       </div>
-    </div>
+    </AuthGuard>
   );
 }
+

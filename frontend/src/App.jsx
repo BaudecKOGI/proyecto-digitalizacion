@@ -19,6 +19,9 @@ import DashboardOverviewPage from "@/pages/dashboard/Dashboard";
 import Disenos3DPage from "@/pages/dashboard/Disenos3d";
 import PrevisualizacionPage from "@/pages/dashboard/Previsualizacion";
 import ProyectosDigitalesPage from "@/pages/dashboard/ProyectosDigitales";
+import EditoresPage from "@/pages/dashboard/Editores";
+import CategoriasPage from "@/pages/dashboard/Categorias";
+import VisualizacionesPage from "@/pages/dashboard/Visualizaciones";
 
 // Imortación de los layouts para la autenticación y el dashboard
 import { Layout as AuthLayout } from "@/layouts/AuthLayout";
@@ -33,7 +36,7 @@ export default function App() {
       {/* Ruta del editor o encargado */}
       <Route path="/editor">
         {/* Rutas sin el Sidebar/Navbar */}
-        <Route index element={<Navigate to="login" replace />} />
+        <Route index element={<Navigate to="/auth/sign-in" replace />} />
         <Route path="login" element={<EditorLogin />} />
         <Route path="hub" element={<EditorHub />} />
 
@@ -47,7 +50,7 @@ export default function App() {
             <Route path="nuevo" element={<EditorNewProject />} />
             <Route path="perfil" element={<EditorProfile />} />
           </Route>
-          
+
           {/* Rutas Digitales */}
           <Route path="software">
             <Route index element={<Navigate to="dashboard" replace />} />
@@ -75,6 +78,9 @@ export default function App() {
           <Route path="disenos-3d" element={<Disenos3DPage />} />
           <Route path="previsualizacion" element={<PrevisualizacionPage />} />
           <Route path="proyectos-digitales" element={<ProyectosDigitalesPage />} />
+          <Route path="editores" element={<EditoresPage />} />
+          <Route path="categorias" element={<CategoriasPage />} />
+          <Route path="visualizaciones" element={<VisualizacionesPage />} />
         </Route>
       </Route>
 

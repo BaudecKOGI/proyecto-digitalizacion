@@ -53,7 +53,7 @@ export default function Footer() {
 
         {/* Brand Column */}
         <div className="flex flex-col items-start lg:col-span-1">
-          <div className="font-sans text-[15px] font-extrabold tracking-[0.2em] text-bg mb-4">FAB LAB</div>
+          <img src="/assets/continental-blanco.png" alt="Continental Logo" className="h-12 mb-6 object-contain opacity-90" />
           <p className="text-[13.5px] text-muted leading-relaxed max-w-[280px]">
             Repositorio interactivo de proyectos y desarrollos tecnológicos de la Universidad Continental.
           </p>

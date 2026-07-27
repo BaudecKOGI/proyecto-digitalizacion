@@ -10,5 +10,8 @@ export const navItems = [
 		href: paths.dashboard.proyectosDigitales,
 		icon: "folder",
 	},
+	{ key: "editores", title: "Editores", href: paths.dashboard.editores, icon: "users" },
+	{ key: "categorias", title: "Categorias", href: paths.dashboard.categorias, icon: "tag" },
+	{ key: "visualizaciones", title: "Visualizaciones", href: paths.dashboard.visualizaciones, icon: "eye" },
 	{ key: "perfil", title: "Perfil", href: paths.dashboard.cuenta, icon: "user" },
 ];

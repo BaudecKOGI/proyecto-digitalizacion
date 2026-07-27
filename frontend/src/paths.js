@@ -7,6 +7,9 @@ export const paths = {
 		disenos3d: "/dashboard/disenos-3d",
 		previsualizacion: "/dashboard/previsualizacion",
 		proyectosDigitales: "/dashboard/proyectos-digitales",
+		editores: "/dashboard/editores",
+		categorias: "/dashboard/categorias",
+		visualizaciones: "/dashboard/visualizaciones",
 	},
 	errors: { notFound: "/errors/not-found" },
 };

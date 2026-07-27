@@ -13,12 +13,14 @@ import { MagnifyingGlassIcon } from "@phosphor-icons/react/dist/ssr/MagnifyingGl
 import { UsersIcon } from "@phosphor-icons/react/dist/ssr/Users";
 
 import { usePopover } from "@/hooks/use-popover";
+import { useUser } from "@/hooks/use-user";
 
 import { MobileNav } from "./MobileNav";
 import { UserPopover } from "./UserPopover";
 
 export function MainNav() {
 	const [openNav, setOpenNav] = React.useState(false);
+	const { user } = useUser();
 
 	const userPopover = usePopover();
 
@@ -70,9 +72,11 @@ export function MainNav() {
 						<Avatar
 							onClick={userPopover.handleOpen}
 							ref={userPopover.anchorRef}
-							src="/assets/avatar_jonel.png"
+							src={user?.avatar || "/assets/avatar_jonel.png"}
 							sx={{ cursor: "pointer" }}
-						/>
+						>
+							{(user?.name || "A").charAt(0).toUpperCase()}
+						</Avatar>
 					</Stack>
 				</Stack>
 			</Box>

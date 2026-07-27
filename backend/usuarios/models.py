@@ -17,7 +17,7 @@ class UsuarioManager(BaseUserManager):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_active', True)
-        extra_fields.setdefault('rol', 'ADMIN')
+        extra_fields.setdefault('rol', None)
 
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('Superuser debe tener is_superuser=True.')
@@ -26,15 +26,20 @@ class UsuarioManager(BaseUserManager):
 
 # 2. Tu modelo de Usuario intacto, pero ahora conectado al Manager
 class Usuario(AbstractUser):
+
+    ROL_ADMIN = "ADMIN"
+    ROL_PROF = "PROF"
+
     ROLES = (
-        ('ADMIN', 'Administrador General'),
-        ('PROF', 'Profesor / Encargado'),
+        (ROL_ADMIN, 'Administrador General'),
+        (ROL_PROF, 'Profesor / Encargado'),
     )
     
     username = None 
     nombre = models.CharField(max_length=150)
     email = models.EmailField(unique=True)
-    rol = models.CharField(max_length=10, choices=ROLES, default='PROF')
+    rol = models.CharField(max_length=10, choices=ROLES, null=True, blank=True)
+    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True, verbose_name='Foto de Perfil')
     updated_at = models.DateTimeField(auto_now=True)
     
     USERNAME_FIELD = 'email'

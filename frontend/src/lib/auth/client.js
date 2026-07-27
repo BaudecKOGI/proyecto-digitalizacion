@@ -1,76 +1,177 @@
 "use client";
 
-function generateToken() {
-	const arr = new Uint8Array(12);
-	globalThis.crypto.getRandomValues(arr);
-	return Array.from(arr, (v) => v.toString(16).padStart(2, "0")).join("");
-}
-
-const user = {
-	id: "USR-000",
-	avatar: "/assets/avatar_jonel.png",
-	firstName: "Jonel",
-	lastName: "Villanueva",
-	email: "jonel@joarvi.io",
-};
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
 
 class AuthClient {
-	async signUp(_) {
-		// Make API request
+  async signUp(_) {
+    return { error: "El registro público está desactivado. Solicita acceso a un Administrador." };
+  }
 
-		// We do not handle the API, so we'll just generate a token and store it in localStorage.
-		const token = generateToken();
-		localStorage.setItem("custom-auth-token", token);
+  async signInWithOAuth(_) {
+    return { error: "Social authentication not implemented" };
+  }
 
-		return {};
-	}
+  async signInWithPassword(params) {
+    const { email, password } = params;
 
-	async signInWithOAuth(_) {
-		return { error: "Social authentication not implemented" };
-	}
+    try {
+      const res = await fetch(`${API_BASE_URL}/auth/login/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-	async signInWithPassword(params) {
-		const { email, password } = params;
+      const data = await res.json();
 
-		// Make API request
+      if (!res.ok) {
+        return { error: data.error || "Credenciales incorrectas." };
+      }
 
-		// We do not handle the API, so we'll check if the credentials match with the hardcoded ones.
-		if (email !== "jonel@gmail.com" || password !== "1234567-.") {
-			return { error: "Invalid credentials" };
-		}
+      if (data.success && data.user) {
+        const formattedUser = {
+          id: data.user.id,
+          avatar: data.user.avatar_url || data.user.avatar || "/assets/avatar_jonel.png",
+          firstName: data.user.nombre.split(" ")[0] || data.user.nombre,
+          lastName: data.user.nombre.split(" ").slice(1).join(" ") || "",
+          name: data.user.nombre,
+          email: data.user.email,
+          rol: data.user.rol,
+          is_active: data.user.is_active,
+        };
 
-		const token = generateToken();
-		localStorage.setItem("custom-auth-token", token);
+        localStorage.setItem("custom-auth-token", data.token);
+        localStorage.setItem("custom-auth-user", JSON.stringify(formattedUser));
 
-		return {};
-	}
+        return { data: { user: formattedUser, token: data.token } };
+      }
 
-	async resetPassword(_) {
-		return { error: "Password reset not implemented" };
-	}
+      return { error: "Error inesperado al iniciar sesión." };
+    } catch (err) {
+      console.error("Error al autenticar con el servidor:", err);
+      return { error: "No se pudo conectar con el servidor de autenticación." };
+    }
+  }
 
-	async updatePassword(_) {
-		return { error: "Update reset not implemented" };
-	}
+  async resetPassword(_) {
+    return { error: "Para restablecer tu contraseña comunícate con el Administrador." };
+  }
 
-	async getUser() {
-		// Make API request
+  async updateProfile({ nombre, email, avatar, remove_avatar }) {
+    const token = localStorage.getItem("custom-auth-token");
+    const storedUser = localStorage.getItem("custom-auth-user");
+    let current_email = "";
+    if (storedUser) {
+      try {
+        current_email = JSON.parse(storedUser).email || "";
+      } catch (e) {}
+    }
+    try {
+      const formData = new FormData();
+      if (nombre) formData.append("nombre", nombre);
+      if (email) formData.append("email", email);
+      if (current_email) formData.append("current_email", current_email);
+      if (avatar) formData.append("avatar", avatar);
+      if (remove_avatar) formData.append("remove_avatar", "true");
 
-		// We do not handle the API, so just check if we have a token in localStorage.
-		const token = localStorage.getItem("custom-auth-token");
+      const res = await fetch(`${API_BASE_URL}/auth/profile/`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        return { error: data.error || "Error al actualizar el perfil." };
+      }
+      if (data.success && data.user) {
+        const formattedUser = {
+          id: data.user.id,
+          avatar: data.user.avatar_url || data.user.avatar || "/assets/avatar_jonel.png",
+          firstName: data.user.nombre.split(" ")[0] || data.user.nombre,
+          lastName: data.user.nombre.split(" ").slice(1).join(" ") || "",
+          name: data.user.nombre,
+          email: data.user.email,
+          rol: data.user.rol,
+          is_active: data.user.is_active,
+        };
+        localStorage.setItem("custom-auth-user", JSON.stringify(formattedUser));
+        return { data: { user: formattedUser } };
+      }
+      return { error: "No se pudo procesar la respuesta del perfil." };
+    } catch (err) {
+      return { error: "Error de red al actualizar el perfil." };
+    }
+  }
 
-		if (!token) {
-			return { data: null };
-		}
+  async updatePassword({ current_password, new_password }) {
+    const token = localStorage.getItem("custom-auth-token");
+    const storedUser = localStorage.getItem("custom-auth-user");
+    let current_email = "";
+    if (storedUser) {
+      try {
+        current_email = JSON.parse(storedUser).email || "";
+      } catch (e) {}
+    }
+    try {
+      const res = await fetch(`${API_BASE_URL}/auth/change-password/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ current_password, new_password, current_email }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        return { error: data.error || "Error al cambiar la contraseña." };
+      }
+      return { data: { success: true, message: data.message } };
+    } catch (err) {
+      return { error: "Error de red al cambiar la contraseña." };
+    }
+  }
 
-		return { data: user };
-	}
+  async getUser() {
+    const token = localStorage.getItem("custom-auth-token");
+    const storedUser = localStorage.getItem("custom-auth-user");
 
-	async signOut() {
-		localStorage.removeItem("custom-auth-token");
+    if (!token || !storedUser) {
+      return { data: null };
+    }
 
-		return {};
-	}
+    try {
+      const user = JSON.parse(storedUser);
+      return { data: user };
+    } catch (e) {
+      localStorage.removeItem("custom-auth-token");
+      localStorage.removeItem("custom-auth-user");
+      return { data: null };
+    }
+  }
+
+  async signOut() {
+    const token = localStorage.getItem("custom-auth-token");
+    try {
+      if (token) {
+        await fetch(`${API_BASE_URL}/auth/logout/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+      }
+    } catch (e) {
+      console.error("Error al cerrar sesión en el servidor:", e);
+    } finally {
+      localStorage.removeItem("custom-auth-token");
+      localStorage.removeItem("custom-auth-user");
+    }
+
+    return {};
+  }
 }
 
 export const authClient = new AuthClient();

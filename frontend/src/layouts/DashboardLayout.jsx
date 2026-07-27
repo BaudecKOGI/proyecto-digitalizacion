@@ -11,7 +11,7 @@ import { SideNav } from "@/components/dashboard/layout/SideNav";
 
 export function Layout({ children }) {
 	return (
-		<AuthGuard>
+		<AuthGuard requiredRole="ADMIN">
 			<GlobalStyles
 				styles={{
 					body: {
