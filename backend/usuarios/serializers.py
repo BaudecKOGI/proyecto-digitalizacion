@@ -9,6 +9,8 @@ class UsuarioSerializer(serializers.ModelSerializer):
         help_text='Contraseña del usuario (opcional en edición)'
     )
     avatar_url = serializers.SerializerMethodField()
+    proyectos_3d_count = serializers.SerializerMethodField()
+    proyectos_software_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Usuario
@@ -19,12 +21,14 @@ class UsuarioSerializer(serializers.ModelSerializer):
             'rol',
             'avatar',
             'avatar_url',
+            'proyectos_3d_count',
+            'proyectos_software_count',
             'is_active',
             'password',
             'updated_at',
             'date_joined'
         ]
-        read_only_fields = ['id', 'avatar_url', 'updated_at', 'date_joined']
+        read_only_fields = ['id', 'avatar_url', 'proyectos_3d_count', 'proyectos_software_count', 'updated_at', 'date_joined']
 
     def get_avatar_url(self, obj):
         if obj.avatar and hasattr(obj.avatar, 'url'):
@@ -33,6 +37,14 @@ class UsuarioSerializer(serializers.ModelSerializer):
                 return request.build_absolute_uri(obj.avatar.url)
             return obj.avatar.url
         return None
+
+    def get_proyectos_3d_count(self, obj):
+        from proyectos.models import Proyecto3D
+        return Proyecto3D.objects.filter(creado_por=obj).count()
+
+    def get_proyectos_software_count(self, obj):
+        from proyectos.models import ProyectoSoftware
+        return ProyectoSoftware.objects.filter(creado_por=obj).count()
 
     def validate_email(self, value):
         email = value.lower().strip()

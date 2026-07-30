@@ -12,7 +12,7 @@ import { paths } from "@/paths";
 import { isNavItemActive } from "@/lib/is-nav-item-active";
 import { Logo } from "@/components/core/Logo";
 
-import { navItems } from "./config";
+import { getNavItems } from "./config";
 import { navIcons } from "./NavIcons";
 
 export function MobileNav({ open, onClose }) {
@@ -49,12 +49,32 @@ export function MobileNav({ open, onClose }) {
 		>
 			<Stack spacing={2} sx={{ p: 3 }}>
 				<Box component={RouterLink} to={paths.home} sx={{ display: "inline-flex" }}>
-					<Logo color="light" height={50} width={200} />
+					<Logo color="light" height={32} width={122} />
+				</Box>
+				<Box
+					sx={{
+						alignItems: "center",
+						backgroundColor: "var(--mui-palette-neutral-900)",
+						border: "1px solid var(--mui-palette-neutral-700)",
+						borderRadius: "12px",
+						cursor: "pointer",
+						display: "flex",
+						p: "4px 12px",
+					}}
+				>
+					<Box sx={{ flex: "1 1 auto" }}>
+						<Typography color="var(--mui-palette-neutral-400)" variant="body2">
+							Workspace
+						</Typography>
+						<Typography color="inherit" variant="subtitle1">
+							FabLab Continental
+						</Typography>
+					</Box>
 				</Box>
 			</Stack>
 			<Divider sx={{ borderColor: "var(--mui-palette-neutral-700)" }} />
 			<Box component="nav" sx={{ flex: "1 1 auto", p: "12px" }}>
-				{renderNavItems({ pathname, items: navItems })}
+				{renderNavItems({ pathname, items: getNavItems() })}
 			</Box>
 		</Drawer>
 	);
@@ -85,11 +105,11 @@ function NavItem({ disabled, external, href, icon, matcher, pathname, title }) {
 			<Box
 				{...(href
 					? {
-							component: external ? "a" : RouterLink,
-							to: href,
-							target: external ? "_blank" : undefined,
-							rel: external ? "noreferrer" : undefined,
-						}
+						component: external ? "a" : RouterLink,
+						to: href,
+						target: external ? "_blank" : undefined,
+						rel: external ? "noreferrer" : undefined,
+					}
 					: { role: "button" })}
 				sx={{
 					alignItems: "center",

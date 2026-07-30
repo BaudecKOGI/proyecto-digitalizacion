@@ -25,12 +25,11 @@ import { Profile as EditorProfile } from './pages/editor/Profile';
 import SignInPage from "@/pages/auth/sign-in/SignIn";
 import ResetPasswordPage from "@/pages/auth/reset-password/ResetPassword";
 import AccountPage from "@/pages/dashboard/account/Account";
-import DashboardOverviewPage from "@/pages/dashboard/Dashboard";
-import Disenos3DPage from "@/pages/dashboard/Disenos3d";
-import PrevisualizacionPage from "@/pages/dashboard/Previsualizacion";
+import DashboardOverviewPage from "@/pages/dashboard/dashboard/Dashboard";
+import Disenos3DPage from "@/pages/dashboard/3DDesigns/Disenos3D";
 import ProyectosDigitalesPage from "@/pages/dashboard/digitalProjects/ProyectosDigitales";
-import EditoresPage from "@/pages/dashboard/Editores";
-import CategoriasPage from "@/pages/dashboard/Categorias";
+import EditoresPage from "@/pages/dashboard/editores/Editores";
+import CategoriasPage from "@/pages/dashboard/categorias/Categorias";
 import VisualizacionesPage from "@/pages/dashboard/Visualizaciones";
 
 // Importación de los layouts para la autenticación y el dashboard
@@ -90,7 +89,6 @@ export default function App() {
           <Route index element={<DashboardOverviewPage />} />
           <Route path="cuenta" element={<AccountPage />} />
           <Route path="disenos-3d" element={<Disenos3DPage />} />
-          <Route path="previsualizacion" element={<PrevisualizacionPage />} />
           <Route path="proyectos-digitales" element={<ProyectosDigitalesPage />} />
           <Route path="editores" element={<EditoresPage />} />
           <Route path="categorias" element={<CategoriasPage />} />

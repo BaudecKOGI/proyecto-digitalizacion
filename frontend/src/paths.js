@@ -5,7 +5,6 @@ export const paths = {
         overview: "/dashboard",
         cuenta: "/dashboard/cuenta",
         disenos3d: "/dashboard/disenos-3d",
-        previsualizacion: "/dashboard/previsualizacion",
         proyectosDigitales: "/dashboard/proyectos-digitales",
         editores: "/dashboard/editores",
         categorias: "/dashboard/categorias",

@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from proyectos.models import Categoria, Tecnologia, Proyecto, Proyecto3D, ProyectoSoftware
+from usuarios.models import Usuario
 from usuarios.serializers import UsuarioSerializer
 from django.utils.text import slugify
 
@@ -85,6 +86,16 @@ class TecnologiaSerializer(serializers.ModelSerializer):
 class ProyectoSerializer(serializers.ModelSerializer):
     creado_por_nombre = serializers.CharField(source='creado_por.nombre', read_only=True)
     categoria_nombre = serializers.CharField(source='categoria.nombre', read_only=True)
+    creado_por = serializers.PrimaryKeyRelatedField(
+        queryset=Usuario.objects.all(),
+        required=False,
+        allow_null=True
+    )
+    categoria = serializers.PrimaryKeyRelatedField(
+        queryset=Categoria.objects.all(),
+        required=False,
+        allow_null=True
+    )
 
     class Meta:
         model = Proyecto
@@ -94,6 +105,13 @@ class ProyectoSerializer(serializers.ModelSerializer):
             'categoria_nombre', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
+
+    def create(self, validated_data):
+        if not validated_data.get('creado_por'):
+            validated_data['creado_por'] = Usuario.objects.first()
+        if not validated_data.get('categoria'):
+            validated_data['categoria'] = Categoria.objects.first()
+        return super().create(validated_data)
 
 
 class Proyecto3DSerializer(ProyectoSerializer):
