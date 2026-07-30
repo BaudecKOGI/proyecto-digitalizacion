@@ -6,9 +6,11 @@ import PublicHome from './pages/PublicHome';
 import EditorLayout from './layouts/EditorLayout';
 import { Login as EditorLogin } from './pages/editor/Login';
 import { Hub as EditorHub } from './pages/editor/Hub';
-import { Overview as EditorOverview } from './pages/editor/Overview';
-import { ProjectsList as EditorProjectsList } from './pages/editor/ProjectsList';
-import { NewProject as EditorNewProject } from './pages/editor/NewProject';
+import { Overview as EditorOverview } from './pages/editor/3d/Dashboard3D';
+import { ProjectsList3D as EditorProjectsList } from './pages/editor/3d/ProjectsList3D';
+import { NewProject3D as EditorNewProject } from './pages/editor/3d/NewProject3D';
+// NUEVO: Importamos el componente para editar proyectos 3D
+import { EditProject3D as EditorEditProject } from './pages/editor/3d/EditProject3D';
 import { Profile as EditorProfile } from './pages/editor/Profile';
 
 // Importaciones del dashboard y la autenticación del Admin
@@ -48,6 +50,8 @@ export default function App() {
             <Route path="dashboard" element={<EditorOverview isDig={false} projectsCount={0} />} />
             <Route path="proyectos" element={<EditorProjectsList mode="3d" projects={[]} />} />
             <Route path="nuevo" element={<EditorNewProject />} />
+            {/* NUEVO: Agregamos la ruta que recibe el ID para editar */}
+            <Route path="editar/:id" element={<EditorEditProject />} />
             <Route path="perfil" element={<EditorProfile />} />
           </Route>
 

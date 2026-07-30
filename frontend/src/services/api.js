@@ -23,7 +23,7 @@ async function handleResponse(res) {
 }
 
 // ==========================================
-// PROYECTOS LANDING PAGE
+// PROYECTOS LANDING PAGE / 3D
 // ==========================================
 export const fetchProyectos3D = async () => {
   try {
@@ -34,6 +34,40 @@ export const fetchProyectos3D = async () => {
     console.log("Backend no disponible o sin datos 3D, usando datos vacíos");
     return [];
   }
+};
+
+export const createProyecto3D = async (formData) => {
+  // Nota vital: Cuando envías FormData con fetch, NO debes poner el "Content-Type".
+  // El navegador lo calcula automáticamente y añade el "boundary" necesario para los archivos.
+  const res = await fetch(`${API_BASE_URL}/proyectos-3d/`, {
+    method: "POST",
+    body: formData,
+  });
+  return handleResponse(res);
+};
+
+// NUEVO: Obtener un solo proyecto 3D por su ID para editarlo
+export const fetchProyecto3DById = async (id) => {
+  const res = await fetch(`${API_BASE_URL}/proyectos-3d/${id}/`);
+  return handleResponse(res);
+};
+
+// NUEVO: Actualizar un proyecto 3D existente
+export const updateProyecto3D = async (id, formData) => {
+  // Usamos PATCH para actualizar solo los campos que se envíen
+  const res = await fetch(`${API_BASE_URL}/proyectos-3d/${id}/`, {
+    method: "PATCH",
+    body: formData, // Al ser FormData (con o sin archivos nuevos), no lleva Content-Type
+  });
+  return handleResponse(res);
+};
+
+// NUEVO: Eliminar un proyecto 3D
+export const deleteProyecto3D = async (id) => {
+  const res = await fetch(`${API_BASE_URL}/proyectos-3d/${id}/`, {
+    method: "DELETE",
+  });
+  return handleResponse(res);
 };
 
 export const fetchProyectosSoftware = async () => {
@@ -88,6 +122,40 @@ export const deleteEditor = async (id) => {
 };
 
 // ==========================================
+// PERFIL DE USUARIO Y SEGURIDAD
+// ==========================================
+
+// Actualizar los datos de la cuenta (Nombre, Correo)
+export const updatePerfil = async (perfilData) => {
+  const res = await fetch(`${API_BASE_URL}/auth/profile/`, {
+    method: "PATCH", // Usamos PATCH o PUT (depende de cómo lo programaron en views.py)
+    headers: {
+      "Content-Type": "application/json",
+      // OJO: Como vi que usas 'rest_framework_simplejwt', seguramente necesites enviar el token.
+      // Si guardas tu token en localStorage, descomenta la siguiente línea:
+      // "Authorization": `Bearer ${localStorage.getItem('access')}`
+    },
+    body: JSON.stringify(perfilData),
+  });
+  return handleResponse(res);
+};
+
+// Actualizar la contraseña
+export const updatePassword = async (passwordData) => {
+  const res = await fetch(`${API_BASE_URL}/auth/change-password/`, {
+    method: "POST", // Por lo general cambiar password suele ser POST o PUT
+    headers: {
+      "Content-Type": "application/json",
+      // Si guardas tu token en localStorage, descomenta la siguiente línea:
+      // "Authorization": `Bearer ${localStorage.getItem('access')}`
+    },
+    // El backend espera recibir algo como { "actual": "...", "nueva": "..." }
+    body: JSON.stringify(passwordData), 
+  });
+  return handleResponse(res);
+};
+
+// ==========================================
 // GESTIÓN DE CATEGORÍAS
 // ==========================================
 export const fetchCategorias = async (search = "") => {
@@ -126,4 +194,3 @@ export const deleteCategoria = async (id) => {
   });
   return handleResponse(res);
 };
-

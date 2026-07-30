@@ -1,28 +1,17 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-// Importamos el icono User y quitamos Settings
-import { 
-  LayoutDashboard, 
-  Box, 
-  PlusCircle, 
-  Tags, 
-  Trash2, 
-  User, 
-  ArrowLeft 
-} from 'lucide-react';
+import { LayoutDashboard, Box, PlusCircle, User, ArrowLeft, Hexagon } from 'lucide-react';
 
-export const EditorSidebar = () => {
+export const EditorSidebar = ({ isCollapsed, setIsCollapsed }) => {
   const location = useLocation();
   const navigate = useNavigate();
   
-  // Determinamos el modo actual basado en la URL
   const isDig = location.pathname.includes('software');
   const basePath = isDig ? '/editor/software' : '/editor/3d';
 
-  // Función para agregar la clase "active" si la pestaña seleccionada coincide con la URL
   const checkActive = (path) => {
-    if (path === 'dashboard' && location.pathname === basePath) return 'active';
-    return location.pathname.endsWith(path) ? 'active' : '';
+    if (path === 'dashboard' && location.pathname === basePath) return true;
+    return location.pathname.endsWith(path);
   };
 
   const handleNav = (path) => {
@@ -30,64 +19,67 @@ export const EditorSidebar = () => {
     else navigate(`${basePath}/${path}`);
   };
 
-  return (
-    <div className="sidebar">
-      {/* Título y Modo Actual */}
-      <div className="brand">
-        <div className="eyebrow">Gestionando</div>
-        <div className="mode">
-          {isDig ? 'Proyectos Digitales' : 'Proyectos 3D'}
+  const NavItem = ({ icon: Icon, label, path }) => {
+    const active = checkActive(path);
+    return (
+      <button 
+        onClick={() => handleNav(path)}
+        className={`group relative flex w-full items-center ${isCollapsed ? 'justify-center' : 'justify-start px-4'} py-3 mb-2 rounded-xl transition-all duration-200
+          ${active 
+            ? 'bg-[var(--accent-dim)] font-semibold shadow-sm text-[var(--accent)]' 
+            : 'text-[var(--text-muted)] hover:bg-[var(--bg-general)] hover:text-[var(--text-main)]'}`}
+      >
+        <Icon size={20} className={`transition-colors ${active ? 'text-[var(--accent)]' : 'text-[var(--text-muted)] group-hover:text-[var(--text-main)]'}`} />
+        
+        <div className={`overflow-hidden transition-all duration-300 whitespace-nowrap ${isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100 ml-3'}`}>
+          <span className="text-sm">{label}</span>
         </div>
+      </button>
+    );
+  };
+
+  return (
+    <aside 
+      onMouseEnter={() => setIsCollapsed(false)}
+      className={`relative z-20 flex flex-col border-r border-[var(--line)] bg-[var(--panel)] transition-all duration-300 ease-in-out
+        ${isCollapsed ? 'w-[76px]' : 'w-64'} hidden sm:flex`}
+    >
+      <div className="flex h-16 items-center justify-center border-b border-[var(--line)] mb-4 px-4 overflow-hidden whitespace-nowrap">
+        {isCollapsed ? (
+           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--accent-dim)] text-[var(--accent)] transition-all duration-300">
+             <Hexagon size={24} />
+           </div>
+        ) : (
+          <div className="flex w-full items-center gap-3 animate-in fade-in duration-300">
+             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--accent-dim)] text-[var(--accent)]">
+               <Hexagon size={20} />
+             </div>
+             <span className="truncate font-display text-lg font-bold tracking-tight text-[var(--text-main)]">
+               FAB LAB <span className="text-[var(--accent)]">REPO</span>
+             </span>
+          </div>
+        )}
       </div>
       
-      {/* Opciones del Menú */}
-      <div 
-        className={`nav-item ${checkActive('dashboard')}`}
-        onClick={() => handleNav('dashboard')}
-      >
-        <LayoutDashboard size={18} /> Dashboard
+      <div className="flex-1 px-3 overflow-y-auto no-scrollbar">
+        <NavItem icon={LayoutDashboard} label="Dashboard" path="dashboard" />
+        <NavItem icon={Box} label="Todos los proyectos" path="proyectos" />
+        <NavItem icon={PlusCircle} label="Nuevo proyecto" path="nuevo" />
+        <div className="my-4 mx-2 border-t border-[var(--line)]"></div>
+        <NavItem icon={User} label="Mi Perfil" path="perfil" />
       </div>
       
-      <div 
-        className={`nav-item ${checkActive('proyectos')}`}
-        onClick={() => handleNav('proyectos')}
-      >
-        <Box size={18} /> Todos los proyectos
+      <div className="mt-auto border-t border-[var(--line)] p-3">
+        <button 
+          onClick={(e) => { e.stopPropagation(); navigate('/editor/hub'); }}
+          className={`group relative flex w-full items-center ${isCollapsed ? 'justify-center' : 'justify-start px-4'} py-3 rounded-xl text-[var(--text-muted)] transition-all duration-200 hover:bg-red-500/10 hover:text-red-500`}
+        >
+          <ArrowLeft size={20} />
+          <div className={`overflow-hidden transition-all duration-300 whitespace-nowrap ${isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100 ml-3'}`}>
+            <span className="text-sm font-medium">Volver al inicio</span>
+          </div>
+        </button>
       </div>
-      
-      <div 
-        className={`nav-item ${checkActive('nuevo')}`}
-        onClick={() => handleNav('nuevo')}
-      >
-        <PlusCircle size={18} /> Nuevo proyecto
-      </div>
-      
-      <div 
-        className={`nav-item ${checkActive('categorias')}`}
-        onClick={() => handleNav('categorias')}
-      >
-        <Tags size={18} /> Categorías / Carreras
-      </div>
-      
-      <div 
-        className={`nav-item ${checkActive('papelera')}`}
-        onClick={() => handleNav('papelera')}
-      >
-        <Trash2 size={18} /> Papelera
-      </div>
-      
-      {/* NUEVA OPCIÓN: Perfil (Reemplaza a Ajustes) */}
-      <div 
-        className={`nav-item ${checkActive('perfil')}`}
-        onClick={() => handleNav('perfil')}
-      >
-        <User size={18} /> Mi Perfil
-      </div>
-      
-      {/* Botón para regresar */}
-      <div className="back-hub" onClick={() => navigate('/editor/hub')}>
-        <ArrowLeft size={16} /> Volver al inicio
-      </div>
-    </div>
+    </aside>
   );
 };

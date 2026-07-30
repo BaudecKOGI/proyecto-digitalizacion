@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import ProjectViewer3D from './ProjectViewer3D';
 
 /**
  * Modal de pantalla completa para listar proyectos de una categoría.
@@ -16,6 +17,9 @@ export default function GalleryScreen({
 }) {
   const [status, setStatus] = useState('idle'); // idle | loading | success | error
   const [proyectos, setProyectos] = useState([]);
+  
+  // Estado para controlar qué proyecto 3D está abierto en el visor
+  const [proyectoSeleccionado, setProyectoSeleccionado] = useState(null);
 
   const colorClass = type === '3d' ? 'text-c3d' : 'text-cdig';
   const bgHoverClass = type === '3d' ? 'hover:border-c3d hover:shadow-md' : 'hover:border-cdig hover:shadow-md';
@@ -25,15 +29,19 @@ export default function GalleryScreen({
     setStatus('loading');
     fetchFn()
       .then((data) => {
-        setProyectos(Array.isArray(data) ? data : data.results || []);
+        // 1. Obtenemos el arreglo de proyectos original
+        const todosLosProyectos = Array.isArray(data) ? data : data.results || [];
+        
+        // 2. Filtramos para guardar en el estado SOLAMENTE los publicados
+        const proyectosPublicados = todosLosProyectos.filter(
+          (p) => p.estado_publicacion === 'PUBLICADO'
+        );
+        
+        setProyectos(proyectosPublicados);
         setStatus('success');
       })
       .catch(() => setStatus('error'));
   }, [active, status, fetchFn]);
-
-  useEffect(() => {
-    document.body.style.overflow = active ? 'hidden' : '';
-  }, [active]);
 
   const showEmptyState = status !== 'success' || proyectos.length === 0;
 
@@ -159,6 +167,12 @@ export default function GalleryScreen({
                   variants={itemVariants}
                   key={p.id}
                   className="group cursor-pointer"
+                  onClick={() => {
+                    // Al hacer clic, si es la galería 3D, abrimos el visor
+                    if (type === '3d') {
+                      setProyectoSeleccionado(p);
+                    }
+                  }}
                 >
                   <div className="relative aspect-[4/3] w-full overflow-hidden bg-panel mb-6">
                     <div
@@ -181,6 +195,12 @@ export default function GalleryScreen({
           </motion.div>
         </motion.div>
       )}
+
+      {/* Visor 3D que se sobrepone a la galería */}
+      <ProjectViewer3D 
+        project={proyectoSeleccionado} 
+        onClose={() => setProyectoSeleccionado(null)} 
+      />
     </AnimatePresence>
   );
 }
