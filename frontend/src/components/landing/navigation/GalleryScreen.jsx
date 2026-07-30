@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ODS_LIST } from '@/pages/dashboard/digitalProjects/odsData';
+import ProjectViewer3D from '@/components/landing/navigation/ProjectViewer3D';
 
 /**
  * Modal de pantalla completa para listar proyectos de una categoría.
@@ -19,6 +20,8 @@ export default function GalleryScreen({
   const [status, setStatus] = useState('idle'); // idle | loading | success | error
   const [proyectos, setProyectos] = useState([]);
   const [selectedOds, setSelectedOds] = useState(initialOds);
+
+  const [proyectoSeleccionado, setProyectoSeleccionado] = useState(null);
 
   const colorClass = type === '3d' ? 'text-c3d' : 'text-cdig';
   const bgHoverClass = type === '3d' ? 'hover:border-c3d hover:shadow-md' : 'hover:border-cdig hover:shadow-md';
