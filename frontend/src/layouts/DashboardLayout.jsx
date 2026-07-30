@@ -38,7 +38,7 @@ export function Layout({ children }) {
 				<Box sx={{ display: "flex", flex: "1 1 auto", flexDirection: "column", pl: { lg: "var(--SideNav-width)" } }}>
 					<MainNav />
 					<main>
-						<Container maxWidth="xl" sx={{ py: "64px" }}>
+						<Container maxWidth="xl" sx={{ pt: { xs: "16px", md: "24px" }, pb: "64px" }}>
 							{children || <Outlet />}
 						</Container>
 					</main>

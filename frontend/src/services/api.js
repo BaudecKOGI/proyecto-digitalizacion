@@ -48,7 +48,7 @@ export const fetchProyectosSoftware = async () => {
 };
 
 // ==========================================
-// GESTIÓN DE EDITORES (ROL='PROF')
+// GESTIÓN DE EDITORES (ROL='EDITOR')
 // ==========================================
 export const fetchEditores = async (search = "") => {
   const url = search 
@@ -127,3 +127,75 @@ export const deleteCategoria = async (id) => {
   return handleResponse(res);
 };
 
+// ==========================================
+// GESTIÓN DE TECNOLOGÍAS
+// ==========================================
+export const fetchTecnologias = async (search = "") => {
+  const url = search 
+    ? `${API_BASE_URL}/tecnologias/?search=${encodeURIComponent(search)}` 
+    : `${API_BASE_URL}/tecnologias/`;
+  const res = await fetch(url);
+  return handleResponse(res);
+};
+
+export const createTecnologia = async (techData) => {
+  const res = await fetch(`${API_BASE_URL}/tecnologias/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(techData),
+  });
+  return handleResponse(res);
+};
+
+export const updateTecnologia = async (id, techData) => {
+  const res = await fetch(`${API_BASE_URL}/tecnologias/${id}/`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(techData),
+  });
+  return handleResponse(res);
+};
+
+export const deleteTecnologia = async (id) => {
+  const res = await fetch(`${API_BASE_URL}/tecnologias/${id}/`, {
+    method: "DELETE",
+  });
+  return handleResponse(res);
+};
+
+// ==========================================
+// GESTIÓN DE PROYECTOS SOFTWARE (ADMIN / EDITOR)
+// ==========================================
+export const fetchProyectosSoftwareAdmin = async ({ search = "", ods = "", categoria = "", estado = "" } = {}) => {
+  const params = new URLSearchParams();
+  if (search) params.append("search", search);
+  if (ods) params.append("ods", ods);
+  if (categoria) params.append("categoria", categoria);
+  if (estado) params.append("estado", estado);
+  const url = `${API_BASE_URL}/proyectos-software/${params.toString() ? "?" + params.toString() : ""}`;
+  const res = await fetch(url);
+  return handleResponse(res);
+};
+
+export const createProyectoSoftware = async (formData) => {
+  const res = await fetch(`${API_BASE_URL}/proyectos-software/`, {
+    method: "POST",
+    body: formData,
+  });
+  return handleResponse(res);
+};
+
+export const updateProyectoSoftware = async (id, formData) => {
+  const res = await fetch(`${API_BASE_URL}/proyectos-software/${id}/`, {
+    method: "PATCH",
+    body: formData,
+  });
+  return handleResponse(res);
+};
+
+export const deleteProyectoSoftware = async (id) => {
+  const res = await fetch(`${API_BASE_URL}/proyectos-software/${id}/`, {
+    method: "DELETE",
+  });
+  return handleResponse(res);
+};

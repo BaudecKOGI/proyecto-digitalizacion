@@ -27,7 +27,7 @@ export function AuthGuard({ children, requiredRole }) {
 			return;
 		}
 
-		// Validación estricta por rol (ej. ADMIN vs PROF/EDITOR)
+		// Validación estricta por rol (ej. ADMIN vs EDITOR)
 		if (requiredRole) {
 			const userRol = (user.rol || "").toUpperCase();
 			const allowedRoles = Array.isArray(requiredRole)
@@ -36,7 +36,7 @@ export function AuthGuard({ children, requiredRole }) {
 
 			if (!allowedRoles.includes(userRol)) {
 				logger.debug(`[AuthGuard]: User role ${userRol} not allowed for ${requiredRole}`);
-				if (userRol === "PROF" || userRol === "EDITOR") {
+				if (userRol === "EDITOR") {
 					navigate("/editor/hub", { replace: true });
 				} else {
 					navigate(paths.dashboard.overview, { replace: true });

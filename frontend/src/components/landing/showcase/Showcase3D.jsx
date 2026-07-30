@@ -16,9 +16,22 @@ export default function Showcase3D({ onOpenGallery }) {
             <h2 className="mb-6 font-display text-[clamp(32px,4vw,56px)] font-bold leading-[1.05] tracking-tight text-text">
               El diseño <br/> se explora.
             </h2>
-            <p className="mb-8 text-[16px] leading-relaxed text-muted">
+            <p className="mb-6 text-[16px] leading-relaxed text-muted">
               Cada proyecto 3D se procesa para la web, permitiendo a la comunidad rotar, acercar y estudiar modelos en tiempo real sin requerir instalaciones pesadas.
             </p>
+
+            {/* Stack Tecnológico y de Fabricación - Senior Industrial Pills */}
+            <div className="mb-8 flex flex-wrap gap-1.5">
+              {['Fusion 360', 'Blender', 'SolidWorks', 'Ultimaker Cura', 'Resina SLA', 'Corte Láser CNC', 'Impresión FDM'].map((tech) => (
+                <span
+                  key={tech}
+                  className="border border-line/80 bg-panel/60 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-text transition-colors hover:border-c3d"
+                >
+                  {tech}
+                </span>
+              ))}
+            </div>
+
             <button 
               onClick={onOpenGallery} 
               className="group flex items-center gap-3 font-sans text-[13px] font-bold uppercase tracking-widest text-text transition-colors hover:text-c3d"

@@ -7,7 +7,7 @@ export const Hub = () => {
   const [activeSide, setActiveSide] = useState('3d');
 
   return (
-    <AuthGuard requiredRole={["PROF", "EDITOR"]}>
+    <AuthGuard requiredRole={["EDITOR"]}>
       <div className="hub-wrapper">
         <div className="hub-title">
           <div className="eyebrow">¿Qué quieres gestionar hoy?</div>

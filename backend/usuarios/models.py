@@ -28,11 +28,11 @@ class UsuarioManager(BaseUserManager):
 class Usuario(AbstractUser):
 
     ROL_ADMIN = "ADMIN"
-    ROL_PROF = "PROF"
+    ROL_EDITOR = "EDITOR"
 
     ROLES = (
         (ROL_ADMIN, 'Administrador General'),
-        (ROL_PROF, 'Profesor / Encargado'),
+        (ROL_EDITOR, 'Editor'),
     )
     
     username = None 

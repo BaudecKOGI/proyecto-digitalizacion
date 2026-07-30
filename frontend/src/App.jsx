@@ -4,7 +4,6 @@ import { Navigate, Route, Routes } from "react-router-dom";
 // Importacion de las rutas del editor y la landing page
 import PublicHome from './pages/PublicHome';
 import EditorLayout from './layouts/EditorLayout';
-import { Login as EditorLogin } from './pages/editor/Login';
 import { Hub as EditorHub } from './pages/editor/Hub';
 import { Overview as EditorOverview } from './pages/editor/Overview';
 import { ProjectsList as EditorProjectsList } from './pages/editor/ProjectsList';
@@ -18,7 +17,7 @@ import AccountPage from "@/pages/dashboard/account/Account";
 import DashboardOverviewPage from "@/pages/dashboard/Dashboard";
 import Disenos3DPage from "@/pages/dashboard/Disenos3d";
 import PrevisualizacionPage from "@/pages/dashboard/Previsualizacion";
-import ProyectosDigitalesPage from "@/pages/dashboard/ProyectosDigitales";
+import ProyectosDigitalesPage from "@/pages/dashboard/digitalProjects/ProyectosDigitales";
 import EditoresPage from "@/pages/dashboard/Editores";
 import CategoriasPage from "@/pages/dashboard/Categorias";
 import VisualizacionesPage from "@/pages/dashboard/Visualizaciones";
@@ -37,7 +36,7 @@ export default function App() {
       <Route path="/editor">
         {/* Rutas sin el Sidebar/Navbar */}
         <Route index element={<Navigate to="/auth/sign-in" replace />} />
-        <Route path="login" element={<EditorLogin />} />
+        <Route path="login" element={<Navigate to="/auth/sign-in" replace />} />
         <Route path="hub" element={<EditorHub />} />
 
         {/* Rutas CON el Sidebar/Navbar (el EditorLayout) */}

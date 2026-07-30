@@ -17,7 +17,7 @@ export default function EditorLayout() {
   }, [location.pathname]); // Se vuelve a ejecutar cada vez que cambias de página
 
   return (
-    <AuthGuard requiredRole={["PROF", "EDITOR"]}>
+    <AuthGuard requiredRole={["EDITOR"]}>
       <div className="shell">
         {/* 1. Ponemos el Sidebar fijo a la izquierda */}
         <EditorSidebar />
