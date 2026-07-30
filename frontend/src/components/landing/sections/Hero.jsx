@@ -114,7 +114,7 @@ export default function Hero() {
 
           {/* Descripción */}
           <motion.p variants={itemVariants} className="mt-8 max-w-[660px] text-base sm:text-lg leading-relaxed text-white/90 drop-shadow-sm font-sans">
-            Explora el repositorio oficial del Fab Lab Continental, donde estudiantes y docentes desarrollan proyectos de fabricación digital y soluciones de software que impulsan la innovación y contribuyen a los Objetivos de Desarrollo Sostenible.
+            Donde los estudiantes y docentes desarrollan proyectos de fabricación digital y soluciones de software que impulsan la innovación y ODS.
           </motion.p>
 
           {/* Fila Inferior: Botón alineado más arriba junto a la descripción y Cuadro Resumido a la derecha */}

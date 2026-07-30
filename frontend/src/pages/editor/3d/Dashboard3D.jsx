@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Box, Code, Eye, FileEdit, 
+import {
+  Box, Code, Eye, FileEdit,
   Clock, ArrowRight, FolderKanban, Activity, ExternalLink
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 // Importamos las funciones de tu API para traer los datos reales
-import { fetchProyectos3D, fetchCategorias } from '@/services/api'; // <-- Verifica que esta ruta sea la correcta a tu api.js
+import { fetchProyectos3D, fetchProyectosSoftware, fetchCategorias } from '@/services/api';
 
 export const Overview = ({ isDig }) => {
   const navigate = useNavigate();
-  
+
   // Estados para guardar la información real
   const [stats, setStats] = useState({ total: 0, publicados: 0, borradores: 0, categorias: 0 });
   const [recientes, setRecientes] = useState([]);
@@ -21,8 +21,8 @@ export const Overview = ({ isDig }) => {
     const cargarDatos = async () => {
       try {
         setLoading(true);
-        // Traemos proyectos y categorías de tu API
-        const proyectosData = await fetchProyectos3D();
+        // Traemos proyectos según si es Digital (software) o 3D
+        const proyectosData = isDig ? await fetchProyectosSoftware() : await fetchProyectos3D();
         const categoriasData = await fetchCategorias();
 
         // Aseguramos que sean arrays (por si tu API devuelve un objeto con .results)
@@ -44,7 +44,7 @@ export const Overview = ({ isDig }) => {
         // (Asumiendo que tu API ya los devuelve ordenados por los más nuevos)
         const ultimosTres = proyectos.slice(0, 3).map(p => {
           // Formateamos un poco la fecha si tu API la devuelve (ej: created_at)
-          const fechaFormateada = p.created_at 
+          const fechaFormateada = p.created_at
             ? new Date(p.created_at).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })
             : 'Reciente';
 
@@ -73,7 +73,7 @@ export const Overview = ({ isDig }) => {
 
   return (
     <div className="flex flex-col gap-6 h-full pb-8">
-      
+
       {/* HEADER DEL DASHBOARD (Sin el botón de "Nuevo") */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-[var(--panel)] p-6 rounded-xl border border-[var(--line)] shadow-sm">
         <div>
@@ -136,7 +136,7 @@ export const Overview = ({ isDig }) => {
 
       {/* SECCIÓN INFERIOR: Dos columnas */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
+
         {/* Columna Izquierda: Actividad Reciente */}
         <div className="lg:col-span-2 bg-[var(--panel)] rounded-xl border border-[var(--line)] overflow-hidden flex flex-col">
           <div className="p-5 border-b border-[var(--line)] flex justify-between items-center bg-[var(--bg-general)]/50">
@@ -144,14 +144,14 @@ export const Overview = ({ isDig }) => {
               <Clock size={18} className="text-[var(--text-muted)]" />
               Proyectos Recientes
             </h3>
-            <button 
+            <button
               onClick={() => navigate('/editor/3d/proyectos')}
               className="text-xs font-bold text-[var(--accent)] hover:underline flex items-center gap-1"
             >
               Ver todos <ArrowRight size={12} />
             </button>
           </div>
-          
+
           <div className="p-2">
             {recientes.length === 0 ? (
               <div className="p-6 text-center text-sm text-[var(--text-muted)]">
@@ -159,8 +159,8 @@ export const Overview = ({ isDig }) => {
               </div>
             ) : (
               recientes.map((proyecto) => (
-                <div 
-                  key={proyecto.id} 
+                <div
+                  key={proyecto.id}
                   className="flex items-center justify-between p-3 mx-2 my-1 rounded-lg hover:bg-[var(--bg-general)] transition-colors group cursor-pointer"
                   onClick={() => navigate(`/editor/3d/editar/${proyecto.id}`)}
                 >
@@ -174,11 +174,10 @@ export const Overview = ({ isDig }) => {
                     </div>
                   </div>
                   <div>
-                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border ${
-                      proyecto.estado === 'PUBLICADO' 
+                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border ${proyecto.estado === 'PUBLICADO'
                         ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
                         : 'bg-amber-500/10 text-amber-600 border-amber-500/20'
-                    }`}>
+                      }`}>
                       {proyecto.estado}
                     </span>
                   </div>
@@ -200,20 +199,20 @@ export const Overview = ({ isDig }) => {
             <p className="text-sm text-[var(--text-muted)]">
               Acciones rápidas para gestionar tu portafolio 3D.
             </p>
-            
+
             <div className="flex flex-col gap-3 mt-2">
-              {/* Botón 1: Redirige a crear un nuevo proyecto */}
-              <button 
-                onClick={() => navigate('/editor/3d/nuevo')}
+              {/* Botón 1: Redirige a crear un nuevo proyecto según sea Software o 3D */}
+              <button
+                onClick={() => navigate(isDig ? '/editor/software/nuevo' : '/editor/3d/nuevo')}
                 className="w-full text-left px-4 py-3 rounded-lg border border-[var(--line)] bg-[var(--bg-general)] text-sm font-bold text-[var(--text-main)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors flex justify-between items-center group cursor-pointer"
               >
-                Subir nuevo proyecto 3D
+                {isDig ? 'Subir nuevo proyecto digital' : 'Subir nuevo proyecto 3D'}
                 <ArrowRight size={16} className="text-[var(--text-muted)] group-hover:text-[var(--accent)] transition-colors" />
               </button>
-              
+
               {/* Botón 2: Redirige a la página pública (Ajusta '/galeria' si tu ruta pública es diferente) */}
-              <button 
-                onClick={() => navigate('/galeria')} // <--- CAMBIA ESTA RUTA POR LA DE TU PÁGINA PÚBLICA
+              <button
+                onClick={() => navigate('/galeria')}
                 className="w-full text-left px-4 py-3 rounded-lg border border-[var(--line)] bg-[var(--bg-general)] text-sm font-bold text-[var(--text-main)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors flex justify-between items-center group cursor-pointer"
               >
                 Ver Galería Pública

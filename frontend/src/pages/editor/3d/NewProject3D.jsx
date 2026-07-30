@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useUser } from '@/hooks/use-user';
 import { fetchCategorias, createProyecto3D } from '@/services/api';
+import { ODS_LIST } from "@/pages/dashboard/digitalProjects/odsData";
 
 // --- IMPORTACIONES 3D ---
 import { Canvas } from '@react-three/fiber';
@@ -149,6 +150,7 @@ export const NewProject3D = () => {
     ciclo: '', 
     estado_publicacion: 'BORRADOR', 
     categoria: '', 
+    ods: '',
   });
 
   const [archivoFbx, setArchivoFbx] = useState(null);
@@ -226,6 +228,8 @@ export const NewProject3D = () => {
       Object.keys(formData).forEach(key => {
         if (key === 'categoria') {
           if (formData.categoria) data.append('categoria', formData.categoria);
+        } else if (key === 'ods') {
+          if (formData.ods) data.append('ods', formData.ods);
         } else {
           data.append(key, formData[key]);
         }
@@ -310,10 +314,21 @@ export const NewProject3D = () => {
             <input className={inputClassName} type="text" name="titulo" value={formData.titulo} onChange={handleChange} placeholder="Ej. Motor V8" required />
 
             <div className="flex gap-4">
-              <div className="flex-1">
+              <div className="flex-[2]">
                 <label className={labelClassName}>Autor(es)</label>
                 <input className={inputClassName} type="text" name="autor_nombre" value={formData.autor_nombre} onChange={handleChange} required />
               </div>
+              <div className="flex-[2]">
+                <label className={labelClassName}>Carrera</label>
+                <input className={inputClassName} type="text" name="carrera" value={formData.carrera} onChange={handleChange} required />
+              </div>
+              <div className="flex-1">
+                <label className={labelClassName}>Ciclo</label>
+                <input className={inputClassName} type="text" name="ciclo" value={formData.ciclo} onChange={handleChange} required />
+              </div>
+            </div>
+
+            <div className="flex gap-4">
               <div className="flex-1">
                 <label className={labelClassName}>Categoría</label>
                 <select className={inputClassName} name="categoria" value={formData.categoria} onChange={handleChange} required>
@@ -323,16 +338,14 @@ export const NewProject3D = () => {
                   ))}
                 </select>
               </div>
-            </div>
-
-            <div className="flex gap-4">
               <div className="flex-1">
-                <label className={labelClassName}>Carrera</label>
-                <input className={inputClassName} type="text" name="carrera" value={formData.carrera} onChange={handleChange} required />
-              </div>
-              <div className="flex-1">
-                <label className={labelClassName}>Ciclo</label>
-                <input className={inputClassName} type="text" name="ciclo" value={formData.ciclo} onChange={handleChange} required />
+                <label className={labelClassName}>ODS de Impacto (ONU)</label>
+                <select className={inputClassName} name="ods" value={formData.ods || ""} onChange={handleChange}>
+                  <option value="">Ninguno / No especificado</option>
+                  {ODS_LIST.map(o => (
+                    <option key={o.id} value={o.id}>{o.label}</option>
+                  ))}
+                </select>
               </div>
             </div>
 

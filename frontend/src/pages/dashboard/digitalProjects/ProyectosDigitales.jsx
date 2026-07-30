@@ -134,9 +134,7 @@ export default function ProyectosDigitalesPage() {
 
   const hasActiveFilters = Boolean(searchTerm || filterOds || filterCategoria || filterEstado);
 
-  // ==========================================
   // MANEJADORES PROYECTOS SOFTWARE
-  // ==========================================
   const handleOpenCreateProyecto = () => {
     setEditingProyecto(null);
     setFormProyecto({
@@ -251,9 +249,7 @@ export default function ProyectosDigitalesPage() {
     }
   };
 
-  // ==========================================
   // MANEJADORES TECNOLOGÍAS
-  // ==========================================
   const handleOpenCreateTech = () => {
     setEditingTech(null);
     setFormTechName("");
@@ -302,13 +298,29 @@ export default function ProyectosDigitalesPage() {
 
   return (
     <Box sx={{ pt: 0, pb: 4, px: { xs: 1, sm: 2 }, maxWidth: 1280, margin: "0 auto" }}>
-      {/* SI ESTAMOS EN VISTA TÉCNICA DETALLADA (NO FLOTANTE), RENDERIZAMOS LA FICHA TÉCNICA */}
+      {/* SI ESTAMOS EN VISTA TÉCNICA DETALLADA O FORMULARIO INTEGRADO, RENDERIZAMOS LA VISTA */}
       {viewingProyecto ? (
         <ProjectDetailView
           proyecto={viewingProyecto}
           onBack={() => setViewingProyecto(null)}
           onEdit={handleOpenEditProyecto}
           onDelete={handleDeleteProyecto}
+        />
+      ) : openModalProyecto ? (
+        <ProyectoFormModal
+          open={openModalProyecto}
+          onClose={() => setOpenModalProyecto(false)}
+          onSave={handleSaveProyecto}
+          editingProyecto={editingProyecto}
+          formProyecto={formProyecto}
+          setFormProyecto={setFormProyecto}
+          archivoPortada={archivoPortada}
+          setArchivoPortada={setArchivoPortada}
+          archivoVideo={archivoVideo}
+          setArchivoVideo={setArchivoVideo}
+          categorias={categorias}
+          tecnologias={tecnologias}
+          formError={formError}
         />
       ) : (
         <>
@@ -325,10 +337,10 @@ export default function ProyectosDigitalesPage() {
           >
             <Box>
               <Typography variant="h4" sx={{ fontWeight: 800, color: "text.primary", mb: 0.5 }}>
-                Gestión de Proyectos Digitales & Software
+                Gestión de Proyectos Digitales
               </Typography>
               <Typography variant="body1" color="text.secondary">
-                Administra proyectos de software, repositorios, demos vivas, videos, tecnologías y ODS.
+                Administra proyectos de software, repositorios, videos, tecnologías y ODS.
               </Typography>
             </Box>
 
@@ -339,7 +351,7 @@ export default function ProyectosDigitalesPage() {
                   startIcon={<PlusIcon />}
                   onClick={handleOpenCreateProyecto}
                   sx={{
-                    borderRadius: 2.5,
+                    borderRadius: 1.5,
                     textTransform: "none",
                     fontWeight: 600,
                     px: 3,
@@ -508,23 +520,6 @@ export default function ProyectosDigitalesPage() {
           )}
         </>
       )}
-
-      {/* MODAL FORMULARIO PROYECTO */}
-      <ProyectoFormModal
-        open={openModalProyecto}
-        onClose={() => setOpenModalProyecto(false)}
-        onSave={handleSaveProyecto}
-        editingProyecto={editingProyecto}
-        formProyecto={formProyecto}
-        setFormProyecto={setFormProyecto}
-        archivoPortada={archivoPortada}
-        setArchivoPortada={setArchivoPortada}
-        archivoVideo={archivoVideo}
-        setArchivoVideo={setArchivoVideo}
-        categorias={categorias}
-        tecnologias={tecnologias}
-        formError={formError}
-      />
 
       {/* MODAL FORMULARIO TECNOLOGÍA */}
       <TecnologiaFormModal

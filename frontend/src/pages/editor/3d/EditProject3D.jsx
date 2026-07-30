@@ -1,11 +1,12 @@
 import React, { useState, useEffect, Suspense, useRef } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { 
   Upload, Save, X, Box as BoxIcon, Plus, Trash2, 
   Eye, FileEdit, Info 
 } from 'lucide-react';
 import { useUser } from '@/hooks/use-user';
-import { fetchCategorias, fetchProyecto3DById, updateProyecto3D } from '@/services/api';
+import { fetchCategorias, fetchProyecto3DById, updateProyecto3D, fetchProyectoSoftwareById, updateProyectoSoftware } from '@/services/api';
+import { ODS_LIST } from "@/pages/dashboard/digitalProjects/odsData";
 
 // --- IMPORTACIONES 3D ---
 import { Canvas } from '@react-three/fiber';
@@ -133,6 +134,8 @@ const FBXModel = ({ url, piezasMoviles, setHabilitarCamara }) => {
 export const EditProject3D = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isDig = location.pathname.includes('/software/');
   const { user } = useUser();
   
   const [categorias, setCategorias] = useState([]);
@@ -148,6 +151,7 @@ export const EditProject3D = () => {
     ciclo: '', 
     estado_publicacion: 'BORRADOR', 
     categoria: '',
+    ods: '',
   });
 
   const [archivoFbx, setArchivoFbx] = useState(null);
@@ -165,7 +169,7 @@ export const EditProject3D = () => {
         const catsData = await fetchCategorias();
         setCategorias(Array.isArray(catsData) ? catsData : catsData?.results || []);
 
-        const proyecto = await fetchProyecto3DById(id);
+        const proyecto = isDig ? await fetchProyectoSoftwareById(id) : await fetchProyecto3DById(id);
         
         setFormData({
           titulo: proyecto.titulo || '',
@@ -175,6 +179,7 @@ export const EditProject3D = () => {
           ciclo: proyecto.ciclo || '',
           estado_publicacion: proyecto.estado_publicacion || 'BORRADOR',
           categoria: proyecto.categoria || '',
+          ods: proyecto.ods || '',
         });
 
         if (proyecto.archivo_fbx) {
@@ -255,6 +260,8 @@ export const EditProject3D = () => {
       Object.keys(formData).forEach(key => {
         if (key === 'categoria') {
           if (formData.categoria) data.append('categoria', formData.categoria);
+        } else if (key === 'ods') {
+          if (formData.ods) data.append('ods', formData.ods);
         } else {
           data.append(key, formData[key]);
         }
@@ -270,8 +277,13 @@ export const EditProject3D = () => {
       const configuracionJSON = JSON.stringify(configA_guardar);
       data.append('configuracion_interactiva', configuracionJSON);
 
-      await updateProyecto3D(id, data);
-      navigate('/editor/3d/proyectos');
+      if (isDig) {
+        await updateProyectoSoftware(id, data);
+        navigate('/editor/software/proyectos');
+      } else {
+        await updateProyecto3D(id, data);
+        navigate('/editor/3d/proyectos');
+      }
     } catch (err) {
       setError(err.message || "Error al actualizar el proyecto. Verifica los datos.");
     } finally {
@@ -348,10 +360,21 @@ export const EditProject3D = () => {
             <input className={inputClassName} type="text" name="titulo" value={formData.titulo} onChange={handleChange} required />
 
             <div className="flex gap-4">
-              <div className="flex-1">
+              <div className="flex-[2]">
                 <label className={labelClassName}>Autor(es)</label>
                 <input className={inputClassName} type="text" name="autor_nombre" value={formData.autor_nombre} onChange={handleChange} required />
               </div>
+              <div className="flex-[2]">
+                <label className={labelClassName}>Carrera</label>
+                <input className={inputClassName} type="text" name="carrera" value={formData.carrera} onChange={handleChange} required />
+              </div>
+              <div className="flex-1">
+                <label className={labelClassName}>Ciclo</label>
+                <input className={inputClassName} type="text" name="ciclo" value={formData.ciclo} onChange={handleChange} required />
+              </div>
+            </div>
+
+            <div className="flex gap-4">
               <div className="flex-1">
                 <label className={labelClassName}>Categoría</label>
                 <select className={inputClassName} name="categoria" value={formData.categoria} onChange={handleChange} required>
@@ -361,16 +384,14 @@ export const EditProject3D = () => {
                   ))}
                 </select>
               </div>
-            </div>
-
-            <div className="flex gap-4">
               <div className="flex-1">
-                <label className={labelClassName}>Carrera</label>
-                <input className={inputClassName} type="text" name="carrera" value={formData.carrera} onChange={handleChange} required />
-              </div>
-              <div className="flex-1">
-                <label className={labelClassName}>Ciclo</label>
-                <input className={inputClassName} type="text" name="ciclo" value={formData.ciclo} onChange={handleChange} required />
+                <label className={labelClassName}>ODS de Impacto (ONU)</label>
+                <select className={inputClassName} name="ods" value={formData.ods || ""} onChange={handleChange}>
+                  <option value="">Ninguno / No especificado</option>
+                  {ODS_LIST.map(o => (
+                    <option key={o.id} value={o.id}>{o.label}</option>
+                  ))}
+                </select>
               </div>
             </div>
 

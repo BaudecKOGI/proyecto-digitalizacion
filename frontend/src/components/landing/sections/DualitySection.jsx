@@ -26,7 +26,7 @@ export default function DualitySection({ onOpen3D, onOpenDigital }) {
     <section
       id="duality"
       className="relative overflow-hidden py-32 px-[8vw] border-b border-line/40 bg-cover bg-center bg-fixed bg-no-repeat"
-      style={{ backgroundImage: `url('/assets/dos-mundos.jpg')` }}
+      style={{ backgroundImage: `url('/assets/uno.png')` }}
     >
       {/* Capa sutil de oscurecimiento equilibrado para realzar texto sin perder nitidez de la foto */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-black/55" />

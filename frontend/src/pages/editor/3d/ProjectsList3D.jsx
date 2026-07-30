@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Pencil, User, Folder, GraduationCap } from 'lucide-react';
-import { fetchProyectos3D } from '@/services/api';
+import { fetchProyectos3D, fetchProyectosSoftware } from '@/services/api';
 
-export const ProjectsList3D = () => {
+export const ProjectsList3D = ({ mode = "3d" }) => {
   const navigate = useNavigate();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,7 +13,7 @@ export const ProjectsList3D = () => {
     const loadProjects = async () => {
       try {
         setLoading(true);
-        const data = await fetchProyectos3D();
+        const data = mode === "dig" ? await fetchProyectosSoftware() : await fetchProyectos3D();
         const rawProjects = Array.isArray(data) ? data : data?.results || [];
         setProjects(rawProjects);
       } catch (err) {
@@ -24,10 +24,14 @@ export const ProjectsList3D = () => {
       }
     };
     loadProjects();
-  }, []);
+  }, [mode]);
 
   const handleEdit = (id) => {
-    navigate(`/editor/3d/editar/${id}`);
+    if (mode === "dig") {
+      navigate(`/editor/software/editar/${id}`);
+    } else {
+      navigate(`/editor/3d/editar/${id}`);
+    }
   };
 
   return (
@@ -35,14 +39,20 @@ export const ProjectsList3D = () => {
       {/* Encabezado */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="m-0 text-2xl font-bold text-[var(--text-main)]">Todos los proyectos 3D</h2>
-          <div className="text-[var(--text-muted)] mt-1">Administra el inventario de tus diseños (Solo lectura y edición).</div>
+          <h2 className="m-0 text-2xl font-bold text-[var(--text-main)]">
+            {mode === "dig" ? "Todos los proyectos Digitales" : "Todos los proyectos 3D"}
+          </h2>
+          <div className="text-[var(--text-muted)] mt-1">
+            {mode === "dig"
+              ? "Administra el inventario de tus proyectos digitales (Solo lectura y edición)."
+              : "Administra el inventario de tus diseños 3D (Solo lectura y edición)."}
+          </div>
         </div>
         <button 
-          onClick={() => navigate('/editor/3d/nuevo')}
+          onClick={() => navigate(mode === "dig" ? '/editor/software/nuevo' : '/editor/3d/nuevo')}
           className="bg-[var(--accent)] hover:opacity-90 transition-opacity text-white border-none py-2.5 px-4 rounded-lg cursor-pointer font-bold flex items-center gap-2"
         >
-          + Nuevo Proyecto 3D
+          {mode === "dig" ? "+ Nuevo Proyecto Digital" : "+ Nuevo Proyecto 3D"}
         </button>
       </div>
 
@@ -70,14 +80,14 @@ export const ProjectsList3D = () => {
             }
 
             return (
-              <div key={project.id} className="bg-[var(--panel)] rounded-xl border border-[var(--line)] overflow-hidden flex flex-col shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md">
+              <div key={project.id} className="bg-[var(--panel)] rounded-xl border border-[var(--line)] overflow-hidden flex flex-col shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md h-[420px]">
                 
                 {/* Imagen del Proyecto */}
-                <div className="w-full h-[200px] bg-[var(--bg-general)] relative overflow-hidden">
+                <div className="w-full h-[200px] bg-[var(--bg-general)] relative overflow-hidden shrink-0">
                   <img 
                     src={imageUrl} 
                     alt={project.titulo} 
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover object-center block"
                   />
                   {/* Etiqueta flotante de estado */}
                   <span className="absolute top-3 right-3 bg-[var(--panel)] px-2 py-1 rounded-full text-xs font-bold text-[var(--text-main)] shadow-sm">
@@ -86,27 +96,29 @@ export const ProjectsList3D = () => {
                 </div>
 
                 {/* Contenido de la Tarjeta */}
-                <div className="p-5 flex-grow flex flex-col gap-3">
-                  <h3 className="m-0 text-lg text-[var(--text-main)] font-semibold leading-tight">
-                    {project.titulo || 'Sin título'}
-                  </h3>
-                  
-                  <div className="flex items-center gap-1.5 text-[var(--text-muted)] text-sm">
-                    <User size={16} />
-                    <span>{project.autor_nombre || 'Autor desconocido'}</span>
+                <div className="p-5 flex-grow flex flex-col justify-between overflow-hidden">
+                  <div>
+                    <h3 className="m-0 text-lg text-[var(--text-main)] font-semibold leading-tight line-clamp-2 h-[2.8rem] overflow-hidden">
+                      {project.titulo || 'Sin título'}
+                    </h3>
+                    
+                    <div className="flex items-center gap-1.5 text-[var(--text-muted)] text-sm mt-2 truncate">
+                      <User size={16} className="shrink-0" />
+                      <span className="truncate">{project.autor_nombre || 'Autor desconocido'}</span>
+                    </div>
                   </div>
 
-                  <div className="flex flex-col gap-2 mt-auto pt-3">
+                  <div className="flex flex-col gap-1.5 mt-auto pt-2">
                     {project.categoria_nombre && (
-                      <div className="flex items-center gap-1.5 text-[var(--text-muted)] text-[13px] bg-[var(--bg-general)] px-2 py-1 rounded-md w-fit">
-                        <Folder size={14} />
-                        <span>{project.categoria_nombre}</span>
+                      <div className="flex items-center gap-1.5 text-[var(--text-muted)] text-[12px] bg-[var(--bg-general)] px-2 py-1 rounded-md w-fit max-w-full truncate">
+                        <Folder size={14} className="shrink-0" />
+                        <span className="truncate">{project.categoria_nombre}</span>
                       </div>
                     )}
                     {project.carrera && (
-                      <div className="flex items-center gap-1.5 text-[var(--text-muted)] text-[13px] bg-[var(--bg-general)] px-2 py-1 rounded-md w-fit">
-                        <GraduationCap size={14} />
-                        <span>{project.carrera}</span>
+                      <div className="flex items-center gap-1.5 text-[var(--text-muted)] text-[12px] bg-[var(--bg-general)] px-2 py-1 rounded-md w-fit max-w-full truncate">
+                        <GraduationCap size={14} className="shrink-0" />
+                        <span className="truncate">{project.carrera}</span>
                       </div>
                     )}
                   </div>
