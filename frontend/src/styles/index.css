@@ -71,15 +71,4 @@ section {
 .reveal.in {
   opacity: 1;
   transform: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation: none !important;
-    transition: none !important;
-  }
-
-  html {
-    scroll-behavior: auto;
-  }
 }

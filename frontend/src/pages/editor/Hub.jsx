@@ -7,7 +7,7 @@ export const Hub = () => {
   const [activeSide, setActiveSide] = useState(null);
 
   return (
-    <AuthGuard requiredRole={["PROF", "EDITOR"]}>
+    <AuthGuard requiredRole={["EDITOR"]}>
       <style>{`
         /* =========================================
            1. ESTRUCTURA Y ELIMINACIÓN DEL FONDO DEL TÍTULO

@@ -9,7 +9,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 class UsuarioViewSet(viewsets.ModelViewSet):
     """
-    ViewSet general para todos los usuarios. Permite filtrar con ?rol=PROF o ?rol=ADMIN
+    ViewSet general para todos los usuarios. Permite filtrar con ?rol=EDITOR o ?rol=ADMIN
     """
     queryset = Usuario.objects.all().order_by('-date_joined')
     serializer_class = UsuarioSerializer
@@ -27,17 +27,17 @@ class UsuarioViewSet(viewsets.ModelViewSet):
 
 class EditorViewSet(viewsets.ModelViewSet):
     """
-    ViewSet específico para gestionar los Editores (rol='PROF') desde el Panel del Administrador.
+    ViewSet específico para gestionar los Editores (rol='EDITOR') desde el Panel del Administrador.
     """
-    queryset = Usuario.objects.filter(rol='PROF').order_by('-date_joined')
+    queryset = Usuario.objects.filter(rol=Usuario.ROL_EDITOR).order_by('-date_joined')
     serializer_class = UsuarioSerializer
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['nombre', 'email']
     ordering_fields = ['nombre', 'email', 'date_joined', 'updated_at']
 
     def perform_create(self, serializer):
-        # Asegura que siempre se asigne rol='PROF' al crear desde este endpoint
-        serializer.save(rol='PROF')
+        # Asegura que siempre se asigne rol='EDITOR' al crear desde este endpoint
+        serializer.save(rol=Usuario.ROL_EDITOR)
 
 
 
@@ -72,8 +72,8 @@ def login_view(request):
         )
 
     # Verificación arquitectónica de roles: No permitir cuentas técnicas (is_superuser/is_staff)
-    # y exigir que el usuario pertenezca al plano de negocio de React (ADMIN o PROF).
-    if user.is_superuser or user.is_staff or user.rol not in [Usuario.ROL_ADMIN, Usuario.ROL_PROF]:
+    # y exigir que el usuario pertenezca al plano de negocio de React (ADMIN o EDITOR).
+    if user.is_superuser or user.is_staff or user.rol not in [Usuario.ROL_ADMIN, Usuario.ROL_EDITOR]:
         return Response(
             {"error": "No tiene permisos para acceder a esta aplicación."},
             status=status.HTTP_401_UNAUTHORIZED

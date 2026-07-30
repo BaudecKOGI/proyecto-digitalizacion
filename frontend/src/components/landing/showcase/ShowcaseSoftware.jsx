@@ -28,9 +28,22 @@ export default function ShowcaseSoftware({ onOpenGallery }) {
             <h2 className="mb-6 font-display text-[clamp(32px,4vw,56px)] font-bold leading-[1.05] tracking-tight text-text">
               Soluciones en <br /> acción.
             </h2>
-            <p className="mb-8 text-[16px] leading-relaxed text-muted">
+            <p className="mb-6 text-[16px] leading-relaxed text-muted">
               Documentamos cada proyecto con vistas previas interactivas. Atrás quedaron las capturas estáticas; evaluamos funcionalidad y experiencia en entornos reales.
             </p>
+
+            {/* Stack Tecnológico Destacado - Senior Industrial Pills */}
+            <div className="mb-8 flex flex-wrap gap-1.5">
+              {['React', 'Python', 'Node.js', 'AWS', 'Three.js', 'WebGL', 'Flutter', 'ROS'].map((tech) => (
+                <span
+                  key={tech}
+                  className="border border-line/80 bg-panel/60 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-text transition-colors hover:border-cdig"
+                >
+                  {tech}
+                </span>
+              ))}
+            </div>
+
             <button
               onClick={onOpenGallery}
               className="group flex items-center gap-3 font-sans text-[13px] font-bold uppercase tracking-widest text-text transition-colors hover:text-cdig"

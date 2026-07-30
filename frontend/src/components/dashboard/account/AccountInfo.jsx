@@ -43,7 +43,7 @@ export function AccountInfo() {
 
   const nombre = user?.name || user?.firstName || "Administrador General";
   const email = user?.email || "admin@continental.edu.pe";
-  const rol = user?.rol === "ADMIN" ? "Administrador General" : "Editor / Profesor";
+  const rol = user?.rol === "ADMIN" ? "Administrador General" : "Editor";
   const avatarUrl = user?.avatar || "/assets/avatar_jonel.png";
 
   const isCustomAvatar =

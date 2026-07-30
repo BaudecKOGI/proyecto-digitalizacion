@@ -28,7 +28,7 @@ export default function EditorLayout() {
   };
 
   return (
-    <AuthGuard requiredRole={["PROF", "EDITOR"]}>
+    <AuthGuard requiredRole={["EDITOR"]}>
       <div className="flex h-screen w-full overflow-hidden bg-[var(--bg-general)] font-sans text-[var(--text-main)] transition-colors duration-300">
         
         <EditorSidebar 

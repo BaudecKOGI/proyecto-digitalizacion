@@ -59,7 +59,7 @@ export function SignInForm() {
 			// Refresh the auth state
 			await checkSession?.();
 
-			if (data?.user?.rol === "PROF" || data?.user?.rol === "EDITOR") {
+			if (data?.user?.rol === "EDITOR") {
 				navigate("/editor/hub");
 			} else {
 				navigate(paths.dashboard.overview);

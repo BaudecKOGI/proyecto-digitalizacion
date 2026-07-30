@@ -1,0 +1,392 @@
+import * as React from "react";
+import {
+  Box,
+  Typography,
+  Button,
+  Grid,
+  Chip,
+  Stack,
+  Paper,
+  Divider,
+  IconButton,
+  Tooltip
+} from "@mui/material";
+import { ArrowLeft as BackIcon } from "@phosphor-icons/react/dist/ssr/ArrowLeft";
+import { GitBranch as GitIcon } from "@phosphor-icons/react/dist/ssr/GitBranch";
+import { Globe as GlobeIcon } from "@phosphor-icons/react/dist/ssr/Globe";
+import { PencilSimple as EditIcon } from "@phosphor-icons/react/dist/ssr/PencilSimple";
+import { Trash as TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
+import { VideoCameraSlash as NoVideoIcon } from "@phosphor-icons/react/dist/ssr/VideoCameraSlash";
+import { OdsBadge } from "./odsData";
+
+export default function ProjectDetailView({
+  proyecto,
+  onBack,
+  onEdit,
+  onDelete
+}) {
+  if (!proyecto) return null;
+
+  return (
+    <Box sx={{ width: "100%", pb: 6 }}>
+      {/* 1. BREADCRUMB / BARRA SUPERIOR DE NAVEGACIÓN */}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 3,
+          pb: 2,
+          borderBottom: "1px solid",
+          borderColor: "divider",
+          flexWrap: "wrap",
+          gap: 2
+        }}
+      >
+        <Stack direction="row" spacing={1.5} alignItems="center">
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<BackIcon />}
+            onClick={onBack}
+            sx={{
+              textTransform: "none",
+              fontWeight: 600,
+              borderRadius: 1.5,
+              borderColor: "divider",
+              color: "text.primary"
+            }}
+          >
+            Volver al listado
+          </Button>
+          <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+            / Proyectos Software / <strong style={{ color: "inherit" }}>{proyecto.titulo}</strong>
+          </Typography>
+        </Stack>
+
+        <Stack direction="row" spacing={1}>
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<EditIcon />}
+            onClick={() => onEdit(proyecto)}
+            sx={{ textTransform: "none", fontWeight: 600, borderRadius: 1.5 }}
+          >
+            Editar proyecto
+          </Button>
+          <Button
+            variant="outlined"
+            color="error"
+            size="small"
+            startIcon={<TrashIcon />}
+            onClick={() => onDelete(proyecto.id)}
+            sx={{ textTransform: "none", fontWeight: 600, borderRadius: 1.5 }}
+          >
+            Eliminar
+          </Button>
+        </Stack>
+      </Box>
+
+      {/* 2. ENCABEZADO TÉCNICO PROFESIONAL */}
+      <Box sx={{ mb: 4 }}>
+        <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1.5 }} flexWrap="wrap" useFlexGap>
+          <Chip
+            label={proyecto.estado_publicacion}
+            size="small"
+            color={
+              proyecto.estado_publicacion === "PUBLICADO"
+                ? "success"
+                : proyecto.estado_publicacion === "BORRADOR"
+                ? "warning"
+                : "default"
+            }
+            sx={{ fontWeight: 700, borderRadius: 1, fontSize: "0.75rem" }}
+          />
+          <OdsBadge odsNum={proyecto.ods} />
+          {proyecto.categoria_nombre && (
+            <Chip
+              label={proyecto.categoria_nombre}
+              size="small"
+              variant="outlined"
+              sx={{ fontWeight: 600, borderRadius: 1 }}
+            />
+          )}
+        </Stack>
+
+        <Typography variant="h4" sx={{ fontWeight: 800, color: "text.primary", mb: 1, letterSpacing: "-0.02em" }}>
+          {proyecto.titulo}
+        </Typography>
+
+        <Typography variant="body1" color="text.secondary" sx={{ fontWeight: 400 }}>
+          Desarrollado por <strong>{proyecto.autor_nombre}</strong> • {proyecto.carrera} (Ciclo {proyecto.ciclo})
+        </Typography>
+      </Box>
+
+      {/* 3. CONTENIDO PRINCIPAL (GRILLA DE 2 COLUMNAS) */}
+      <Grid container spacing={4}>
+        {/* COLUMNA IZQUIERDA (75% - VISUAL Y DESCRIPCIÓN) */}
+        <Grid item xs={12} md={8}>
+          {/* REPRODUCTOR DE VIDEO O PORTADA INTEGRADA EN EL FLUJO */}
+          <Paper
+            elevation={0}
+            sx={{
+              borderRadius: 2.5,
+              border: "1px solid",
+              borderColor: "divider",
+              overflow: "hidden",
+              mb: 4,
+              bgcolor: "#090D16"
+            }}
+          >
+            {proyecto.archivo_video ? (
+              <Box sx={{ width: "100%", bgcolor: "#000" }}>
+                <video
+                  src={proyecto.archivo_video}
+                  controls
+                  poster={proyecto.imagen_portada}
+                  style={{
+                    width: "100%",
+                    maxHeight: 480,
+                    display: "block",
+                    backgroundColor: "#000"
+                  }}
+                >
+                  Tu navegador no soporta la reproducción de video HTML5.
+                </video>
+              </Box>
+            ) : proyecto.imagen_portada ? (
+              <Box
+                component="img"
+                src={proyecto.imagen_portada}
+                alt={proyecto.titulo}
+                sx={{
+                  width: "100%",
+                  maxHeight: 460,
+                  objectFit: "cover",
+                  display: "block"
+                }}
+              />
+            ) : (
+              <Box
+                sx={{
+                  py: 10,
+                  px: 4,
+                  textAlign: "center",
+                  color: "text.secondary"
+                }}
+              >
+                <NoVideoIcon size={40} style={{ opacity: 0.4, marginBottom: 12 }} />
+                <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                  Sin archivo de video ni imagen portada
+                </Typography>
+                <Typography variant="caption" color="text.disabled">
+                  Edita el proyecto para subir una captura de pantalla o un video MP4 en vivo.
+                </Typography>
+              </Box>
+            )}
+          </Paper>
+
+          {/* DESCRIPCIÓN TÉCNICA Y ALCANCE */}
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, color: "text.primary", mb: 2 }}>
+              Descripción del Proyecto & Alcance
+            </Typography>
+            <Paper
+              elevation={0}
+              sx={{
+                p: 3,
+                borderRadius: 2,
+                border: "1px solid",
+                borderColor: "divider",
+                bgcolor: "background.paper"
+              }}
+            >
+              <Typography
+                variant="body1"
+                sx={{
+                  color: "text.primary",
+                  lineHeight: 1.8,
+                  whiteSpace: "pre-line"
+                }}
+              >
+                {proyecto.descripcion || "Sin especificaciones detalladas registradas para este proyecto."}
+              </Typography>
+            </Paper>
+          </Box>
+        </Grid>
+
+        {/* COLUMNA DERECHA (33% - ESPECIFICACIONES TÉCNICAS Y STACK) */}
+        <Grid item xs={12} md={4}>
+          <Stack spacing={3}>
+            {/* FICHA DE ESPECIFICACIONES */}
+            <Paper
+              elevation={0}
+              sx={{
+                p: 3,
+                borderRadius: 2.5,
+                border: "1px solid",
+                borderColor: "divider"
+              }}
+            >
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2, textTransform: "uppercase", letterSpacing: "0.05em", color: "text.secondary" }}>
+                Ficha Técnica
+              </Typography>
+
+              <Stack spacing={2} divider={<Divider />}>
+                <Box>
+                  <Typography variant="caption" color="text.secondary">
+                    Responsable / Autor
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                    {proyecto.autor_nombre}
+                  </Typography>
+                </Box>
+
+                <Box>
+                  <Typography variant="caption" color="text.secondary">
+                    Carrera Profesional
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                    {proyecto.carrera}
+                  </Typography>
+                </Box>
+
+                <Box>
+                  <Typography variant="caption" color="text.secondary">
+                    Ciclo Académico
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                    Ciclo {proyecto.ciclo}
+                  </Typography>
+                </Box>
+
+                <Box>
+                  <Typography variant="caption" color="text.secondary">
+                    Área / Categoría
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                    {proyecto.categoria_nombre || "Sin Categoría"}
+                  </Typography>
+                </Box>
+
+                <Box>
+                  <Typography variant="caption" color="text.secondary">
+                    Fecha de Registro
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                    {proyecto.created_at ? new Date(proyecto.created_at).toLocaleDateString("es-ES", { year: "numeric", month: "long", day: "numeric" }) : "N/A"}
+                  </Typography>
+                </Box>
+              </Stack>
+            </Paper>
+
+            {/* STACK TECNOLÓGICO */}
+            <Paper
+              elevation={0}
+              sx={{
+                p: 3,
+                borderRadius: 2.5,
+                border: "1px solid",
+                borderColor: "divider"
+              }}
+            >
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2, textTransform: "uppercase", letterSpacing: "0.05em", color: "text.secondary" }}>
+                Stack Tecnológico
+              </Typography>
+
+              <Stack direction="row" spacing={0.8} flexWrap="wrap" useFlexGap>
+                {(proyecto.tecnologias_detalle || []).length > 0 ? (
+                  (proyecto.tecnologias_detalle || []).map((t) => (
+                    <Chip
+                      key={t.id}
+                      label={t.nombre}
+                      size="small"
+                      variant="outlined"
+                      sx={{
+                        fontWeight: 600,
+                        borderRadius: 1,
+                        borderColor: "divider",
+                        color: "text.primary"
+                      }}
+                    />
+                  ))
+                ) : (
+                  <Typography variant="body2" color="text.disabled">
+                    No se declararon tecnologías en este proyecto.
+                  </Typography>
+                )}
+              </Stack>
+            </Paper>
+
+            {/* ENLACES DIRECTOS (REPOSITORIO / DEMO) */}
+            <Paper
+              elevation={0}
+              sx={{
+                p: 3,
+                borderRadius: 2.5,
+                border: "1px solid",
+                borderColor: "divider"
+              }}
+            >
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2, textTransform: "uppercase", letterSpacing: "0.05em", color: "text.secondary" }}>
+                Repositorios y Enlaces
+              </Typography>
+
+              <Stack spacing={1.5}>
+                {proyecto.url_repositorio ? (
+                  <Button
+                    variant="outlined"
+                    fullWidth
+                    component="a"
+                    href={proyecto.url_repositorio}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    startIcon={<GitIcon />}
+                    sx={{
+                      textTransform: "none",
+                      fontWeight: 600,
+                      justifyContent: "flex-start",
+                      borderRadius: 1.5,
+                      borderColor: "divider",
+                      color: "text.primary"
+                    }}
+                  >
+                    Ver Repositorio Git
+                  </Button>
+                ) : (
+                  <Typography variant="body2" color="text.disabled">
+                    • Repositorio Git no adjuntado
+                  </Typography>
+                )}
+
+                {proyecto.url_demo_live ? (
+                  <Button
+                    variant="contained"
+                    fullWidth
+                    component="a"
+                    href={proyecto.url_demo_live}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    startIcon={<GlobeIcon />}
+                    sx={{
+                      textTransform: "none",
+                      fontWeight: 600,
+                      justifyContent: "flex-start",
+                      borderRadius: 1.5
+                    }}
+                  >
+                    Abrir Demo en Vivo
+                  </Button>
+                ) : (
+                  <Typography variant="body2" color="text.disabled">
+                    • Demo en línea no disponible
+                  </Typography>
+                )}
+              </Stack>
+            </Paper>
+          </Stack>
+        </Grid>
+      </Grid>
+    </Box>
+  );
+}

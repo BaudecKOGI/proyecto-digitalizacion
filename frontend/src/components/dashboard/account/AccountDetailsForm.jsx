@@ -193,7 +193,7 @@ export function AccountDetailsForm() {
                 <TextField
                   fullWidth
                   label="Rol Asignado"
-                  value={user?.rol === "ADMIN" ? "ADMINISTRADOR GENERAL" : "EDITOR / PROFESOR"}
+                  value={user?.rol === "ADMIN" ? "ADMINISTRADOR GENERAL" : "EDITOR"}
                   disabled
                   slotProps={{
                     input: {

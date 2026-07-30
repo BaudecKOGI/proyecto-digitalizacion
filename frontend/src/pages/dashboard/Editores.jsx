@@ -190,7 +190,7 @@ export default function EditoresPage() {
           email: formData.email.trim(),
           password: formData.password.trim(),
           is_active: formData.is_active,
-          rol: "PROF"
+          rol: "EDITOR"
         });
         showSnackbar("Nuevo editor creado correctamente", "success");
       }
@@ -238,7 +238,7 @@ export default function EditoresPage() {
             Gestión de Editores
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            Administra a los profesores y encargados con acceso al Panel de Edición del FAB LAB.
+            Administra a los editores y encargados con acceso al Panel de Edición del FAB LAB.
           </Typography>
         </Box>
 
@@ -335,7 +335,7 @@ export default function EditoresPage() {
           <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400, margin: "0 auto 24px" }}>
             {searchTerm
               ? "Intenta buscar con otro nombre o correo electrónico."
-              : "Crea el primer perfil de Editor para permitir que profesores o encargados gestionen proyectos."}
+              : "Crea el primer perfil de Editor para permitir que los encargados gestionen proyectos."}
           </Typography>
           {!searchTerm && (
             <Button
@@ -362,7 +362,7 @@ export default function EditoresPage() {
           <Table>
             <TableHead sx={{ backgroundColor: "action.hover" }}>
               <TableRow>
-                <TableCell sx={{ fontWeight: 700, py: 2 }}>EDITOR / PROFESOR</TableCell>
+                <TableCell sx={{ fontWeight: 700, py: 2 }}>EDITOR</TableCell>
                 <TableCell sx={{ fontWeight: 700, py: 2 }}>CORREO ELECTRÓNICO</TableCell>
                 <TableCell sx={{ fontWeight: 700, py: 2 }}>ROL</TableCell>
                 <TableCell sx={{ fontWeight: 700, py: 2 }}>ESTADO</TableCell>
@@ -493,7 +493,7 @@ export default function EditoresPage() {
             <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
               {editingEditor
                 ? "Actualiza el nombre, correo electrónico o estado de la cuenta."
-                : "Ingresa los datos para registrar a un nuevo encargado o profesor."}
+                : "Ingresa los datos para registrar a un nuevo editor o encargado."}
             </Typography>
 
             {formError && (
