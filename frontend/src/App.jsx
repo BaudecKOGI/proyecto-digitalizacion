@@ -1,15 +1,24 @@
 import * as React from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 
-// Importacion de las rutas del editor y la landing page
+// Importación de las rutas del editor y la landing page
 import PublicHome from './pages/PublicHome';
 import EditorLayout from './layouts/EditorLayout';
 import { Hub as EditorHub } from './pages/editor/Hub';
+
+// --- RUTAS DE 3D ---
 import { Overview as EditorOverview } from './pages/editor/3d/Dashboard3D';
 import { ProjectsList3D as EditorProjectsList } from './pages/editor/3d/ProjectsList3D';
 import { NewProject3D as EditorNewProject } from './pages/editor/3d/NewProject3D';
-// NUEVO: Importamos el componente para editar proyectos 3D
 import { EditProject3D as EditorEditProject } from './pages/editor/3d/EditProject3D';
+
+// --- RUTAS DE SOFTWARE (DESARROLLO DIGITAL) ---
+import { DashboardSoftware } from './pages/editor/software/DashboardSoftware';
+import ProjectsListSoftware from './pages/editor/software/ProjectsListSoftware';
+import NewProjectSoftware from './pages/editor/software/NewProjectSoftware';
+import EditProjectSoftware from './pages/editor/software/EditProjectSoftware';
+
+// Ruta de Perfil compartida por el editor
 import { Profile as EditorProfile } from './pages/editor/Profile';
 
 // Importaciones del dashboard y la autenticación del Admin
@@ -24,7 +33,7 @@ import EditoresPage from "@/pages/dashboard/Editores";
 import CategoriasPage from "@/pages/dashboard/Categorias";
 import VisualizacionesPage from "@/pages/dashboard/Visualizaciones";
 
-// Imortación de los layouts para la autenticación y el dashboard
+// Importación de los layouts para la autenticación y el dashboard
 import { Layout as AuthLayout } from "@/layouts/AuthLayout";
 import { Layout as DashboardLayout } from "@/layouts/DashboardLayout";
 
@@ -43,25 +52,27 @@ export default function App() {
 
         {/* Rutas CON el Sidebar/Navbar (el EditorLayout) */}
         <Route element={<EditorLayout />}>
-          {/* Rutas 3D */}
+          
+          {/* SECCIÓN 3D */}
           <Route path="3d">
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<EditorOverview isDig={false} projectsCount={0} />} />
             <Route path="proyectos" element={<EditorProjectsList mode="3d" projects={[]} />} />
             <Route path="nuevo" element={<EditorNewProject />} />
-            {/* NUEVO: Agregamos la ruta que recibe el ID para editar */}
             <Route path="editar/:id" element={<EditorEditProject />} />
             <Route path="perfil" element={<EditorProfile />} />
           </Route>
 
-          {/* Rutas Digitales */}
+          {/* SECCIÓN SOFTWARE (PROYECTOS DIGITALES) */}
           <Route path="software">
             <Route index element={<Navigate to="dashboard" replace />} />
-            <Route path="dashboard" element={<EditorOverview isDig={true} projectsCount={0} />} />
-            <Route path="proyectos" element={<EditorProjectsList mode="dig" projects={[]} />} />
-            <Route path="nuevo" element={<EditorNewProject />} />
+            <Route path="dashboard" element={<DashboardSoftware />} />
+            <Route path="proyectos" element={<ProjectsListSoftware />} />
+            <Route path="nuevo" element={<NewProjectSoftware />} />
+            <Route path="editar/:id" element={<EditProjectSoftware />} />
             <Route path="perfil" element={<EditorProfile />} />
           </Route>
+
         </Route>
       </Route>
 
@@ -87,7 +98,7 @@ export default function App() {
         </Route>
       </Route>
 
-      {/*CATCH-ALL: Si el usuario escribe una ruta que no existe, regresa al inicio */}
+      {/* CATCH-ALL: Si el usuario escribe una ruta que no existe, regresa al inicio */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
