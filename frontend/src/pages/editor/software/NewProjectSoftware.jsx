@@ -8,7 +8,8 @@ import {
   ExternalLink,
   Info,
   Upload,
-  Video
+  Video,
+  X
 } from 'lucide-react';
 import { useUser } from '@/hooks/use-user';
 import { fetchCategorias, fetchTecnologias, createProyectoSoftware } from '@/services/api';
@@ -460,7 +461,17 @@ export default function NewProjectSoftware() {
       </div>
 
       {/* BARRA DE ACCIÓN INFERIOR */}
-      <div className="flex justify-end pt-4 border-t border-[var(--line)] mt-4">
+      <div className="flex justify-end items-center gap-3 pt-4 border-t border-[var(--line)] mt-4">
+        <button 
+          type="button"
+          onClick={() => navigate('/editor/software/proyectos')}
+          disabled={loading}
+          className="flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-[var(--text-muted)] bg-[var(--panel)] border border-[var(--line)] hover:text-[var(--text-main)] hover:border-[var(--text-muted)] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <X size={18} />
+          Cancelar
+        </button>
+
         <button 
           type="submit"
           form="project-form"

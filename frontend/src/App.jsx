@@ -11,12 +11,17 @@ import { Overview as EditorOverview } from './pages/editor/3d/Dashboard3D';
 import { ProjectsList3D as EditorProjectsList } from './pages/editor/3d/ProjectsList3D';
 import { NewProject3D as EditorNewProject } from './pages/editor/3d/NewProject3D';
 import { EditProject3D as EditorEditProject } from './pages/editor/3d/EditProject3D';
+import { ProjectDetailView3D } from './pages/editor/3d/ProjectDetailView3D';
+// 👇 NUEVO: Carreras (3D) 👇
+import { Careers3D } from './pages/editor/3d/Careers3D';
 
 // --- RUTAS DE SOFTWARE (DESARROLLO DIGITAL) ---
 import { DashboardSoftware } from './pages/editor/software/DashboardSoftware';
 import ProjectsListSoftware from './pages/editor/software/ProjectsListSoftware';
 import NewProjectSoftware from './pages/editor/software/NewProjectSoftware';
 import EditProjectSoftware from './pages/editor/software/EditProjectSoftware';
+// 👇 NUEVO: Carreras (Software) 👇
+import CareersSoftware from './pages/editor/software/CareersSoftware';
 
 // Ruta de Perfil compartida por el editor
 import { Profile as EditorProfile } from './pages/editor/Profile';
@@ -51,7 +56,7 @@ export default function App() {
 
         {/* Rutas CON el Sidebar/Navbar (el EditorLayout) */}
         <Route element={<EditorLayout />}>
-          
+
           {/* SECCIÓN 3D */}
           <Route path="3d">
             <Route index element={<Navigate to="dashboard" replace />} />
@@ -59,6 +64,13 @@ export default function App() {
             <Route path="proyectos" element={<EditorProjectsList mode="3d" projects={[]} />} />
             <Route path="nuevo" element={<EditorNewProject />} />
             <Route path="editar/:id" element={<EditorEditProject />} />
+            <Route path="detalle/:id" element={<ProjectDetailView3D />} />
+
+            {/* 👇 NUEVO: Carreras -> Ciclos -> Alumnos (3D) 👇 */}
+            <Route path="carreras" element={<Careers3D />} />
+            <Route path="carreras/:carrera" element={<Careers3D />} />
+            <Route path="carreras/:carrera/:ciclo" element={<Careers3D />} />
+
             <Route path="perfil" element={<EditorProfile />} />
           </Route>
 
@@ -69,6 +81,12 @@ export default function App() {
             <Route path="proyectos" element={<ProjectsListSoftware />} />
             <Route path="nuevo" element={<NewProjectSoftware />} />
             <Route path="editar/:id" element={<EditProjectSoftware />} />
+
+            {/* 👇 NUEVO: Carreras -> Ciclos -> Alumnos (Software) 👇 */}
+            <Route path="carreras" element={<CareersSoftware />} />
+            <Route path="carreras/:carrera" element={<CareersSoftware />} />
+            <Route path="carreras/:carrera/:ciclo" element={<CareersSoftware />} />
+
             <Route path="perfil" element={<EditorProfile />} />
           </Route>
 

@@ -10,17 +10,15 @@ import {
   Globe,
   CheckCircle2,
   X,
-  Play 
+  Play,
+  ChevronLeft,
+  ChevronRight,
+  FilterX
 } from 'lucide-react';
 
-// Importamos la API y los ODS para formatear sus etiquetas
 import { fetchProyectosSoftwareAdmin, fetchCategorias } from "../../../services/api";
 import { ODS_LIST } from "@/pages/dashboard/digitalProjects/odsData";
-
-// IMPORTACIÓN DE TU MODAL REUTILIZABLE
 import VideoPlayerModal from "@/pages/dashboard/digitalProjects/VideoPlayerModal";
-
-// NUEVO: Importamos la vista de detalle
 import ProjectDetailViewSoftware from "./ProjectDetailViewSoftware"; 
 
 export default function ProjectsListSoftware() {
@@ -38,23 +36,37 @@ export default function ProjectsListSoftware() {
   const [categoriaFilter, setCategoriaFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('TODOS');
 
-  // Estado para la notificación flotante (Toast)
+  // Paginación
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Toast
   const [toastMessage, setToastMessage] = useState(null);
 
-  // ESTADOS PARA EL MODAL DE VIDEO
+  // Modal de video
   const [modalVideoAbierto, setModalVideoAbierto] = useState(false);
   const [proyectoSeleccionado, setProyectoSeleccionado] = useState(null);
 
-  // NUEVO: Estado para saber qué proyecto se está viendo en detalle
-  const [detalleProyecto, setDetalleProyecto] = useState(null);
+  // Vista de detalle — se inicializa con el proyecto si venimos desde Carreras
+  const [detalleProyecto, setDetalleProyecto] = useState(
+    () => location.state?.openProject || null
+  );
 
-  // Capturar mensaje enviado por redirección (ej. de crear o editar)
+  // Capturar mensaje de redirección (ej. después de crear/editar)
   useEffect(() => {
     if (location.state?.message) {
       showToast(location.state.message);
       window.history.replaceState({}, document.title);
     }
   }, [location]);
+
+  // Si venimos desde Carreras con el proyecto completo, abrimos el detalle al instante
+  useEffect(() => {
+    if (location.state?.openProject) {
+      setDetalleProyecto(location.state.openProject);
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const showToast = (msg) => {
     setToastMessage(msg);
@@ -63,7 +75,6 @@ export default function ProjectsListSoftware() {
     }, 4000);
   };
 
-  // Cargar Categorías
   useEffect(() => {
     const loadCats = async () => {
       try {
@@ -76,7 +87,6 @@ export default function ProjectsListSoftware() {
     loadCats();
   }, []);
 
-  // Cargar lista de proyectos desde Django REST Framework
   const cargarDatos = async () => {
     setLoading(true);
     try {
@@ -89,6 +99,7 @@ export default function ProjectsListSoftware() {
       
       const listaProyectos = Array.isArray(data) ? data : (data?.results || []);
       setProyectos(listaProyectos);
+      setCurrentPage(1);
     } catch (error) {
       console.error("Error al cargar proyectos de Django:", error);
       setProyectos([]);
@@ -99,9 +110,9 @@ export default function ProjectsListSoftware() {
 
   useEffect(() => {
     cargarDatos();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchTerm, statusFilter, categoriaFilter, odsFilter]);
 
-  // FUNCIONES PARA EL MODAL DE VIDEO
   const handleAbrirVideo = (proyecto) => {
     setProyectoSeleccionado(proyecto);
     setModalVideoAbierto(true);
@@ -112,7 +123,29 @@ export default function ProjectsListSoftware() {
     setProyectoSeleccionado(null);
   };
 
-  // NUEVO: Si hay un proyecto en "detalleProyecto", renderizamos esa vista en lugar de la tabla
+  // Limpiar todos los filtros
+  const limpiarFiltros = () => {
+    setSearchTerm('');
+    setOdsFilter('');
+    setCategoriaFilter('');
+    setStatusFilter('TODOS');
+    setCurrentPage(1);
+  };
+
+  // ¿Hay filtros activos?
+  const hayFiltrosActivos = 
+    searchTerm !== '' || 
+    odsFilter !== '' || 
+    categoriaFilter !== '' || 
+    statusFilter !== 'TODOS';
+
+  // Paginación
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentProjects = proyectos.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(proyectos.length / itemsPerPage);
+
+  // Si hay detalle abierto, mostramos solo el detalle (sin flash de la tabla)
   if (detalleProyecto) {
     return (
       <ProjectDetailViewSoftware 
@@ -122,7 +155,6 @@ export default function ProjectsListSoftware() {
     );
   }
 
-  // SI NO HAY PROYECTO SELECCIONADO, SE RENDERIZA LA LISTA NORMAL
   return (
     <div className="flex flex-col gap-6 h-full pb-8 relative">
       
@@ -135,10 +167,9 @@ export default function ProjectsListSoftware() {
           </p>
         </div>
         
-        {/* BOTÓN NUEVO PROYECTO */}
         <button 
           onClick={() => navigate('/editor/software/nuevo')}
-          className="flex items-center gap-2 bg-[var(--accent)] text-white px-5 py-2.5 rounded-xl font-semibold hover:opacity-90 transition-all cursor-pointer shadow-md shadow-[var(--accent)]/20"
+          className="flex items-center gap-2 bg-[var(--accent)] text-white px-5 py-2.5 rounded-xl font-semibold hover:opacity-90 transition-all cursor-pointer shadow-md shadow-[var(--accent)]/20 shrink-0"
         >
           <Plus size={18} />
           Nuevo Proyecto Software
@@ -146,26 +177,26 @@ export default function ProjectsListSoftware() {
       </div>
 
       {/* FILTROS Y BÚSQUEDA */}
-      <div className="bg-[var(--panel)] p-4 rounded-2xl border border-[var(--line)] grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+      <div className="bg-[var(--panel)] p-4 rounded-2xl border border-[var(--line)] flex flex-col sm:flex-row flex-wrap gap-3 items-center">
         
         {/* Buscador */}
-        <div className="relative md:col-span-1">
+        <div className="relative flex-1 min-w-[200px] w-full sm:w-auto">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={18} />
           <input 
             type="text" 
-            placeholder="Buscar por título, autor o carrera..." 
+            placeholder="Buscar título, autor..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-[var(--bg-general)] border border-[var(--line)] text-[var(--text-main)] rounded-xl pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-[var(--accent)] transition-colors"
+            className="w-full bg-[var(--bg-general)] border border-[var(--line)] text-[var(--text-main)] rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-[var(--accent)] transition-colors"
           />
         </div>
         
-        {/* Filtrar ODS */}
-        <div>
+        {/* ODS */}
+        <div className="w-full sm:w-44 shrink-0">
           <select 
             value={odsFilter}
             onChange={(e) => setOdsFilter(e.target.value)}
-            className="w-full bg-[var(--bg-general)] border border-[var(--line)] text-[var(--text-main)] rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-[var(--accent)] transition-colors cursor-pointer"
+            className="w-full bg-[var(--bg-general)] border border-[var(--line)] text-[var(--text-main)] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[var(--accent)] transition-colors cursor-pointer"
           >
             <option value="">Filtrar ODS</option>
             {ODS_LIST.map(o => (
@@ -174,12 +205,12 @@ export default function ProjectsListSoftware() {
           </select>
         </div>
 
-        {/* Filtrar Categoría */}
-        <div>
+        {/* Categoría */}
+        <div className="w-full sm:w-44 shrink-0">
           <select 
             value={categoriaFilter}
             onChange={(e) => setCategoriaFilter(e.target.value)}
-            className="w-full bg-[var(--bg-general)] border border-[var(--line)] text-[var(--text-main)] rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-[var(--accent)] transition-colors cursor-pointer"
+            className="w-full bg-[var(--bg-general)] border border-[var(--line)] text-[var(--text-main)] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[var(--accent)] transition-colors cursor-pointer"
           >
             <option value="">Categoría</option>
             {categorias.map(cat => (
@@ -188,12 +219,12 @@ export default function ProjectsListSoftware() {
           </select>
         </div>
 
-        {/* Filtrar Estado */}
-        <div>
+        {/* Estado */}
+        <div className="w-full sm:w-40 shrink-0">
           <select 
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="w-full bg-[var(--bg-general)] border border-[var(--line)] text-[var(--text-main)] rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-[var(--accent)] transition-colors cursor-pointer"
+            className="w-full bg-[var(--bg-general)] border border-[var(--line)] text-[var(--text-main)] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[var(--accent)] transition-colors cursor-pointer"
           >
             <option value="TODOS">Estado</option>
             <option value="PUBLICADO">Publicado</option>
@@ -201,14 +232,26 @@ export default function ProjectsListSoftware() {
           </select>
         </div>
 
+        {/* Botón Limpiar */}
+        {hayFiltrosActivos && (
+          <button
+            onClick={limpiarFiltros}
+            className="flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-2.5 text-sm font-medium text-[var(--text-muted)] hover:text-[var(--accent)] bg-[var(--bg-general)] border border-[var(--line)] hover:border-[var(--accent)] rounded-xl transition-all cursor-pointer shrink-0"
+            title="Limpiar todos los filtros"
+          >
+            <FilterX size={16} />
+            Limpiar
+          </button>
+        )}
       </div>
 
-      {/* TABLA DE PROYECTOS */}
-      <div className="bg-[var(--panel)] rounded-2xl border border-[var(--line)] overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
+      {/* TABLA */}
+      <div className="bg-[var(--panel)] rounded-2xl border border-[var(--line)] shadow-sm flex flex-col overflow-hidden">
+        
+        <div className="overflow-x-auto overflow-y-auto max-h-[55vh] scrollbar-thin">
           <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-[var(--bg-general)]/50 border-b border-[var(--line)]">
+            <thead className="sticky top-0 z-10 bg-[var(--bg-general)] shadow-sm">
+              <tr className="border-b border-[var(--line)]">
                 <th className="p-4 text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">Proyecto & Autor</th>
                 <th className="p-4 text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">Carrera / Categoría</th>
                 <th className="p-4 text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">ODS de Impacto</th>
@@ -231,18 +274,14 @@ export default function ProjectsListSoftware() {
                   </td>
                 </tr>
               ) : (
-                proyectos.map((proyecto) => {
+                currentProjects.map((proyecto) => {
                   const estado = proyecto.estado_publicacion || proyecto.estado || 'BORRADOR';
                   const odsObj = ODS_LIST.find(o => String(o.id) === String(proyecto.ods));
                   
                   return (
                     <tr key={proyecto.id} className="hover:bg-[var(--bg-general)]/40 transition-colors group">
-                      
-                      {/* PROYECTO & AUTOR */}
                       <td className="p-4">
                         <div className="flex items-center gap-3">
-                          
-                          {/* CONTENEDOR DE LA IMAGEN CON ICONO PLAY Y ONCLICK PARA EL MODAL */}
                           <div 
                             onClick={() => handleAbrirVideo(proyecto)}
                             title="Haz clic para ver el video"
@@ -253,8 +292,6 @@ export default function ProjectsListSoftware() {
                             ) : (
                               <Code size={20} className="text-[var(--accent)]" />
                             )}
-                            
-                            {/* Overlay e Icono de Play estilo imagen de referencia */}
                             <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover/video:bg-black/30 transition-colors">
                               <div className="bg-white rounded-full p-1 shadow-sm flex items-center justify-center">
                                 <Play size={14} className="text-[#0f111a] ml-0.5" fill="currentColor" />
@@ -270,7 +307,6 @@ export default function ProjectsListSoftware() {
                               Por: {proyecto.autor_nombre || 'Desconocido'} {proyecto.ciclo && `• Ciclo ${proyecto.ciclo}`}
                             </span>
                             
-                            {/* Iconos de Enlaces */}
                             <div className="flex items-center gap-2 mt-1 text-[var(--text-muted)]">
                               {proyecto.url_repositorio && (
                                 <a href={proyecto.url_repositorio} target="_blank" rel="noreferrer" className="hover:text-[var(--accent)] transition-colors" title="Ver Git">
@@ -287,7 +323,6 @@ export default function ProjectsListSoftware() {
                         </div>
                       </td>
 
-                      {/* CARRERA / CATEGORÍA */}
                       <td className="p-4">
                         <div className="flex flex-col">
                           <span className="text-sm font-bold text-[var(--text-main)]">
@@ -299,10 +334,9 @@ export default function ProjectsListSoftware() {
                         </div>
                       </td>
 
-                      {/* ODS DE IMPACTO */}
                       <td className="p-4">
                         {odsObj ? (
-                          <span className="inline-block px-3 py-1 rounded-full text-[11px] font-semibold text-white bg-[#a21942]">
+                          <span className="inline-block px-3 py-1 rounded-full text-[11px] font-semibold text-white bg-[#a21942] whitespace-nowrap">
                             {odsObj.label}
                           </span>
                         ) : (
@@ -310,12 +344,11 @@ export default function ProjectsListSoftware() {
                         )}
                       </td>
 
-                      {/* TECNOLOGÍAS */}
                       <td className="p-4">
                         <div className="flex flex-wrap gap-1 max-w-[180px]">
                           {Array.isArray(proyecto.tecnologias_detalle) && proyecto.tecnologias_detalle.length > 0 ? (
                             proyecto.tecnologias_detalle.map(t => (
-                              <span key={t.id} className="text-[11px] px-2 py-0.5 rounded-full border border-[var(--line)] text-[var(--text-main)] bg-[var(--bg-general)]">
+                              <span key={t.id} className="text-[11px] px-2 py-0.5 rounded-full border border-[var(--line)] text-[var(--text-main)] bg-[var(--bg-general)] whitespace-nowrap">
                                 {t.nombre}
                               </span>
                             ))
@@ -325,7 +358,6 @@ export default function ProjectsListSoftware() {
                         </div>
                       </td>
 
-                      {/* ESTADO */}
                       <td className="p-4">
                         <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                           estado.toUpperCase() === 'PUBLICADO' 
@@ -336,11 +368,8 @@ export default function ProjectsListSoftware() {
                         </span>
                       </td>
 
-                      {/* ACCIONES */}
                       <td className="p-4 text-right">
                         <div className="flex justify-end items-center gap-1">
-                          
-                          {/* MODIFICADO: Ver Detalle ahora actualiza el estado local */}
                           <button 
                             onClick={() => setDetalleProyecto(proyecto)}
                             className="p-2 rounded-xl text-[var(--text-muted)] hover:bg-[var(--accent)]/10 hover:text-[var(--accent)] transition-colors cursor-pointer"
@@ -348,8 +377,6 @@ export default function ProjectsListSoftware() {
                           >
                             <Eye size={18} />
                           </button>
-
-                          {/* Editar */}
                           <button 
                             onClick={() => navigate(`/editor/software/editar/${proyecto.id}`)}
                             className="p-2 rounded-xl text-[var(--text-muted)] hover:bg-[var(--accent)]/10 hover:text-[var(--accent)] transition-colors cursor-pointer"
@@ -357,10 +384,8 @@ export default function ProjectsListSoftware() {
                           >
                             <Edit size={18} />
                           </button>
-
                         </div>
                       </td>
-
                     </tr>
                   );
                 })
@@ -368,9 +393,54 @@ export default function ProjectsListSoftware() {
             </tbody>
           </table>
         </div>
+
+        {/* FOOTER DE PAGINACIÓN */}
+        {!loading && proyectos.length > 0 && (
+          <div className="flex items-center justify-between p-4 border-t border-[var(--line)] bg-[var(--panel)]">
+            <div className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
+              <span>Mostrar</span>
+              <select 
+                value={itemsPerPage}
+                onChange={(e) => {
+                  setItemsPerPage(Number(e.target.value) || proyectos.length);
+                  setCurrentPage(1);
+                }}
+                className="bg-[var(--bg-general)] border border-[var(--line)] text-[var(--text-main)] rounded-lg px-2 py-1 focus:outline-none focus:border-[var(--accent)] cursor-pointer"
+              >
+                <option value={5}>5</option>
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={proyectos.length}>Todos</option>
+              </select>
+              <span>registros</span>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-[var(--text-muted)]">
+                Página {currentPage} de {totalPages}
+              </span>
+              <div className="flex gap-1">
+                <button 
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="p-1 rounded-lg border border-[var(--line)] text-[var(--text-muted)] hover:bg-[var(--bg-general)] hover:text-[var(--text-main)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                <button 
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="p-1 rounded-lg border border-[var(--line)] text-[var(--text-muted)] hover:bg-[var(--bg-general)] hover:text-[var(--text-main)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* MENSAJE FLOTANTE (TOAST) */}
+      {/* TOAST */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-emerald-500 text-white px-5 py-3.5 rounded-2xl shadow-xl animate-in fade-in slide-in-from-bottom-5">
           <CheckCircle2 size={20} />
@@ -384,7 +454,7 @@ export default function ProjectsListSoftware() {
         </div>
       )}
 
-      {/* COMPONENTE DEL MODAL DE VIDEO REUTILIZADO */}
+      {/* MODAL DE VIDEO */}
       <VideoPlayerModal 
         open={modalVideoAbierto} 
         onClose={handleCerrarVideo} 
