@@ -117,11 +117,11 @@ export function AccountInfo() {
   };
 
   return (
-    <Card sx={{ borderRadius: 3, boxShadow: 3, overflow: "hidden" }}>
+    <Card elevation={0} sx={{ borderRadius: "0px", border: "1px solid rgba(0, 0, 0, 0.05)", boxShadow: "0 1px 2px rgba(0, 0, 0, 0.02)", bgcolor: "#FFFFFF", overflow: "hidden" }}>
       <Box
         sx={{
           height: 80,
-          background: "linear-gradient(135deg, #2b5876 0%, #4e4376 100%)",
+          background: "#002B49",
         }}
       />
       <CardContent sx={{ pt: 0 }}>
@@ -172,12 +172,26 @@ export function AccountInfo() {
               style={{ display: "none" }}
             />
             <Button
-              variant="outlined"
+              variant="contained"
               size="small"
               onClick={handleFileSelect}
               disabled={uploading}
               startIcon={<CameraIcon size={16} />}
-              sx={{ borderRadius: 2, textTransform: "none", fontWeight: 600 }}
+              sx={{
+                borderRadius: "2px",
+                textTransform: "none",
+                fontWeight: 600,
+                px: 2,
+                py: 0.7,
+                bgcolor: "#FFFFFF",
+                color: "#002B49",
+                boxShadow: "none",
+                border: "1px solid #002B49",
+                "&:hover": {
+                  bgcolor: "#FFFFFF",
+                  boxShadow: "none",
+                },
+              }}
             >
               Cambiar foto
             </Button>
@@ -203,13 +217,10 @@ export function AccountInfo() {
             <Typography color="text.secondary" variant="body2">
               {email}
             </Typography>
-            <Box sx={{ pt: 0.5 }}>
-              <Chip
-                label={rol}
-                color="primary"
-                size="small"
-                sx={{ fontWeight: 600, px: 1 }}
-              />
+            <Box sx={{ pt: 0.2 }}>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: "text.secondary" }}>
+                {rol}
+              </Typography>
             </Box>
           </Stack>
         </Stack>

@@ -145,6 +145,47 @@ const CanvasLoader = () => {
 
 export default function ProjectViewer3D({ project, onClose }) {
   const [habilitarCamara, setHabilitarCamara] = useState(true);
+  const [likesCount, setLikesCount] = useState(0);
+  const [sharesCount, setSharesCount] = useState(0);
+  const [viewsCount, setViewsCount] = useState(0);
+  const [liked, setLiked] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (project && project.id) {
+      setLikesCount(project.likes_totales || 0);
+      setSharesCount(project.compartidos_totales || 0);
+      setViewsCount((project.vistas_totales || 0) + 1);
+      setLiked(false);
+      setCopied(false);
+
+      // Registrar visita en el backend automáticamente al abrir el proyecto
+      fetch(`http://127.0.0.1:8000/api/metricas/por-proyecto/${project.id}/view/`, {
+        method: 'POST',
+      }).catch(() => {});
+    }
+  }, [project]);
+
+  const handleLike = () => {
+    if (!project || liked) return;
+    setLiked(true);
+    setLikesCount((prev) => prev + 1);
+    fetch(`http://127.0.0.1:8000/api/metricas/por-proyecto/${project.id}/like/`, {
+      method: 'POST',
+    }).catch(() => {});
+  };
+
+  const handleShare = () => {
+    if (!project) return;
+    setSharesCount((prev) => prev + 1);
+    const url = window.location.href;
+    navigator.clipboard?.writeText(url).catch(() => {});
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
+    fetch(`http://127.0.0.1:8000/api/metricas/por-proyecto/${project.id}/share/`, {
+      method: 'POST',
+    }).catch(() => {});
+  };
 
   // 1. Extraemos tanto las piezas móviles como la cámara de forma segura
   let piezasMoviles = [];
@@ -218,7 +259,39 @@ export default function ProjectViewer3D({ project, onClose }) {
               </div>
             </div>
             
-            <hr className="border-line my-2" />
+            {/* BARRA INTERACTIVA DE ACCIONES Y MÉTRICAS (LIKE, COMPARTIR, VISTAS) */}
+            <div className="flex items-center justify-between gap-2 border-y border-line py-3 my-1">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleLike}
+                  disabled={liked}
+                  className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-sans text-[11px] font-bold uppercase tracking-wider transition-all ${
+                    liked
+                      ? 'bg-rose-500/20 text-rose-400 border border-rose-500/40'
+                      : 'bg-bg/60 text-text hover:bg-rose-500/10 hover:text-rose-400 border border-line'
+                  }`}
+                  title="Dar Me Gusta a este proyecto"
+                >
+                  <span className="text-sm">{liked ? '♥' : '♡'}</span>
+                  <span>{likesCount}</span>
+                </button>
+
+                <button
+                  onClick={handleShare}
+                  className="relative flex items-center gap-1.5 rounded-lg bg-bg/60 px-3 py-1.5 font-sans text-[11px] font-bold uppercase tracking-wider text-text border border-line transition-all hover:bg-c3d/10 hover:text-c3d hover:border-c3d/40"
+                  title="Compartir proyecto y copiar enlace"
+                >
+                  <span className="text-sm">⎘</span>
+                  <span>{copied ? '¡Copiado!' : 'Compartir'}</span>
+                  {sharesCount > 0 && <span className="text-muted font-normal">({sharesCount})</span>}
+                </button>
+              </div>
+
+              <div className="flex items-center gap-1.5 font-mono text-[11px] text-muted" title="Vistas registradas">
+                <span>👁</span>
+                <span className="font-bold">{viewsCount}</span>
+              </div>
+            </div>
             
             <div className="overflow-y-auto max-h-[30vh] pr-2 custom-scrollbar">
               <p className="font-sans text-[14px] leading-relaxed text-text whitespace-pre-wrap">
@@ -248,42 +321,57 @@ export default function ProjectViewer3D({ project, onClose }) {
             )}
           </div>
 
-          {/* VISOR 3D (CANVAS) */}
-          <div className="flex-1 relative z-0">
-            {/* 3. Aplicamos la posición inicial de la cámara aquí */}
-            <Canvas shadows camera={{ position: posicionCamara, fov: 50 }}>
-              <color attach="background" args={['var(--bg)']} />
-              
-              <Suspense fallback={<CanvasLoader />}>
-                {/* 4. Le decimos al Stage si debe o no ajustar la cámara automáticamente */}
-                <Stage environment="city" intensity={0.6} adjustCamera={autoAjustarCamara}>
-                  <FBXModel 
-                    url={project.archivo_fbx} 
-                    piezasMoviles={piezasMoviles}
-                    setHabilitarCamara={setHabilitarCamara}
-                  />
-                </Stage>
-              </Suspense>
-              
-              <OrbitControls 
-                makeDefault 
-                enabled={habilitarCamara}
-                target={targetCamara}         /* <-- Nuevo target del JSON */
-                minDistance={minZoom}         /* <-- Límite mínimo de zoom */
-                maxDistance={maxZoom}         /* <-- Límite máximo de zoom */
-                minPolarAngle={Math.PI / 4} 
-                maxPolarAngle={Math.PI / 1.5} 
+          {/* VISOR 3D o VISTA PREVIA SOFTWARE */}
+          <div className="flex-1 relative z-0 flex items-center justify-center bg-bg/90">
+            {project.archivo_fbx ? (
+              <Canvas shadows camera={{ position: posicionCamara, fov: 50 }}>
+                <color attach="background" args={['var(--bg)']} />
+                
+                <Suspense fallback={<CanvasLoader />}>
+                  <Stage environment="city" intensity={0.6} adjustCamera={autoAjustarCamara}>
+                    <FBXModel 
+                      url={project.archivo_fbx} 
+                      piezasMoviles={piezasMoviles}
+                      setHabilitarCamara={setHabilitarCamara}
+                    />
+                  </Stage>
+                </Suspense>
+                
+                <OrbitControls 
+                  makeDefault 
+                  enabled={habilitarCamara}
+                  target={targetCamara}
+                  minDistance={minZoom}
+                  maxDistance={maxZoom}
+                  minPolarAngle={Math.PI / 4} 
+                  maxPolarAngle={Math.PI / 1.5} 
+                />
+              </Canvas>
+            ) : project.archivo_video ? (
+              <video
+                src={project.archivo_video}
+                controls
+                autoPlay
+                className="max-h-[80vh] max-w-[70vw] rounded-xl shadow-2xl border border-line"
               />
-            </Canvas>
+            ) : (
+              <img
+                src={project.imagen_portada}
+                alt={project.titulo}
+                className="max-h-[80vh] max-w-[70vw] rounded-xl shadow-2xl object-contain border border-line"
+              />
+            )}
           </div>
 
           {/* INSTRUCCIONES INFERIORES */}
           <div className="absolute bottom-8 left-1/2 z-10 flex -translate-x-1/2 items-center gap-3 rounded-full bg-panel/80 px-6 py-3 backdrop-blur-md shadow-lg pointer-events-none">
             <svg className="h-5 w-5 text-c3d" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <span className="font-sans text-[11px] font-bold uppercase tracking-widest text-text">
-              Pasa el mouse y arrastra las piezas para interactuar • Usa la rueda para hacer zoom
+              {project.archivo_fbx
+                ? "Pasa el mouse y arrastra las piezas para interactuar • Usa la rueda para hacer zoom"
+                : "Vista previa interactiva del proyecto • Usa la barra de control inferior para explorar"}
             </span>
           </div>
         </motion.div>

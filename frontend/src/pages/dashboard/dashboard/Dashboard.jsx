@@ -98,7 +98,7 @@ export default function Dashboard() {
   }
 
   return (
-    <Box sx={{ pt: 0, pb: 4, px: { xs: 1, sm: 2 }, maxWidth: 1360, margin: "0 auto" }}>
+    <Box sx={{ pb: 4, maxWidth: 1360, margin: "0 auto" }}>
       {/* CABECERA Y ACCIÓN RÁPIDA DE REFRESCO */}
       <Stack
         direction={{ xs: "column", sm: "row" }}
@@ -109,20 +109,27 @@ export default function Dashboard() {
       >
         <Box>
           <Typography variant="h4" sx={{ fontWeight: 800, color: "text.primary", mb: 0.5 }}>
-            Panel de Administración
+            Hola, Bienvenido
           </Typography>
         </Box>
 
         <Button
           variant="outlined"
-          startIcon={refreshing ? <CircularProgress size={16} /> : <RefreshIcon size={18} />}
+          startIcon={refreshing ? <CircularProgress size={16} color="inherit" /> : <RefreshIcon weight="bold" />}
           disabled={refreshing}
           onClick={() => loadDashboardData(true)}
           sx={{
-            borderRadius: 2.5,
             textTransform: "none",
             fontWeight: 700,
-            px: 2.5
+            borderRadius: "6px",
+            borderColor: "rgba(0,0,0,0.15)",
+            color: "#002B49",
+            px: 2.5,
+            py: 1,
+            "&:hover": {
+              borderColor: "#002B49",
+              bgcolor: "rgba(0, 43, 73, 0.04)"
+            }
           }}
         >
           {refreshing ? "Actualizando..." : "Actualizar Datos"}
@@ -130,80 +137,84 @@ export default function Dashboard() {
       </Stack>
 
 
-      {/* 2. TARJETAS DE ESTADÍSTICAS (KPIs) - ESTILO LIMPIO CON NÚMEROS REALES */}
+      {/* 2. TARJETAS DE ESTADÍSTICAS*/}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
           <SummaryStatCard
-            title="TOTAL PROYECTOS"
+            title="Total de Proyectos"
             value={(total3D || 124) + (totalSoftware || 48)}
-            icon={<SparkleIcon size={28} weight="fill" />}
-            color="#F79009"
-            trend={{ direction: "up", value: 15 }}
-          />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-          <SummaryStatCard
-            title="DISEÑOS 3D"
-            value={total3D || 124}
-            icon={<CubeIcon size={28} weight="fill" />}
+            icon={<SparkleIcon />}
             color="#6366F1"
-            trend={{ direction: "up", value: 12 }}
+            subtitle="Proyectos Digitales y Diseños 3D"
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
           <SummaryStatCard
-            title="PROY. DIGITALES"
-            value={totalSoftware || 48}
-            icon={<FolderIcon size={28} weight="fill" />}
-            color="#10B981"
-            trend={{ direction: "up", value: 8 }}
-          />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-          <SummaryStatCard
-            title="VISUALIZACIONES"
-            value="4.2k"
-            icon={<EyeIcon size={28} weight="fill" />}
+            title="Diseños 3D"
+            value={total3D || 124}
+            icon={<CubeIcon />}
             color="#0EA5E9"
-            trend={{ direction: "down", value: 16 }}
+            subtitle="Modelos FBX y GLB registrados"
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+          <SummaryStatCard
+            title="Proyectos Digitales"
+            value={totalSoftware || 48}
+            icon={<FolderIcon />}
+            color="#F97316"
+            subtitle="Aplicaciones y sistemas web"
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+          <SummaryStatCard
+            title="Visualizaciones"
+            value="4.2k"
+            icon={<EyeIcon />}
+            color="#10B981"
+            subtitle="+16% de tráfico mensual"
           />
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
           <SummaryStatCard
-            title="EDITORES"
+            title="Editores Activos"
             value={totalEditores || 15}
-            icon={<UsersIcon size={28} weight="fill" />}
-            color="#6366F1"
+            icon={<UsersIcon />}
+            color="#8B5CF6"
+            subtitle="Cuentas con acceso de publicación"
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
           <SummaryStatCard
-            title="TECNOLOGIAS"
+            title="Tecnologías"
             value={totalTecnologias || 24}
-            icon={<CodeIcon size={28} weight="fill" />}
-            color="#F59E0B"
+            icon={<CodeIcon />}
+            color="#06B6D4"
+            subtitle="Librerías, frameworks y motores"
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
           <SummaryStatCard
-            title="CATEGORIAS"
+            title="Categorías"
             value={totalCategorias || 48}
-            icon={<TagIcon size={28} weight="fill" />}
-            color="#F79009"
+            icon={<TagIcon />}
+            color="#F59E0B"
+            subtitle="Áreas académicas y técnicas"
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
           <SummaryStatCard
-            title="ODS IMPACTADOS"
+            title="ODS Impactados"
             value={17}
-            icon={<GlobeIcon size={28} weight="fill" />}
-            color="#10B981"
+            icon={<GlobeIcon />}
+            color="#3B82F6"
+            subtitle="Objetivos ONU cubiertos"
           />
         </Grid>
       </Grid>
 
-      {/* 3. SECCIÓN DE ACTIVIDAD RECIENTE (TABLAS A DOS COLUMNAS) */}
+      {/* 3. SECCIÓN DE ACTIVIDAD RECIENTE */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid size={{ xs: 12, lg: 6 }}>
           <Recent3DTable disenos={disenos3D} categorias={categorias} />

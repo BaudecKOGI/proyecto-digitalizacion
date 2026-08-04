@@ -97,8 +97,8 @@ export default function ProjectDetailView({
               proyecto.estado_publicacion === "PUBLICADO"
                 ? "success"
                 : proyecto.estado_publicacion === "BORRADOR"
-                ? "warning"
-                : "default"
+                  ? "warning"
+                  : "default"
             }
             sx={{ fontWeight: 700, borderRadius: 1, fontSize: "0.75rem" }}
           />
@@ -122,17 +122,17 @@ export default function ProjectDetailView({
         </Typography>
       </Box>
 
-      {/* 3. CONTENIDO PRINCIPAL (GRILLA DE 2 COLUMNAS) */}
+      {/* 3. CONTENIDO PRINCIPAL */}
       <Grid container spacing={4}>
-        {/* COLUMNA IZQUIERDA (75% - VISUAL Y DESCRIPCIÓN) */}
-        <Grid item xs={12} md={8}>
+        {/* COLUMNA IZQUIERDA */}
+        <Grid size={{ xs: 12, md: 8 }}>
           {/* REPRODUCTOR DE VIDEO O PORTADA INTEGRADA EN EL FLUJO */}
           <Paper
             elevation={0}
             sx={{
-              borderRadius: 2.5,
-              border: "1px solid",
-              borderColor: "divider",
+              borderRadius: "6px",
+              border: "1px solid rgba(0, 0, 0, 0.05)",
+              boxShadow: "0 1px 2px rgba(0, 0, 0, 0.02)",
               overflow: "hidden",
               mb: 4,
               bgcolor: "#090D16"
@@ -195,10 +195,10 @@ export default function ProjectDetailView({
               elevation={0}
               sx={{
                 p: 3,
-                borderRadius: 2,
-                border: "1px solid",
-                borderColor: "divider",
-                bgcolor: "background.paper"
+                borderRadius: "6px",
+                border: "1px solid rgba(0, 0, 0, 0.05)",
+                boxShadow: "0 1px 2px rgba(0, 0, 0, 0.02)",
+                bgcolor: "#FFFFFF"
               }}
             >
               <Typography
@@ -216,16 +216,17 @@ export default function ProjectDetailView({
         </Grid>
 
         {/* COLUMNA DERECHA (33% - ESPECIFICACIONES TÉCNICAS Y STACK) */}
-        <Grid item xs={12} md={4}>
+        <Grid size={{ xs: 12, md: 4 }}>
           <Stack spacing={3}>
             {/* FICHA DE ESPECIFICACIONES */}
             <Paper
               elevation={0}
               sx={{
                 p: 3,
-                borderRadius: 2.5,
-                border: "1px solid",
-                borderColor: "divider"
+                borderRadius: "6px",
+                border: "1px solid rgba(0, 0, 0, 0.05)",
+                boxShadow: "0 1px 2px rgba(0, 0, 0, 0.02)",
+                bgcolor: "#FFFFFF"
               }}
             >
               <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2, textTransform: "uppercase", letterSpacing: "0.05em", color: "text.secondary" }}>
@@ -285,9 +286,10 @@ export default function ProjectDetailView({
               elevation={0}
               sx={{
                 p: 3,
-                borderRadius: 2.5,
-                border: "1px solid",
-                borderColor: "divider"
+                borderRadius: "6px",
+                border: "1px solid rgba(0, 0, 0, 0.05)",
+                boxShadow: "0 1px 2px rgba(0, 0, 0, 0.02)",
+                bgcolor: "#FFFFFF"
               }}
             >
               <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2, textTransform: "uppercase", letterSpacing: "0.05em", color: "text.secondary" }}>
@@ -318,14 +320,15 @@ export default function ProjectDetailView({
               </Stack>
             </Paper>
 
-            {/* ENLACES DIRECTOS (REPOSITORIO / DEMO) */}
+            {/* ENLACES DIRECTOS */}
             <Paper
               elevation={0}
               sx={{
                 p: 3,
-                borderRadius: 2.5,
-                border: "1px solid",
-                borderColor: "divider"
+                borderRadius: "6px",
+                border: "1px solid rgba(0, 0, 0, 0.05)",
+                boxShadow: "0 1px 2px rgba(0, 0, 0, 0.02)",
+                bgcolor: "#FFFFFF"
               }}
             >
               <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2, textTransform: "uppercase", letterSpacing: "0.05em", color: "text.secondary" }}>

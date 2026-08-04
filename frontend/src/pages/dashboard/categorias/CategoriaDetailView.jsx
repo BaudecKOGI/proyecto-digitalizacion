@@ -100,10 +100,10 @@ export default function CategoriaDetailView({ categoria, onBack }) {
         sx={{
           p: 4,
           mb: 4,
-          borderRadius: 3,
-          border: "1px solid",
-          borderColor: "divider",
-          bgcolor: "background.paper"
+          borderRadius: "6px",
+          border: "1px solid rgba(0, 0, 0, 0.05)",
+          boxShadow: "0 1px 2px rgba(0, 0, 0, 0.02)",
+          bgcolor: "#FFFFFF"
         }}
       >
         <Stack
@@ -208,11 +208,12 @@ export default function CategoriaDetailView({ categoria, onBack }) {
             {disenos3D.map((item) => (
               <Grid key={item.id} size={{ xs: 12, sm: 6, md: 4 }}>
                 <Card
+                  elevation={0}
                   sx={{
-                    borderRadius: 3,
-                    border: "1px solid",
-                    borderColor: "divider",
-                    boxShadow: "0px 4px 20px rgba(0,0,0,0.03)",
+                    borderRadius: "6px",
+                    border: "1px solid rgba(0, 0, 0, 0.05)",
+                    boxShadow: "0 1px 2px rgba(0, 0, 0, 0.02)",
+                    bgcolor: "#FFFFFF",
                     height: "100%",
                     display: "flex",
                     flexDirection: "column",
@@ -308,11 +309,12 @@ export default function CategoriaDetailView({ categoria, onBack }) {
             {proyectosSoftware.map((item) => (
               <Grid key={item.id} size={{ xs: 12, sm: 6, md: 4 }}>
                 <Card
+                  elevation={0}
                   sx={{
-                    borderRadius: 3,
-                    border: "1px solid",
-                    borderColor: "divider",
-                    boxShadow: "0px 4px 20px rgba(0,0,0,0.03)",
+                    borderRadius: "6px",
+                    border: "1px solid rgba(0, 0, 0, 0.05)",
+                    boxShadow: "0 1px 2px rgba(0, 0, 0, 0.02)",
+                    bgcolor: "#FFFFFF",
                     height: "100%",
                     display: "flex",
                     flexDirection: "column",

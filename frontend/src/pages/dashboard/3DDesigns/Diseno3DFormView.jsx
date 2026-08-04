@@ -1,15 +1,31 @@
-import React, { useState, useEffect, Suspense, useRef } from "react";
-import { 
-  Upload, Save, X, Box as BoxIcon, Plus, Trash2, 
-  Eye, FileEdit, Info 
-} from "lucide-react";
+import * as React from "react";
+import { useState, useEffect, Suspense, useRef } from "react";
+import {
+  Box,
+  TextField,
+  FormControl,
+  Select,
+  MenuItem,
+  Button,
+  Alert,
+  Typography,
+  Paper,
+  Stack,
+  Divider,
+  Checkbox,
+  FormControlLabel,
+  IconButton
+} from "@mui/material";
+import { ArrowLeft as BackIcon } from "@phosphor-icons/react/dist/ssr/ArrowLeft";
+import { Plus, Trash2, Upload, Eye, FileEdit, Box as BoxIcon } from "lucide-react";
 import { ODS_LIST } from "@/pages/dashboard/digitalProjects/odsData";
+import ConfirmDialog from "@/components/core/ConfirmDialog";
 
-// --- IMPORTACIONES 3D ---
+// IMPORTACIONES 3D
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Stage, useFBX, Html } from "@react-three/drei";
 
-// --- COMPONENTE INTERNO PARA EL MODELO Y LA MANIPULACIÓN DIRECTA (MECÁNICA 3D) ---
+// COMPONENTE INTERNO: MODELO FBX + INTERACCIÓN
 const FBXModel = ({ url, piezasMoviles, setHabilitarCamara }) => {
   const fbx = useFBX(url);
   const originalRotations = useRef({});
@@ -36,13 +52,12 @@ const FBXModel = ({ url, piezasMoviles, setHabilitarCamara }) => {
       const deltaX = e.clientX - lastX;
       const deltaY = e.clientY - lastY;
 
-      // Sensibilidad de giro
       const sensiblidad = config.invertir_giro ? -0.01 : 0.01;
       const cambioRotacion = (deltaX + deltaY) * sensiblidad;
 
       const baseRot = originalRotations.current[mesh.uuid]?.[config.eje] || 0;
-      const minRad = baseRot + (config.min_giro * Math.PI / 180);
-      const maxRad = baseRot + (config.max_giro * Math.PI / 180);
+      const minRad = baseRot + (config.min_giro * Math.PI) / 180;
+      const maxRad = baseRot + (config.max_giro * Math.PI) / 180;
 
       const rotActual = mesh.rotation[config.eje];
       const nuevaRotacion = Math.max(minRad, Math.min(maxRad, rotActual + cambioRotacion));
@@ -75,7 +90,7 @@ const FBXModel = ({ url, piezasMoviles, setHabilitarCamara }) => {
     while (nodoActual) {
       const nombreNodo = nodoActual.name ? nodoActual.name.trim().toLowerCase() : "";
       const piezaConfig = (piezasMoviles || []).find(
-        p => p.nombre_objeto && p.nombre_objeto.trim().toLowerCase() === nombreNodo
+        (p) => p.nombre_objeto && p.nombre_objeto.trim().toLowerCase() === nombreNodo
       );
       if (piezaConfig) {
         return { config: piezaConfig, mesh: nodoActual };
@@ -123,6 +138,7 @@ const FBXModel = ({ url, piezasMoviles, setHabilitarCamara }) => {
   );
 };
 
+// FORMULARIO PRINCIPAL
 export default function Diseno3DFormView({
   onBack,
   onSave,
@@ -140,6 +156,47 @@ export default function Diseno3DFormView({
   const [piezasMoviles, setPiezasMoviles] = useState([]);
   const [habilitarCamara, setHabilitarCamara] = useState(true);
 
+  // ESTADO PARA CONFIRMAR CANCELACIÓN
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [initialFormState, setInitialFormState] = useState(null);
+  const [initialPiezasState, setInitialPiezasState] = useState(null);
+
+  useEffect(() => {
+    if (!initialFormState && formDiseno) {
+      setInitialFormState(JSON.stringify(formDiseno));
+    }
+  }, [formDiseno, initialFormState]);
+
+  useEffect(() => {
+    if (!initialPiezasState && piezasMoviles.length > 0) {
+      setInitialPiezasState(JSON.stringify(piezasMoviles));
+    } else if (!initialPiezasState && editingDiseno) {
+      setInitialPiezasState("[]");
+    }
+  }, [piezasMoviles, initialPiezasState, editingDiseno]);
+
+  const hasUnsavedChanges = () => {
+    const currentFormState = JSON.stringify(formDiseno);
+    const currentPiezasState = JSON.stringify(piezasMoviles);
+    const basePiezas = initialPiezasState || "[]";
+    const baseForm = initialFormState || "{}";
+
+    if (currentFormState !== baseForm) return true;
+    if (currentPiezasState !== basePiezas) return true;
+    if (archivoFBX) return true;
+    if (imagenMiniatura) return true;
+    
+    return false;
+  };
+
+  const handleCancelClick = () => {
+    if (hasUnsavedChanges()) {
+      setShowCancelDialog(true);
+    } else {
+      onBack();
+    }
+  };
+
   useEffect(() => {
     if (archivoFBX) {
       const url = URL.createObjectURL(archivoFBX);
@@ -156,7 +213,11 @@ export default function Diseno3DFormView({
     if (editingDiseno && editingDiseno.configuracion_interactiva) {
       let config = editingDiseno.configuracion_interactiva;
       if (typeof config === "string") {
-        try { config = JSON.parse(config); } catch (e) { config = {}; }
+        try {
+          config = JSON.parse(config);
+        } catch (e) {
+          config = {};
+        }
       }
       if (config && Array.isArray(config.piezas_moviles)) {
         setPiezasMoviles(config.piezas_moviles);
@@ -171,7 +232,14 @@ export default function Diseno3DFormView({
   const agregarPieza = () => {
     setPiezasMoviles([
       ...piezasMoviles,
-      { nombre_objeto: "", eje: "x", etiqueta: "", min_giro: -180, max_giro: 180, invertir_giro: false }
+      {
+        nombre_objeto: "",
+        eje: "x",
+        etiqueta: "",
+        min_giro: -180,
+        max_giro: 180,
+        invertir_giro: false
+      }
     ]);
   };
 
@@ -182,8 +250,7 @@ export default function Diseno3DFormView({
   };
 
   const eliminarPieza = (index) => {
-    const nuevasPiezas = piezasMoviles.filter((_, i) => i !== index);
-    setPiezasMoviles(nuevasPiezas);
+    setPiezasMoviles(piezasMoviles.filter((_, i) => i !== index));
   };
 
   const handleSubmitForm = (e) => {
@@ -191,344 +258,627 @@ export default function Diseno3DFormView({
     onSave(e, piezasMoviles);
   };
 
-  // Clases predefinidas fieles al estilo visual del Editor y la imagen de referencia
-  const inputClassName =
-    "w-full p-2.5 bg-[var(--bg-general)] border border-[var(--line)] rounded-lg text-[var(--text-main)] text-sm mb-4 outline-none focus:border-[#06b6d4] transition-colors";
-  const labelClassName =
-    "block text-xs font-semibold text-[var(--text-muted)] mb-1.5 uppercase tracking-wide";
-  const sectionTitleClassName =
-    "text-base font-bold text-[var(--text-main)] border-b-2 border-[var(--line)] pb-2 mb-5 flex items-center justify-between";
+  // ESTILOS
+  const fieldSx = {
+    bgcolor: "#F8FAFC",
+    borderRadius: "2px 2px 0 0",
+    "& .MuiOutlinedInput-root": {
+      bgcolor: "#F8FAFC",
+      borderRadius: "2px 2px 0 0",
+      "& fieldset": {
+        border: "none",
+        borderBottom: "1px solid #002B49"
+      },
+      "&:hover fieldset": {
+        border: "none",
+        borderBottom: "1.5px solid #002B49"
+      },
+      "&.Mui-focused fieldset": {
+        border: "none",
+        borderBottom: "2px solid #002B49"
+      }
+    },
+    "& .MuiInputBase-input": {
+      py: 1.2,
+      px: 1.5,
+      fontSize: "0.95rem",
+      color: "#0F172A",
+      fontWeight: 500
+    }
+  };
+
+  const selectSx = {
+    bgcolor: "#F8FAFC",
+    borderRadius: "2px 2px 0 0",
+    "& .MuiOutlinedInput-notchedOutline": {
+      border: "none",
+      borderBottom: "1px solid #002B49"
+    },
+    "&:hover .MuiOutlinedInput-notchedOutline": {
+      border: "none",
+      borderBottom: "1.5px solid #002B49"
+    },
+    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+      border: "none",
+      borderBottom: "2px solid #002B49"
+    },
+    "& .MuiSelect-select": {
+      py: 1.2,
+      px: 1.5,
+      fontSize: "0.95rem",
+      color: "#0F172A",
+      fontWeight: 500
+    }
+  };
+
+  const labelSx = {
+    fontWeight: 600,
+    color: "#1E293B",
+    mb: 0.6,
+    fontSize: "0.85rem"
+  };
 
   return (
-    <div className="flex flex-col h-full w-full">
-      {/* HEADER */}
-      <div className="mb-6 flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <h2 className="text-2xl font-bold mb-1 text-[var(--text-main)]">
-            {editingDiseno ? `Editar Diseño 3D: ${formDiseno.titulo || ""}` : "Subir Nuevo Diseño 3D"}
-          </h2>
-          <div className="text-sm text-[var(--text-muted)]">
-            {editingDiseno
-              ? "Modifica la información general o la configuración mecánica de tu proyecto."
-              : "Sube tu archivo .fbx, configura sus datos y prueba sus interacciones mecánicas en tiempo real."}
-          </div>
-        </div>
-      </div>
+    <Box sx={{ width: "100%", pb: 6 }}>
+      {/* 1. BARRA SUPERIOR DE NAVEGACIÓN */}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 3,
+          pb: 2,
+          borderBottom: "1px solid",
+          borderColor: "divider",
+          flexWrap: "wrap",
+          gap: 2
+        }}
+      >
+        <Stack direction="row" spacing={1.5} alignItems="center">
+          <Button
+            variant="outlined"
+            onClick={onBack}
+            startIcon={<BackIcon size={18} />}
+            sx={{
+              textTransform: "none",
+              fontWeight: 600,
+              borderRadius: "2px",
+              borderColor: "#002B49",
+              color: "#002B49",
+              "&:hover": {
+                bgcolor: "rgba(0, 43, 73, 0.04)",
+                borderColor: "#002B49"
+              }
+            }}
+          >
+            Volver a Diseños
+          </Button>
+          <Typography variant="h6" fontWeight={700} sx={{ color: "text.primary" }}>
+            {editingDiseno ? "Editar Diseño 3D" : "Crear Diseño 3D"}
+          </Typography>
+        </Stack>
+      </Box>
 
       {formError && (
-        <div className="bg-red-500/10 text-red-500 p-3 rounded-lg mb-6 border border-red-500/20 flex items-center gap-2">
-          <Info size={18} /> {formError}
-        </div>
+        <Alert severity="error" sx={{ mb: 3, borderRadius: "2px" }}>
+          {formError}
+        </Alert>
       )}
 
-      {/* CONTENEDOR EN DOS COLUMNAS: FORMULARIO (45%) Y DEMO 3D (FLEX-1) */}
-      <div className="flex flex-col lg:flex-row gap-6 flex-1 min-h-[620px]">
-        {/* LADO IZQUIERDO: FORMULARIO DEL PROYECTO */}
-        <div className="flex-[0_0_46%] bg-[var(--panel)] p-6 rounded-xl border border-[var(--line)] overflow-y-auto max-h-[calc(100vh-180px)] shadow-sm">
-          <form onSubmit={handleSubmitForm} id="diseno3d-form">
-            {/* SECCIÓN 1: ESTADO DE PUBLICACIÓN */}
-            <h3 className={sectionTitleClassName}>
-              <span>1. Estado de Publicación</span>
-            </h3>
-            <div className="flex gap-3 mb-7">
-              <button
-                type="button"
-                onClick={() => setFormDiseno({ ...formDiseno, estado_publicacion: "PUBLICADO" })}
-                className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-lg font-bold cursor-pointer transition-all duration-200 border ${
-                  formDiseno.estado_publicacion === "PUBLICADO"
-                    ? "border-[#06b6d4] bg-[#ecfeff] text-[#0891b2] dark:bg-[#06b6d4]/15 dark:text-[#22d3ee]"
-                    : "border-[var(--line)] bg-[var(--bg-general)] text-[var(--text-muted)]"
-                }`}
-              >
-                <Eye size={18} /> Público
-              </button>
-              <button
-                type="button"
-                onClick={() => setFormDiseno({ ...formDiseno, estado_publicacion: "BORRADOR" })}
-                className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-lg font-bold cursor-pointer transition-all duration-200 border ${
-                  formDiseno.estado_publicacion === "BORRADOR"
-                    ? "border-amber-500 bg-amber-500/10 text-amber-600"
-                    : "border-[var(--line)] bg-[var(--bg-general)] text-[var(--text-muted)]"
-                }`}
-              >
-                <FileEdit size={18} /> Borrador
-              </button>
-            </div>
+      {/* 2. LAYOUT A DOS COLUMNAS */}
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", lg: "row" },
+          gap: 4,
+          alignItems: "flex-start"
+        }}
+      >
+        {/* COLUMNA IZQUIERDA: FORMULARIO */}
+        <Paper
+          elevation={0}
+          component="form"
+          id="diseno3d-form"
+          onSubmit={handleSubmitForm}
+          sx={{
+            flex: { xs: "1 1 100%", lg: "0 0 46%" },
+            width: "100%",
+            p: { xs: 2.5, sm: 4 },
+            borderRadius: "6px",
+            border: "1px solid rgba(0, 0, 0, 0.05)",
+            boxShadow: "0 1px 2px rgba(0, 0, 0, 0.02)",
+            bgcolor: "#FFFFFF"
+          }}
+        >
+          <Typography variant="h5" fontWeight={800} gutterBottom sx={{ color: "text.primary", mb: 0.5 }}>
+            {editingDiseno ? "Editar Diseño 3D" : "Crear Nuevo Diseño 3D"}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            Completa la información general, carga el modelo 3D y configura las interacciones mecánicas del proyecto.
+          </Typography>
 
-            {/* SECCIÓN 2: INFORMACIÓN GENERAL */}
-            <h3 className={sectionTitleClassName}>
-              <span>2. Información General</span>
-            </h3>
-            <label className={labelClassName}>Título del Proyecto</label>
-            <input
-              className={inputClassName}
-              type="text"
-              name="titulo"
-              value={formDiseno.titulo}
-              onChange={(e) => setFormDiseno({ ...formDiseno, titulo: e.target.value })}
-              placeholder="Ej. Brazo Robótico Articulado"
-              required
-            />
+          <Divider sx={{ mb: 3 }} />
 
-            <div className="flex gap-4">
-              <div className="flex-[2]">
-                <label className={labelClassName}>Autor(es)</label>
-                <input
-                  className={inputClassName}
-                  type="text"
-                  name="autor_nombre"
-                  value={formDiseno.autor_nombre}
-                  onChange={(e) => setFormDiseno({ ...formDiseno, autor_nombre: e.target.value })}
+          <Stack spacing={3.5}>
+            {/* ESTADO DE PUBLICACIÓN */}
+            <Box>
+              <Typography variant="body2" sx={labelSx}>
+                Estado de Publicación
+              </Typography>
+              <Stack direction="row" spacing={1.5}>
+                <Button
+                  fullWidth
+                  variant={formDiseno.estado_publicacion === "PUBLICADO" ? "contained" : "outlined"}
+                  onClick={() => setFormDiseno({ ...formDiseno, estado_publicacion: "PUBLICADO" })}
+                  startIcon={<Eye size={18} />}
+                  sx={{
+                    textTransform: "none",
+                    fontWeight: 600,
+                    borderRadius: "2px",
+                    borderColor: "#002B49",
+                    ...(formDiseno.estado_publicacion === "PUBLICADO"
+                      ? { bgcolor: "#002B49", color: "#fff", "&:hover": { bgcolor: "#001e33" } }
+                      : { color: "#002B49", "&:hover": { bgcolor: "rgba(0,43,73,0.04)" } })
+                  }}
+                >
+                  Público
+                </Button>
+                <Button
+                  fullWidth
+                  variant={formDiseno.estado_publicacion === "BORRADOR" ? "contained" : "outlined"}
+                  onClick={() => setFormDiseno({ ...formDiseno, estado_publicacion: "BORRADOR" })}
+                  startIcon={<FileEdit size={18} />}
+                  sx={{
+                    textTransform: "none",
+                    fontWeight: 600,
+                    borderRadius: "2px",
+                    borderColor: "#002B49",
+                    ...(formDiseno.estado_publicacion === "BORRADOR"
+                      ? { bgcolor: "#002B49", color: "#fff", "&:hover": { bgcolor: "#001e33" } }
+                      : { color: "#002B49", "&:hover": { bgcolor: "rgba(0,43,73,0.04)" } })
+                  }}
+                >
+                  Borrador
+                </Button>
+              </Stack>
+            </Box>
+
+            {/* TÍTULO */}
+            <Box>
+              <Typography variant="body2" sx={labelSx}>
+                Título del Proyecto
+              </Typography>
+              <TextField
+                fullWidth
+                required
+                placeholder="Ej. Brazo Robótico Articulado"
+                value={formDiseno.titulo || ""}
+                onChange={(e) => setFormDiseno({ ...formDiseno, titulo: e.target.value })}
+                sx={fieldSx}
+              />
+            </Box>
+
+            {/* AUTOR + CARRERA + CICLO */}
+            <Stack direction={{ xs: "column", md: "row" }} spacing={2.5}>
+              <Box sx={{ flex: 2 }}>
+                <Typography variant="body2" sx={labelSx}>
+                  Autor(es)
+                </Typography>
+                <TextField
+                  fullWidth
+                  required
                   placeholder="Ej. Alessandro"
-                  required
+                  value={formDiseno.autor_nombre || ""}
+                  onChange={(e) => setFormDiseno({ ...formDiseno, autor_nombre: e.target.value })}
+                  sx={fieldSx}
                 />
-              </div>
-              <div className="flex-[2]">
-                <label className={labelClassName}>Carrera</label>
-                <input
-                  className={inputClassName}
-                  type="text"
-                  name="carrera"
-                  value={formDiseno.carrera}
-                  onChange={(e) => setFormDiseno({ ...formDiseno, carrera: e.target.value })}
+              </Box>
+              <Box sx={{ flex: 2 }}>
+                <Typography variant="body2" sx={labelSx}>
+                  Carrera
+                </Typography>
+                <TextField
+                  fullWidth
+                  required
                   placeholder="Ej. Arquitectura"
-                  required
+                  value={formDiseno.carrera || ""}
+                  onChange={(e) => setFormDiseno({ ...formDiseno, carrera: e.target.value })}
+                  sx={fieldSx}
                 />
-              </div>
-              <div className="flex-1">
-                <label className={labelClassName}>Ciclo</label>
-                <input
-                  className={inputClassName}
-                  type="text"
-                  name="ciclo"
-                  value={formDiseno.ciclo}
-                  onChange={(e) => setFormDiseno({ ...formDiseno, ciclo: e.target.value })}
+              </Box>
+              <Box sx={{ flex: 1 }}>
+                <Typography variant="body2" sx={labelSx}>
+                  Ciclo
+                </Typography>
+                <TextField
+                  fullWidth
+                  required
                   placeholder="Ej. III"
-                  required
+                  value={formDiseno.ciclo || ""}
+                  onChange={(e) => setFormDiseno({ ...formDiseno, ciclo: e.target.value })}
+                  sx={fieldSx}
                 />
-              </div>
-            </div>
+              </Box>
+            </Stack>
 
-            <div className="flex gap-4">
-              <div className="flex-1">
-                <label className={labelClassName}>Categoría</label>
-                <select
-                  className={inputClassName}
-                  name="categoria"
-                  value={formDiseno.categoria || ""}
-                  onChange={(e) => setFormDiseno({ ...formDiseno, categoria: e.target.value })}
+            {/* CATEGORÍA + ODS */}
+            <Stack direction={{ xs: "column", md: "row" }} spacing={2.5}>
+              <Box sx={{ flex: 1 }}>
+                <Typography variant="body2" sx={labelSx}>
+                  Categoría
+                </Typography>
+                <FormControl fullWidth>
+                  <Select
+                    value={formDiseno.categoria || ""}
+                    onChange={(e) => setFormDiseno({ ...formDiseno, categoria: e.target.value })}
+                    displayEmpty
+                    sx={selectSx}
+                  >
+                    <MenuItem value="">
+                      <em>Seleccionar...</em>
+                    </MenuItem>
+                    {categorias.map((cat) => (
+                      <MenuItem key={cat.id} value={cat.id}>
+                        {cat.nombre}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Box>
+              <Box sx={{ flex: 1 }}>
+                <Typography variant="body2" sx={labelSx}>
+                  ODS de Impacto (ONU)
+                </Typography>
+                <FormControl fullWidth>
+                  <Select
+                    value={formDiseno.ods || ""}
+                    onChange={(e) => setFormDiseno({ ...formDiseno, ods: e.target.value })}
+                    displayEmpty
+                    sx={selectSx}
+                  >
+                    <MenuItem value="">
+                      <em>No especificado</em>
+                    </MenuItem>
+                    {ODS_LIST.map((o) => (
+                      <MenuItem key={o.id} value={o.id}>
+                        {o.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Box>
+            </Stack>
+
+            {/* DESCRIPCIÓN */}
+            <Box>
+              <Typography variant="body2" sx={labelSx}>
+                Descripción
+              </Typography>
+              <TextField
+                fullWidth
+                multiline
+                rows={3}
+                required
+                placeholder="Descripción del modelo 3D..."
+                value={formDiseno.descripcion || ""}
+                onChange={(e) => setFormDiseno({ ...formDiseno, descripcion: e.target.value })}
+                sx={fieldSx}
+              />
+            </Box>
+
+            {/* ARCHIVOS */}
+            <Box>
+              <Typography variant="body2" sx={{ ...labelSx, mb: 1.5 }}>
+                Archivos (Opcional)
+              </Typography>
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={2.5}>
+                <Button
+                  variant="outlined"
+                  component="label"
+                  fullWidth
+                  startIcon={<Upload size={18} />}
+                  sx={{
+                    py: 1.8,
+                    borderRadius: "2px",
+                    textTransform: "none",
+                    fontWeight: 600,
+                    borderColor: "#002B49",
+                    color: "#002B49",
+                    borderStyle: "dashed",
+                    "&:hover": { bgcolor: "rgba(0,43,73,0.04)", borderColor: "#002B49" }
+                  }}
                 >
-                  <option value="">Seleccionar...</option>
-                  {categorias.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.nombre}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex-1">
-                <label className={labelClassName}>ODS de Impacto (ONU)</label>
-                <select
-                  className={inputClassName}
-                  name="ods"
-                  value={formDiseno.ods || ""}
-                  onChange={(e) => setFormDiseno({ ...formDiseno, ods: e.target.value })}
-                >
-                  <option value="">Ninguno / No especificado</option>
-                  {ODS_LIST.map((o) => (
-                    <option key={o.id} value={o.id}>
-                      {o.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <label className={labelClassName}>Descripción</label>
-            <textarea
-              className={`${inputClassName} h-24 resize-none`}
-              name="descripcion"
-              value={formDiseno.descripcion}
-              onChange={(e) => setFormDiseno({ ...formDiseno, descripcion: e.target.value })}
-              placeholder="Descripción detallada del modelo 3D..."
-              required
-            />
-
-            {/* SECCIÓN 3: ARCHIVOS (OPCIONAL EN EDICIÓN, OBLIGATORIO NUEVO) */}
-            <h3 className={sectionTitleClassName}>
-              <span>3. Archivos (Opcional)</span>
-            </h3>
-            <div className="grid grid-cols-2 gap-4 mb-7">
-              {/* Box de Archivo FBX */}
-              <label className="border border-dashed border-[var(--line)] rounded-lg p-4 flex flex-col items-center justify-center text-center cursor-pointer hover:border-[#06b6d4] transition-colors bg-[var(--bg-general)]">
-                <Upload size={24} className="text-[#06b6d4] mb-2" />
-                <span className="text-xs font-bold text-[var(--text-main)] truncate max-w-full">
                   {archivoFBX
                     ? archivoFBX.name
                     : editingDiseno
                     ? "Actualizar .FBX"
                     : "Subir Modelo .FBX"}
-                </span>
-                <span className="text-[10px] text-[var(--text-muted)] mt-0.5">
-                  {editingDiseno ? "Se conservará el actual" : "Formato .fbx o .glb"}
-                </span>
-                <input
-                  type="file"
-                  className="hidden"
-                  accept=".fbx,.obj,.glb,.gltf"
-                  onChange={(e) => setArchivoFBX(e.target.files?.[0] || null)}
-                />
-              </label>
+                  <input
+                    type="file"
+                    hidden
+                    accept=".fbx,.obj,.glb,.gltf"
+                    onChange={(e) => setArchivoFBX(e.target.files?.[0] || null)}
+                  />
+                </Button>
 
-              {/* Box de Miniatura */}
-              <label className="border border-dashed border-[var(--line)] rounded-lg p-4 flex flex-col items-center justify-center text-center cursor-pointer hover:border-[#06b6d4] transition-colors bg-[var(--bg-general)]">
-                <Upload size={24} className="text-[#06b6d4] mb-2" />
-                <span className="text-xs font-bold text-[var(--text-main)] truncate max-w-full">
+                <Button
+                  variant="outlined"
+                  component="label"
+                  fullWidth
+                  startIcon={<Upload size={18} />}
+                  sx={{
+                    py: 1.8,
+                    borderRadius: "2px",
+                    textTransform: "none",
+                    fontWeight: 600,
+                    borderColor: "#002B49",
+                    color: "#002B49",
+                    borderStyle: "dashed",
+                    "&:hover": { bgcolor: "rgba(0,43,73,0.04)", borderColor: "#002B49" }
+                  }}
+                >
                   {imagenMiniatura
                     ? imagenMiniatura.name
                     : editingDiseno
                     ? "Actualizar Miniatura"
                     : "Subir Portada"}
-                </span>
-                <span className="text-[10px] text-[var(--text-muted)] mt-0.5">
-                  {editingDiseno ? "Se conservará la actual" : "Imagen PNG, JPG"}
-                </span>
-                <input
-                  type="file"
-                  className="hidden"
-                  accept="image/*"
-                  onChange={(e) => setImagenMiniatura(e.target.files?.[0] || null)}
-                />
-              </label>
-            </div>
+                  <input
+                    type="file"
+                    hidden
+                    accept="image/*"
+                    onChange={(e) => setImagenMiniatura(e.target.files?.[0] || null)}
+                  />
+                </Button>
+              </Stack>
+            </Box>
 
-            {/* SECCIÓN 4: CONTROLES MECÁNICOS (3D) */}
-            <h3 className={sectionTitleClassName}>
-              <span>4. Controles Mecánicos (3D)</span>
-              <button
-                type="button"
-                onClick={agregarPieza}
-                className="flex items-center gap-1.5 bg-[#06b6d4] text-white border-none py-1.5 px-2.5 rounded-md text-xs font-bold cursor-pointer hover:opacity-90 transition-opacity"
-              >
-                <Plus size={14} /> Nueva Pieza
-              </button>
-            </h3>
+            {/* CONTROLES MECÁNICOS */}
+            <Box>
+              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
+                <Typography variant="body2" sx={labelSx}>
+                  Controles Mecánicos
+                </Typography>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  startIcon={<Plus size={14} />}
+                  onClick={agregarPieza}
+                  sx={{
+                    textTransform: "none",
+                    fontWeight: 600,
+                    borderRadius: "2px",
+                    borderColor: "#002B49",
+                    color: "#002B49",
+                    "&:hover": { bgcolor: "rgba(0,43,73,0.04)" }
+                  }}
+                >
+                  Nueva Pieza
+                </Button>
+              </Stack>
 
-            {piezasMoviles.length === 0 ? (
-              <div className="text-center p-6 bg-[var(--bg-general)] rounded-lg border border-dashed border-[var(--line)] text-[13px] text-[var(--text-muted)]">
-                No has agregado piezas móviles. Presiona "Nueva Pieza" para configurar la interacción.
-              </div>
-            ) : (
-              <div className="flex flex-col gap-4">
-                {piezasMoviles.map((pieza, index) => (
-                  <div key={index} className="bg-[var(--bg-general)] border border-[var(--line)] rounded-lg p-4 relative">
-                    <button
-                      type="button"
-                      onClick={() => eliminarPieza(index)}
-                      className="absolute top-3 right-3 bg-red-500/10 border-none text-red-500 w-7 h-7 rounded-full flex items-center justify-center cursor-pointer hover:bg-red-500/20 transition-colors"
-                      title="Eliminar pieza"
+              {piezasMoviles.length === 0 ? (
+                <Box
+                  sx={{
+                    textAlign: "center",
+                    p: 3,
+                    bgcolor: "#F8FAFC",
+                    borderRadius: "4px",
+                    border: "1px dashed",
+                    borderColor: "divider"
+                  }}
+                >
+                  <Typography variant="body2" color="text.secondary">
+                    No has agregado piezas móviles. Presiona "Nueva Pieza" para configurar la interacción.
+                  </Typography>
+                </Box>
+              ) : (
+                <Stack spacing={2}>
+                  {piezasMoviles.map((pieza, index) => (
+                    <Paper
+                      key={index}
+                      elevation={0}
+                      sx={{
+                        p: 2.5,
+                        bgcolor: "#F8FAFC",
+                        border: "1px solid",
+                        borderColor: "divider",
+                        borderRadius: "4px",
+                        position: "relative"
+                      }}
                     >
-                      <Trash2 size={14} />
-                    </button>
+                      <IconButton
+                        size="small"
+                        onClick={() => eliminarPieza(index)}
+                        sx={{
+                          position: "absolute",
+                          top: 8,
+                          right: 8,
+                          color: "error.main",
+                          bgcolor: "error.lighter",
+                          "&:hover": { bgcolor: "error.light" }
+                        }}
+                      >
+                        <Trash2 size={14} />
+                      </IconButton>
 
-                    <div className="flex gap-3 mb-3 pr-8">
-                      <div className="flex-1">
-                        <label className={`${labelClassName} !text-[11px]`}>ID de la pieza (FBX)</label>
-                        <input
-                          type="text"
-                          className={`${inputClassName} !mb-0 !p-2`}
-                          placeholder="Ej: Rueda_Izq"
-                          value={pieza.nombre_objeto}
-                          onChange={(e) => actualizarPieza(index, "nombre_objeto", e.target.value)}
-                          required
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <label className={`${labelClassName} !text-[11px]`}>Etiqueta (UI)</label>
-                        <input
-                          type="text"
-                          className={`${inputClassName} !mb-0 !p-2`}
-                          placeholder="Ej: Girar Rueda"
-                          value={pieza.etiqueta}
-                          onChange={(e) => actualizarPieza(index, "etiqueta", e.target.value)}
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div className="flex gap-3">
-                      <div className="flex-1">
-                        <label className={`${labelClassName} !text-[11px]`}>Eje</label>
-                        <select
-                          className={`${inputClassName} !mb-0 !p-2`}
-                          value={pieza.eje}
-                          onChange={(e) => actualizarPieza(index, "eje", e.target.value)}
-                        >
-                          <option value="x">Eje X</option>
-                          <option value="y">Eje Y</option>
-                          <option value="z">Eje Z</option>
-                        </select>
-                      </div>
-                      <div className="flex-1">
-                        <label className={`${labelClassName} !text-[11px]`}>Límite Min (°)</label>
-                        <input
-                          type="number"
-                          className={`${inputClassName} !mb-0 !p-2`}
-                          value={pieza.min_giro}
-                          onChange={(e) => actualizarPieza(index, "min_giro", Number(e.target.value))}
-                          required
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <label className={`${labelClassName} !text-[11px]`}>Límite Max (°)</label>
-                        <input
-                          type="number"
-                          className={`${inputClassName} !mb-0 !p-2`}
-                          value={pieza.max_giro}
-                          onChange={(e) => actualizarPieza(index, "max_giro", Number(e.target.value))}
-                          required
-                        />
-                      </div>
-                      <div className="flex-1 flex flex-col justify-center">
-                        <label className={`${labelClassName} !text-[11px] invisible`}>Invertir</label>
-                        <label className="flex items-center gap-1.5 text-xs font-bold text-[var(--text-muted)] cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={pieza.invertir_giro || false}
-                            onChange={(e) => actualizarPieza(index, "invertir_giro", e.target.checked)}
-                            className="cursor-pointer w-4 h-4 accent-[#06b6d4]"
+                      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ mb: 2, pr: 4 }}>
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="caption" sx={{ ...labelSx, fontSize: "0.75rem" }}>
+                            ID de la pieza (FBX)
+                          </Typography>
+                          <TextField
+                            fullWidth
+                            size="small"
+                            required
+                            placeholder="Ej: Rueda_Izq"
+                            value={pieza.nombre_objeto}
+                            onChange={(e) => actualizarPieza(index, "nombre_objeto", e.target.value)}
+                            sx={fieldSx}
                           />
-                          Invertir Giro
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </form>
-        </div>
+                        </Box>
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="caption" sx={{ ...labelSx, fontSize: "0.75rem" }}>
+                            Etiqueta (UI)
+                          </Typography>
+                          <TextField
+                            fullWidth
+                            size="small"
+                            required
+                            placeholder="Ej: Girar Rueda"
+                            value={pieza.etiqueta}
+                            onChange={(e) => actualizarPieza(index, "etiqueta", e.target.value)}
+                            sx={fieldSx}
+                          />
+                        </Box>
+                      </Stack>
 
-        {/* LADO DERECHO: VISOR 3D EXACTO COMO EN LA IMAGEN DE REFERENCIA */}
-        <div className="flex-1 bg-[#1e293b] rounded-xl border border-[#334155] relative overflow-hidden flex items-center justify-center shadow-inner min-h-[580px]">
+                      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems="flex-end">
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="caption" sx={{ ...labelSx, fontSize: "0.75rem" }}>
+                            Eje
+                          </Typography>
+                          <FormControl fullWidth size="small">
+                            <Select
+                              value={pieza.eje}
+                              onChange={(e) => actualizarPieza(index, "eje", e.target.value)}
+                              sx={selectSx}
+                            >
+                              <MenuItem value="x">Eje X</MenuItem>
+                              <MenuItem value="y">Eje Y</MenuItem>
+                              <MenuItem value="z">Eje Z</MenuItem>
+                            </Select>
+                          </FormControl>
+                        </Box>
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="caption" sx={{ ...labelSx, fontSize: "0.75rem" }}>
+                            Límite Min (°)
+                          </Typography>
+                          <TextField
+                            fullWidth
+                            size="small"
+                            type="number"
+                            required
+                            value={pieza.min_giro}
+                            onChange={(e) => actualizarPieza(index, "min_giro", Number(e.target.value))}
+                            sx={fieldSx}
+                          />
+                        </Box>
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="caption" sx={{ ...labelSx, fontSize: "0.75rem" }}>
+                            Límite Max (°)
+                          </Typography>
+                          <TextField
+                            fullWidth
+                            size="small"
+                            type="number"
+                            required
+                            value={pieza.max_giro}
+                            onChange={(e) => actualizarPieza(index, "max_giro", Number(e.target.value))}
+                            sx={fieldSx}
+                          />
+                        </Box>
+                        <Box sx={{ flex: 1, pb: 0.5 }}>
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                checked={pieza.invertir_giro || false}
+                                onChange={(e) => actualizarPieza(index, "invertir_giro", e.target.checked)}
+                                sx={{ color: "#002B49", "&.Mui-checked": { color: "#002B49" } }}
+                              />
+                            }
+                            label={
+                              <Typography variant="caption" fontWeight={600}>
+                                Invertir Giro
+                              </Typography>
+                            }
+                          />
+                        </Box>
+                      </Stack>
+                    </Paper>
+                  ))}
+                </Stack>
+              )}
+            </Box>
+          </Stack>
+
+          <Divider sx={{ my: 4 }} />
+
+          {/* BOTONES INFERIORES */}
+          <Stack direction="row" spacing={2} justifyContent="flex-end">
+            <Button
+              type="button"
+              variant="outlined"
+              onClick={handleCancelClick}
+              sx={{
+                borderRadius: "2px",
+                textTransform: "none",
+                fontWeight: 600,
+                fontSize: "0.95rem",
+                color: "#002B49",
+                borderColor: "#002B49",
+                px: 3.5,
+                py: 0.9,
+                "&:hover": { borderColor: "#002B49", bgcolor: "rgba(0, 43, 73, 0.04)" }
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              sx={{
+                textTransform: "none",
+                fontWeight: 600,
+                borderRadius: "2px",
+                px: 4,
+                py: 0.9,
+                bgcolor: "#002B49",
+                color: "#FFFFFF",
+                boxShadow: "none",
+                "&:hover": { bgcolor: "#001e33", boxShadow: "none" }
+              }}
+            >
+              {editingDiseno ? "Actualizar Proyecto" : "Crear Diseño 3D"}
+            </Button>
+          </Stack>
+        </Paper>
+
+        {/* COLUMNA DERECHA: VISOR 3D */}
+        <Box
+          sx={{
+            flex: { xs: "1 1 100%", lg: "1 1 auto" },
+            width: { xs: "100%", lg: "auto" },
+            minWidth: { lg: 420 },
+            height: { xs: 480, lg: "calc(100vh - 80px)" },
+            position: { lg: "sticky" },
+            top: { lg: 24 },
+            bgcolor: "#1e293b",
+            borderRadius: "6px",
+            border: "1px solid #334155",
+            overflow: "hidden",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center"
+          }}
+        >
           {!fbxUrl ? (
-            <div className="text-center text-slate-400 p-6">
-              <BoxIcon size={64} className="mx-auto mb-4 opacity-30" />
-              <p className="text-[15px] font-medium">
+            <Box sx={{ textAlign: "center", color: "#94a3b8", p: 3 }}>
+              <BoxIcon size={64} style={{ opacity: 0.3, marginBottom: 16 }} />
+              <Typography variant="body2" fontWeight={500}>
                 Sube tu archivo .FBX a la izquierda
                 <br />
                 para previsualizarlo aquí
-              </p>
-            </div>
+              </Typography>
+            </Box>
           ) : (
-            <Canvas shadows camera={{ position: [0, 2, 5], fov: 50 }} className="w-full h-full">
+            <Canvas shadows camera={{ position: [0, 2, 5], fov: 50 }} style={{ width: "100%", height: "100%" }}>
               <color attach="background" args={["#1e293b"]} />
               <Suspense
                 fallback={
                   <Html center>
-                    <div className="text-center text-[#22d3ee] font-bold text-sm">
+                    <Typography sx={{ color: "#22d3ee", fontWeight: 700, fontSize: 14 }}>
                       Cargando modelo 3D...
-                    </div>
+                    </Typography>
                   </Html>
                 }
               >
@@ -543,26 +893,22 @@ export default function Diseno3DFormView({
               <OrbitControls makeDefault enabled={habilitarCamara} />
             </Canvas>
           )}
-        </div>
-      </div>
+        </Box>
+      </Box>
 
-      {/* BARRA INFERIOR DE BOTONES FIEL AL EJEMPLO DE LA IMAGEN */}
-      <div className="flex justify-end gap-4 mt-6 pt-4 border-t border-[var(--line)]">
-        <button
-          type="button"
-          onClick={onBack}
-          className="px-5 py-2.5 rounded-lg border border-[var(--line)] bg-[var(--panel)] text-[var(--text-main)] font-bold flex items-center gap-2 cursor-pointer hover:bg-[var(--bg-general)] transition-colors"
-        >
-          <X size={16} /> Cancelar
-        </button>
-        <button
-          type="submit"
-          form="diseno3d-form"
-          className="px-6 py-2.5 rounded-lg border-none bg-[#06b6d4] text-white font-bold flex items-center gap-2 hover:opacity-90 transition-opacity cursor-pointer"
-        >
-          <Save size={16} /> {editingDiseno ? "Actualizar Proyecto" : "Crear Diseño 3D"}
-        </button>
-      </div>
-    </div>
+      {/* DIÁLOGO DE CONFIRMACIÓN AL CANCELAR */}
+      <ConfirmDialog
+        open={showCancelDialog}
+        onClose={() => setShowCancelDialog(false)}
+        onConfirm={() => {
+          setShowCancelDialog(false);
+          onBack();
+        }}
+        title="¿Cancelar cambios?"
+        message="Tienes cambios sin guardar. Si cancelas ahora, perderás todos los datos ingresados. ¿Estás seguro de que deseas cancelar?"
+        confirmText="Sí, cancelar"
+        cancelText="Continuar editando"
+      />
+    </Box>
   );
 }

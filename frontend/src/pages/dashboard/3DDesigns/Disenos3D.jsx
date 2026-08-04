@@ -18,8 +18,10 @@ import {
   Alert,
   IconButton,
   Tooltip,
-  Grid
+  Grid,
+  Link
 } from "@mui/material";
+import { Link as RouterLink } from "react-router-dom";
 
 import { MagnifyingGlass as SearchIcon } from "@phosphor-icons/react/dist/ssr/MagnifyingGlass";
 import { Plus as PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
@@ -40,11 +42,10 @@ import { ODS_LIST } from "@/pages/dashboard/digitalProjects/odsData";
 import Disenos3DTable from "./Disenos3DTable";
 import Diseno3DFormView from "./Diseno3DFormView";
 import Diseno3DDetailView from "./Diseno3DDetailView";
+import Diseno3DDeleteModal from "./Diseno3DDeleteModal";
 
 export default function Disenos3D() {
-  // ==========================
-  // ESTADOS PRINCIPALES
-  // ==========================
+
   const [disenos, setDisenos] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -57,13 +58,12 @@ export default function Disenos3D() {
   const [selectedCategoria, setSelectedCategoria] = useState("");
   const [selectedOds, setSelectedOds] = useState("");
 
-  // Modo de visualización: tabla o cuadrícula
-  const [viewMode, setViewMode] = useState("table");
+  const [viewMode, setViewMode] = useState(() => {
+    return localStorage.getItem("disenos3d_viewMode") || "table";
+  });
 
-  // Vista activa: 'list' (listado/tabla) o 'form' (crear/editar integrado)
   const [activeView, setActiveView] = useState("list");
 
-  // Vista de detalle a pantalla del admin
   const [selectedDiseno, setSelectedDiseno] = useState(null);
 
   // Elemento en edición
@@ -87,18 +87,16 @@ export default function Disenos3D() {
   // Notificaciones
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
 
-  // ==========================
-  // CARGA DE DATOS
-  // ==========================
+  // Modal de eliminación
+  const [deleteModal, setDeleteModal] = useState({ open: false, item: null, submitting: false });
+
   const loadData = async () => {
     setLoading(true);
     try {
-      const estadoParam = tabValue === "todos" ? "" : tabValue;
       const [dataDisenos, dataCats] = await Promise.all([
         fetchProyectos3DAdmin({
           ods: selectedOds,
-          categoria: selectedCategoria,
-          estado: estadoParam
+          categoria: selectedCategoria
         }),
         fetchCategorias()
       ]);
@@ -122,13 +120,17 @@ export default function Disenos3D() {
 
   useEffect(() => {
     loadData();
-  }, [tabValue, selectedCategoria, selectedOds]);
+  }, [selectedCategoria, selectedOds]);
 
   // FILTRADO 
   const filteredDisenos = useMemo(() => {
-    if (!searchTerm.trim()) return disenos;
+    let list = disenos;
+    if (tabValue !== "todos") {
+      list = list.filter(item => item.estado_publicacion === tabValue);
+    }
+    if (!searchTerm.trim()) return list;
     const query = searchTerm.toLowerCase().trim();
-    return disenos.filter(item => {
+    return list.filter(item => {
       const titulo = (item.titulo || "").toLowerCase();
       const autor = (item.autor_nombre || "").toLowerCase();
       const desc = (item.descripcion || "").toLowerCase();
@@ -140,7 +142,7 @@ export default function Disenos3D() {
         carrera.includes(query)
       );
     });
-  }, [disenos, searchTerm]);
+  }, [disenos, tabValue, searchTerm]);
 
   // Manejar ENTER en búsqueda
   const handleKeyDown = (e) => {
@@ -165,7 +167,7 @@ export default function Disenos3D() {
       autor_nombre: "",
       carrera: "",
       ciclo: "",
-      categoria: categorias[0]?.id || "",
+      categoria: "",
       ods: "",
       descripcion: "",
       creado_por: 1
@@ -270,10 +272,14 @@ export default function Disenos3D() {
     }
   };
 
-  const handleDeleteDiseno = async (item) => {
-    if (!window.confirm(`¿Estás seguro de eliminar el diseño 3D "${item.titulo}"? Esta acción no se puede deshacer.`)) {
-      return;
-    }
+  const handleDeleteDiseno = (item) => {
+    setDeleteModal({ open: true, item, submitting: false });
+  };
+
+  const handleConfirmDelete = async () => {
+    const item = deleteModal.item;
+    if (!item) return;
+    setDeleteModal((prev) => ({ ...prev, submitting: true }));
     try {
       await deleteProyecto3D(item.id);
       setSnackbar({
@@ -292,18 +298,27 @@ export default function Disenos3D() {
         message: err.message || "No se pudo eliminar el diseño 3D.",
         severity: "error"
       });
+    } finally {
+      setDeleteModal({ open: false, item: null, submitting: false });
     }
   };
 
   // RENDERING: VISTA DETALLE O LISTADO
   if (selectedDiseno) {
     return (
-      <Box sx={{ p: { xs: 2, md: 4 } }}>
+      <Box sx={{ pb: 4, maxWidth: 1360, margin: "0 auto" }}>
         <Diseno3DDetailView
           diseno={selectedDiseno}
+          categorias={categorias}
           onBack={() => setSelectedDiseno(null)}
           onEdit={(item) => handleOpenEdit(item)}
           onDelete={(item) => handleDeleteDiseno(item)}
+        />
+        <Diseno3DDeleteModal
+          open={deleteModal.open}
+          onClose={() => setDeleteModal({ open: false, item: null, submitting: false })}
+          onConfirm={handleConfirmDelete}
+          submitting={deleteModal.submitting}
         />
       </Box>
     );
@@ -311,7 +326,7 @@ export default function Disenos3D() {
 
   if (activeView === "form") {
     return (
-      <Box sx={{ p: { xs: 2, md: 4 } }}>
+      <Box sx={{ pb: 4, maxWidth: 1360, margin: "0 auto" }}>
         <Diseno3DFormView
           onBack={() => setActiveView("list")}
           onSave={handleSaveDiseno}
@@ -335,7 +350,7 @@ export default function Disenos3D() {
   const borradorCount = disenos.filter((d) => d.estado_publicacion === "BORRADOR").length;
 
   return (
-    <Box sx={{ p: { xs: 2, md: 4 } }}>
+    <Box sx={{ pb: 4, maxWidth: 1360, margin: "0 auto" }}>
       {/* HEADER PRINCIPAL */}
       <Stack
         direction={{ xs: "column", sm: "row" }}
@@ -345,8 +360,11 @@ export default function Disenos3D() {
         sx={{ mb: 4 }}
       >
         <Box>
+          <Typography variant="caption" sx={{ color: "#64748B", fontWeight: 500, display: "block", mb: 0.5 }}>
+            <Link component={RouterLink} to="/dashboard" color="inherit" underline="hover">Inicio</Link> / Modelos 3D
+          </Typography>
           <Typography variant="h4" fontWeight={800} sx={{ color: "text.primary" }}>
-            Administración de Diseños 3D
+            Gestión de Modelos 3D
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
             Gestiona el catálogo de modelos interactivos, visor 3D, archivos .fbx y estado de publicación.
@@ -359,168 +377,71 @@ export default function Disenos3D() {
           startIcon={<PlusIcon weight="bold" />}
           onClick={handleOpenCreate}
           sx={{
-            fontWeight: 700,
-            borderRadius: 1.5,
-            px: 3,
-            py: 1.2,
+            fontWeight: 600,
+            borderRadius: "2px",
+            px: 3.5,
+            py: 1,
+            bgcolor: "#002B49",
+            color: "#FFFFFF",
             textTransform: "none",
-            boxShadow: "0 4px 14px rgba(0, 102, 255, 0.35)"
+            boxShadow: "none",
+            "&:hover": {
+              bgcolor: "#001e33",
+              boxShadow: "none"
+            }
           }}
         >
           Nuevo Diseño 3D
         </Button>
       </Stack>
 
-      {/* KPIS DE ESTADÍSTICA */}
-      <Grid container spacing={2.5} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={4}>
-          <Paper
-            elevation={0}
-            sx={{
-              p: 2.5,
-              borderRadius: 3,
-              border: "1px solid",
-              borderColor: "divider",
-              bgcolor: "background.paper"
-            }}
-          >
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
-              <Box>
-                <Typography variant="caption" color="text.secondary" fontWeight={700}>
-                  TOTAL DISEÑOS 3D
-                </Typography>
-                <Typography variant="h4" fontWeight={800} sx={{ mt: 0.5 }}>
-                  {totalCount}
-                </Typography>
-              </Box>
+      {/* PESTAÑAS DE FILTRO POR ESTADO (Estilo Minimalista Negro con Contadores e Indicador al Ancho del Texto) */}
+      <Box sx={{ borderBottom: "1px solid rgba(0, 0, 0, 0.08)", mb: 3.5 }}>
+        <Stack direction="row" spacing={4}>
+          {[
+            { label: `Todos los Diseños: ${totalCount}`, value: "todos" },
+            { label: `Publicaciones: ${publicadosCount}`, value: "PUBLICADO" },
+            { label: `Borradores: ${borradorCount}`, value: "BORRADOR" }
+          ].map((tab) => {
+            const isSelected = tabValue === tab.value;
+            return (
               <Box
+                key={tab.value}
+                onClick={() => setTabValue(tab.value)}
                 sx={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: 2,
-                  bgcolor: "primary.50",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "primary.main"
+                  position: "relative",
+                  pb: 1.5,
+                  cursor: "pointer",
+                  color: isSelected ? "#111827" : "#94A3B8",
+                  fontWeight: isSelected ? 700 : 600,
+                  fontSize: "0.98rem",
+                  transition: "all 0.2s ease",
+                  "&:hover": {
+                    color: "#111827"
+                  },
+                  "&::after": isSelected
+                    ? {
+                      content: '""',
+                      position: "absolute",
+                      bottom: -1,
+                      left: 0,
+                      right: 0,
+                      height: "2.5px",
+                      backgroundColor: "#111827",
+                      borderRadius: "2px 2px 0 0"
+                    }
+                    : {}
                 }}
               >
-                <CubeIcon size={26} weight="duotone" />
+                {tab.label}
               </Box>
-            </Stack>
-          </Paper>
-        </Grid>
-
-        <Grid item xs={12} sm={4}>
-          <Paper
-            elevation={0}
-            sx={{
-              p: 2.5,
-              borderRadius: 3,
-              border: "1px solid",
-              borderColor: "divider",
-              bgcolor: "background.paper"
-            }}
-          >
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
-              <Box>
-                <Typography variant="caption" color="text.secondary" fontWeight={700}>
-                  PUBLICADOS EN LANDING
-                </Typography>
-                <Typography variant="h4" fontWeight={800} sx={{ mt: 0.5, color: "success.main" }}>
-                  {publicadosCount}
-                </Typography>
-              </Box>
-              <Box
-                sx={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: 2,
-                  bgcolor: "success.50",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "success.main"
-                }}
-              >
-                <CubeIcon size={26} weight="fill" />
-              </Box>
-            </Stack>
-          </Paper>
-        </Grid>
-
-        <Grid item xs={12} sm={4}>
-          <Paper
-            elevation={0}
-            sx={{
-              p: 2.5,
-              borderRadius: 3,
-              border: "1px solid",
-              borderColor: "divider",
-              bgcolor: "background.paper"
-            }}
-          >
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
-              <Box>
-                <Typography variant="caption" color="text.secondary" fontWeight={700}>
-                  EN BORRADOR / REVISIÓN
-                </Typography>
-                <Typography variant="h4" fontWeight={800} sx={{ mt: 0.5, color: "warning.main" }}>
-                  {borradorCount}
-                </Typography>
-              </Box>
-              <Box
-                sx={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: 2,
-                  bgcolor: "warning.50",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "warning.main"
-                }}
-              >
-                <CubeIcon size={26} weight="regular" />
-              </Box>
-            </Stack>
-          </Paper>
-        </Grid>
-      </Grid>
-
-      {/* PESTAÑAS DE FILTRO POR ESTADO */}
-      <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
-        <Tabs
-          value={tabValue}
-          onChange={(_, newVal) => setTabValue(newVal)}
-          textColor="primary"
-          indicatorColor="primary"
-          sx={{
-            "& .MuiTab-root": {
-              textTransform: "none",
-              fontWeight: 700,
-              fontSize: "0.95rem"
-            }
-          }}
-        >
-          <Tab label="Todos los Diseños" value="todos" />
-          <Tab label="Publicados" value="PUBLICADO" />
-          <Tab label="Borradores" value="BORRADOR" />
-        </Tabs>
+            );
+          })}
+        </Stack>
       </Box>
 
-      {/* BARRA DE BÚSQUEDA Y FILTROS - DISEÑO FLEXBOX RESPONSIVO SIN TRUNCAMIENTOS */}
-      <Paper
-        elevation={0}
-        sx={{
-          p: 2.5,
-          mb: 4,
-          borderRadius: 3,
-          border: "1px solid",
-          borderColor: "divider",
-          bgcolor: "background.paper"
-        }}
-      >
+      {/* BARRA DE BÚSQUEDA Y FILTROS */}
+      <Box sx={{ mb: 3 }}>
         <Stack
           direction={{ xs: "column", md: "row" }}
           spacing={2}
@@ -528,18 +449,29 @@ export default function Disenos3D() {
           justifyContent="space-between"
         >
           {/* Campo de Búsqueda */}
-          <Box sx={{ flexGrow: 1, minWidth: { xs: "100%", md: 300 } }}>
+          <Box sx={{ flexGrow: 1, minWidth: { xs: "100%", md: 320 } }}>
             <TextField
               fullWidth
               size="small"
               placeholder="Buscar por título o nombre del autor..."
+              label="Buscar"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyDown={handleKeyDown}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "2px",
+                  bgcolor: "#FFFFFF",
+                  "& fieldset": { borderColor: "rgba(0, 0, 0, 0.23)" },
+                  "&:hover fieldset": { borderColor: "rgba(0, 0, 0, 0.4)" },
+                  "&.Mui-focused fieldset": { borderColor: "#002B49" }
+                },
+                "& .MuiInputLabel-root.Mui-focused": { color: "#002B49" }
+              }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <SearchIcon size={20} />
+                    <SearchIcon size={20} color="#64748B" />
                   </InputAdornment>
                 )
               }}
@@ -554,12 +486,38 @@ export default function Disenos3D() {
             sx={{ flexShrink: 0 }}
           >
             {/* Filtro por Categoría */}
-            <FormControl size="small" sx={{ minWidth: 200, width: { xs: "100%", sm: "auto" } }}>
-              <InputLabel>Categoría</InputLabel>
+            <FormControl
+              size="small"
+              sx={{
+                minWidth: 200,
+                width: { xs: "100%", sm: "auto" },
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "2px",
+                  bgcolor: "#FFFFFF",
+                  "& fieldset": { borderColor: "rgba(0, 0, 0, 0.23)" },
+                  "&:hover fieldset": { borderColor: "rgba(0, 0, 0, 0.4)" },
+                  "&.Mui-focused fieldset": { borderColor: "#002B49" }
+                },
+                "& .MuiInputLabel-root.Mui-focused": { color: "#002B49" }
+              }}
+            >
+              <InputLabel>Categorías</InputLabel>
               <Select
                 value={selectedCategoria}
-                label="Categoría"
+                label="Categorías"
                 onChange={(e) => setSelectedCategoria(e.target.value)}
+                MenuProps={{
+                  PaperProps: {
+                    sx: {
+                      borderRadius: "6px",
+                      "& .MuiMenuItem-root.Mui-selected": {
+                        bgcolor: "#002B49",
+                        color: "#FFFFFF",
+                        "&:hover": { bgcolor: "#001e33" }
+                      }
+                    }
+                  }
+                }}
               >
                 <MenuItem value="">
                   <em>Todas las categorías</em>
@@ -573,12 +531,38 @@ export default function Disenos3D() {
             </FormControl>
 
             {/* Filtro por ODS */}
-            <FormControl size="small" sx={{ minWidth: 250, width: { xs: "100%", sm: "auto" } }}>
-              <InputLabel>Objetivo ODS</InputLabel>
+            <FormControl
+              size="small"
+              sx={{
+                minWidth: 220,
+                width: { xs: "100%", sm: "auto" },
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "2px",
+                  bgcolor: "#FFFFFF",
+                  "& fieldset": { borderColor: "rgba(0, 0, 0, 0.23)" },
+                  "&:hover fieldset": { borderColor: "rgba(0, 0, 0, 0.4)" },
+                  "&.Mui-focused fieldset": { borderColor: "#002B49" }
+                },
+                "& .MuiInputLabel-root.Mui-focused": { color: "#002B49" }
+              }}
+            >
+              <InputLabel>Filtros (ODS)</InputLabel>
               <Select
                 value={selectedOds}
-                label="Objetivo ODS"
+                label="Filtros (ODS)"
                 onChange={(e) => setSelectedOds(e.target.value)}
+                MenuProps={{
+                  PaperProps: {
+                    sx: {
+                      borderRadius: "6px",
+                      "& .MuiMenuItem-root.Mui-selected": {
+                        bgcolor: "#002B49",
+                        color: "#FFFFFF",
+                        "&:hover": { bgcolor: "#001e33" }
+                      }
+                    }
+                  }
+                }}
               >
                 <MenuItem value="">
                   <em>Todos los ODS</em>
@@ -601,7 +585,16 @@ export default function Disenos3D() {
                     color="inherit"
                     startIcon={<ClearFilterIcon />}
                     onClick={handleClearFilters}
-                    sx={{ textTransform: "none", fontWeight: 600, borderRadius: 1.5, px: 2 }}
+                    sx={{
+                      textTransform: "none",
+                      fontWeight: 600,
+                      borderRadius: "2px",
+                      borderColor: "rgba(0, 0, 0, 0.23)",
+                      color: "#475569",
+                      px: 2,
+                      py: 0.8,
+                      "&:hover": { borderColor: "#002B49", bgcolor: "rgba(0, 43, 73, 0.04)", color: "#002B49" }
+                    }}
                   >
                     Limpiar
                   </Button>
@@ -611,9 +604,20 @@ export default function Disenos3D() {
               {/* Toggle vista tabla / cuadricula */}
               <Tooltip title={viewMode === "table" ? "Cambiar a Cuadrícula" : "Cambiar a Tabla"}>
                 <IconButton
-                  onClick={() => setViewMode(viewMode === "table" ? "grid" : "table")}
-                  color="primary"
-                  sx={{ border: "1px solid", borderColor: "divider", width: 40, height: 40 }}
+                  onClick={() => {
+                    const next = viewMode === "table" ? "grid" : "table";
+                    setViewMode(next);
+                    localStorage.setItem("disenos3d_viewMode", next);
+                  }}
+                  sx={{
+                    border: "1px solid rgba(0, 0, 0, 0.23)",
+                    borderRadius: "2px",
+                    bgcolor: "#FFFFFF",
+                    color: "#002B49",
+                    width: 40,
+                    height: 40,
+                    "&:hover": { bgcolor: "rgba(0, 43, 73, 0.04)", borderColor: "#002B49" }
+                  }}
                 >
                   {viewMode === "table" ? <GridIcon size={20} /> : <TableIcon size={20} />}
                 </IconButton>
@@ -621,16 +625,25 @@ export default function Disenos3D() {
             </Stack>
           </Stack>
         </Stack>
-      </Paper>
+      </Box>
 
       {/* TABLA O GRID DE DISEÑOS 3D */}
       <Disenos3DTable
         disenos={filteredDisenos}
+        categorias={categorias}
         loading={loading}
         viewMode={viewMode}
         onView={(item) => setSelectedDiseno(item)}
         onEdit={(item) => handleOpenEdit(item)}
         onDelete={(item) => handleDeleteDiseno(item)}
+      />
+
+      {/* MODAL DE ELIMINACIÓN */}
+      <Diseno3DDeleteModal
+        open={deleteModal.open}
+        onClose={() => setDeleteModal({ open: false, item: null, submitting: false })}
+        onConfirm={handleConfirmDelete}
+        submitting={deleteModal.submitting}
       />
 
       {/* SNACKBAR COMUNICACIONES */}

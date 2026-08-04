@@ -12,8 +12,10 @@ import {
   CircularProgress,
   Alert,
   Snackbar,
-  Stack
+  Stack,
+  Link
 } from "@mui/material";
+import { Link as RouterLink } from "react-router-dom";
 
 import { MagnifyingGlass as SearchIcon } from "@phosphor-icons/react/dist/ssr/MagnifyingGlass";
 import { Plus as PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
@@ -32,7 +34,7 @@ import CategoriaDeleteModal from "./CategoriaDeleteModal";
 import CategoriaDetailView from "./CategoriaDetailView";
 
 /**
- * GESTIÓN DE CATEGORÍAS (PÁGINA PRINCIPAL MODULARIZADA)
+ * GESTIÓN DE CATEGORÍAS
  */
 export default function CategoriasPage() {
   const [categorias, setCategorias] = React.useState([]);
@@ -172,7 +174,7 @@ export default function CategoriasPage() {
     }
   };
 
-  // Si el usuario está viendo el detalle de una categoría (vista integrada en la página, no flotante)
+  // Si el usuario está viendo el detalle de una categoría
   if (viewingCategory) {
     return (
       <Box sx={{ pt: 0, pb: 4, px: 2, maxWidth: 1280, margin: "0 auto" }}>
@@ -185,7 +187,7 @@ export default function CategoriasPage() {
   }
 
   return (
-    <Box sx={{ pt: 0, pb: 4, px: 2, maxWidth: 1280, margin: "0 auto" }}>
+    <Box sx={{ pb: 4, maxWidth: 1360, margin: "0 auto" }}>
       {/* Encabezado */}
       <Box
         sx={{
@@ -198,6 +200,9 @@ export default function CategoriasPage() {
         }}
       >
         <Box>
+          <Typography variant="caption" sx={{ color: "#64748B", fontWeight: 500, display: "block", mb: 0.5 }}>
+            <Link component={RouterLink} to="/dashboard" color="inherit" underline="hover">Inicio</Link> / Categorías
+          </Typography>
           <Typography variant="h4" sx={{ fontWeight: 800, color: "text.primary", mb: 0.5 }}>
             Gestión de Categorías
           </Typography>
@@ -205,66 +210,71 @@ export default function CategoriasPage() {
             Organiza y estructura las clasificaciones para proyectos 3D y de desarrollo de software del FAB LAB.
           </Typography>
         </Box>
-
-        <Button
-          variant="contained"
-          size="large"
-          startIcon={<PlusIcon weight="bold" />}
-          onClick={handleOpenCreate}
-          sx={{
-            borderRadius: 1.5,
-            px: 3,
-            py: 1.2,
-            fontWeight: 700,
-            textTransform: "none",
-            boxShadow: "0px 4px 14px rgba(247, 144, 9, 0.4)",
-            backgroundColor: "#F79009",
-            "&:hover": { backgroundColor: "#E07B00" }
-          }}
-        >
-          Nueva Categoría
-        </Button>
       </Box>
 
       {/* Barra de Búsqueda y Filtros */}
-      <Card
+      <Box
         sx={{
           mb: 4,
-          borderRadius: 2.5,
-          boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.04)",
-          border: "1px solid",
-          borderColor: "divider"
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 2,
+          alignItems: "center",
+          justifyContent: "space-between"
         }}
       >
-        <CardContent sx={{ p: 2.5 }}>
-          <Grid container spacing={2} alignItems="center">
-            <Grid size={{ xs: 12, sm: 8, md: 6 }}>
-              <TextField
-                fullWidth
-                placeholder="Buscar categoría por nombre o descripción..."
-                value={searchTerm}
-                onChange={handleSearchChange}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon size={20} color="#6B7280" />
-                    </InputAdornment>
-                  ),
-                  sx: { borderRadius: 2, backgroundColor: "background.default" }
-                }}
-                size="medium"
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 4, md: 6 }} sx={{ textAlign: { sm: "right" } }}>
-              <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
-                Total categorías: <strong>{categorias.length}</strong>
-              </Typography>
-            </Grid>
-          </Grid>
-        </CardContent>
-      </Card>
+        <TextField
+          size="small"
+          placeholder="Buscar categoría por nombre o descripción..."
+          label="Buscar"
+          value={searchTerm}
+          onChange={handleSearchChange}
+          sx={{
+            width: { xs: "100%", sm: 360 },
+            "& .MuiOutlinedInput-root": {
+              bgcolor: "#FFFFFF",
+              borderRadius: "2px",
+              "& fieldset": { borderColor: "rgba(0, 0, 0, 0.23)" },
+              "&:hover fieldset": { borderColor: "rgba(0, 0, 0, 0.4)" },
+              "&.Mui-focused fieldset": { borderColor: "#002B49" }
+            }
+          }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon size={20} color="#64748B" />
+              </InputAdornment>
+            )
+          }}
+        />
 
-      {/* Tabla / Lista de Categorías */}
+        <Stack direction="row" alignItems="center" spacing={3}>
+          <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
+            Total categorías: <strong>{categorias.length}</strong>
+          </Typography>
+          <Button
+            variant="contained"
+            size="medium"
+            startIcon={<PlusIcon weight="bold" />}
+            onClick={handleOpenCreate}
+            sx={{
+              borderRadius: "2px",
+              px: 3.5,
+              py: 1,
+              fontWeight: 600,
+              textTransform: "none",
+              boxShadow: "none",
+              backgroundColor: "#002B49",
+              color: "#FFFFFF",
+              "&:hover": { backgroundColor: "#001e33", boxShadow: "none" }
+            }}
+          >
+            Nueva Categoría
+          </Button>
+        </Stack>
+      </Box>
+
+      {/* Tabla de Categorías */}
       {loading ? (
         <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
           <CircularProgress sx={{ color: "#F79009" }} />
@@ -285,8 +295,8 @@ export default function CategoriasPage() {
               width: 64,
               height: 64,
               margin: "0 auto 16px",
-              backgroundColor: "rgba(247, 144, 9, 0.1)",
-              color: "#F79009"
+              backgroundColor: "rgba(99, 102, 241, 0.1)",
+              color: "#9CA3AF"
             }}
           >
             <TagIcon size={32} />

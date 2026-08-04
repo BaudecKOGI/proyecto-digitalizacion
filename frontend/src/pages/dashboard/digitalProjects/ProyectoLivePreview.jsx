@@ -13,10 +13,7 @@ import { Code as CodeIcon } from "@phosphor-icons/react/dist/ssr/Code";
 import { GithubLogo } from "@phosphor-icons/react/dist/ssr/GithubLogo";
 import { ArrowSquareOut } from "@phosphor-icons/react/dist/ssr/ArrowSquareOut";
 
-/**
- * COMPONENTE MODULAR DE DEMO / VISTA PREVIA EN VIVO
- * Muestra a la derecha del formulario cómo se verá la tarjeta del proyecto en el catálogo digital.
- */
+//COMPONENTE MODULAR DE DEMO
 export default function ProyectoLivePreview({
   formProyecto,
   archivoPortada,
@@ -42,21 +39,20 @@ export default function ProyectoLivePreview({
           mb: 1.5
         }}
       >
-        VISTA PREVIA EN VIVO
+        VISTA PREVIA
       </Typography>
 
       <Paper
         elevation={0}
         sx={{
-          borderRadius: 3,
-          border: "1px solid",
-          borderColor: "divider",
-          bgcolor: "background.paper",
+          borderRadius: "6px",
+          border: "1px solid rgba(0, 0, 0, 0.05)",
+          bgcolor: "#FFFFFF",
           overflow: "hidden",
-          boxShadow: "0 10px 30px -10px rgba(0,0,0,0.15)"
+          boxShadow: "0 10px 30px -10px rgba(0,0,0,0.08)"
         }}
       >
-        {/* Portada o Placeholder en vivo */}
+        {/* Portada o Placeholder */}
         <Box
           sx={{
             width: "100%",

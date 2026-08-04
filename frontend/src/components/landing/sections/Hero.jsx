@@ -125,7 +125,7 @@ export default function Hero() {
                 href="#duality"
                 className="group inline-flex items-center gap-4 px-8 py-4 bg-white text-[#090D16] font-sans text-sm font-bold uppercase tracking-wider transition-colors hover:bg-c3d hover:text-white"
               >
-                <span>Explorar Proyectos</span>
+                <span>Explorar Cambios</span>
                 <span className="text-lg leading-none transition-transform duration-300 group-hover:translate-x-1">→</span>
               </a>
             </div>

@@ -15,18 +15,18 @@ import { Cube as CubeIcon } from "@phosphor-icons/react/dist/ssr/Cube";
 import { OdsBadge } from "@/pages/dashboard/digitalProjects/odsData";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Stage, Html } from "@react-three/drei";
-import FBXInteractiveModel from "./FBXInteractiveModel";
+import FBXInteractiveModel, { FBXErrorBoundary } from "./FBXInteractiveModel";
 
 /**
  * COMPONENTE MODULAR PARA EL MODAL DE PANTALLA COMPLETA 3D
- * Contiene el visor 3D en su máxima extensión a la izquierda y una barra lateral de detalles a la derecha.
  */
 export default function Diseno3DFullscreenModal({
   open,
   onClose,
   diseno,
   fbxUrl,
-  piezasMoviles
+  piezasMoviles,
+  categorias = []
 }) {
   const [habilitarCamara, setHabilitarCamara] = useState(true);
 
@@ -59,14 +59,11 @@ export default function Diseno3DFullscreenModal({
             bgcolor: "rgba(15, 23, 42, 0.85)",
             px: 3,
             py: 1.2,
-            borderRadius: 2,
+            borderRadius: 1.5,
             border: "1px solid rgba(255, 255, 255, 0.15)",
             backdropFilter: "blur(10px)"
           }}
         >
-          <Typography variant="subtitle1" sx={{ color: "white", fontWeight: 800 }}>
-            {diseno.titulo}
-          </Typography>
           <Typography variant="caption" sx={{ color: "rgba(255,255,255,0.7)" }}>
             Exploración 3D en Pantalla Completa
           </Typography>
@@ -87,13 +84,15 @@ export default function Diseno3DFullscreenModal({
                 </Html>
               }
             >
-              <Stage environment="city" intensity={0.7}>
-                <FBXInteractiveModel
-                  url={fbxUrl}
-                  piezasMoviles={piezasMoviles}
-                  setHabilitarCamara={setHabilitarCamara}
-                />
-              </Stage>
+              <FBXErrorBoundary>
+                <Stage environment="city" intensity={0.7}>
+                  <FBXInteractiveModel
+                    url={fbxUrl}
+                    piezasMoviles={piezasMoviles}
+                    setHabilitarCamara={setHabilitarCamara}
+                  />
+                </Stage>
+              </FBXErrorBoundary>
             </Suspense>
             <OrbitControls makeDefault enabled={habilitarCamara} />
           </Canvas>
@@ -124,7 +123,7 @@ export default function Diseno3DFullscreenModal({
             pointerEvents: "none"
           }}
         >
-          💡 Mantén presionado y arrastra para rotar o inspeccionar el modelo 3D
+          Mantén presionado y arrastra para rotar o inspeccionar el modelo 3D
         </Box>
       </Box>
 
@@ -133,8 +132,8 @@ export default function Diseno3DFullscreenModal({
         sx={{
           width: { xs: "100%", md: 400 },
           height: "100vh",
-          bgcolor: "#0f172a",
-          borderLeft: "1px solid #1e293b",
+          bgcolor: "#FFFFFF",
+          borderLeft: "1px solid rgba(0, 0, 0, 0.08)",
           display: "flex",
           flexDirection: "column",
           flexShrink: 0,
@@ -145,30 +144,35 @@ export default function Diseno3DFullscreenModal({
         <Box
           sx={{
             p: 2.5,
-            borderBottom: "1px solid #1e293b",
+            borderBottom: "1px solid rgba(0, 0, 0, 0.08)",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            bgcolor: "#111827"
+            bgcolor: "#FFFFFF"
           }}
         >
-          <Typography variant="subtitle1" sx={{ color: "white", fontWeight: 800 }}>
+          <Typography variant="subtitle1" sx={{ color: "#111827", fontWeight: 800 }}>
             Detalles del Diseño 3D
           </Typography>
 
           <Button
             variant="contained"
-            color="error"
-            size="small"
+            size="medium"
             startIcon={<Minimize2 size={16} />}
             onClick={onClose}
             sx={{
-              fontWeight: 700,
-              borderRadius: 1.5,
+              fontWeight: 600,
+              borderRadius: "2px",
+              px: 3.5,
+              py: 1,
+              bgcolor: "#002B49",
+              color: "#FFFFFF",
               textTransform: "none",
-              px: 2,
-              py: 0.8,
-              boxShadow: "0 4px 12px rgba(239, 68, 68, 0.4)"
+              boxShadow: "none",
+              "&:hover": {
+                bgcolor: "#001e33",
+                boxShadow: "none"
+              }
             }}
           >
             Salir
@@ -176,25 +180,8 @@ export default function Diseno3DFullscreenModal({
         </Box>
 
         {/* Cuerpo scrollable con información */}
-        <Box sx={{ p: 3, flexGrow: 1, overflowY: "auto", color: "white" }}>
-          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
-            <Chip
-              label={diseno.estado_publicacion || "BORRADOR"}
-              size="small"
-              color={diseno.estado_publicacion === "PUBLICADO" ? "success" : "default"}
-              sx={{ fontWeight: 700, fontSize: "0.75rem" }}
-            />
-            {diseno.categoria && (
-              <Chip
-                label={typeof diseno.categoria === "object" ? diseno.categoria.nombre : `Categoría #${diseno.categoria}`}
-                size="small"
-                variant="outlined"
-                sx={{ fontWeight: 600, fontSize: "0.75rem", color: "#38bdf8", borderColor: "#38bdf8" }}
-              />
-            )}
-          </Stack>
-
-          <Typography variant="h5" fontWeight={800} sx={{ color: "white", mb: 2 }}>
+        <Box sx={{ p: 3, flexGrow: 1, overflowY: "auto", color: "#111827" }}>
+          <Typography variant="h5" fontWeight={800} sx={{ color: "#111827", mb: 2 }}>
             {diseno.titulo}
           </Typography>
 
@@ -204,37 +191,50 @@ export default function Diseno3DFullscreenModal({
             </Box>
           )}
 
-          <Divider sx={{ my: 2.5, borderColor: "#1e293b" }} />
+          {diseno.categoria && (
+            <Chip
+              label={
+                typeof diseno.categoria === "object"
+                  ? diseno.categoria.nombre
+                  : categorias.find((c) => c.id === Number(diseno.categoria))?.nombre
+                  || `Categoría #${diseno.categoria}`
+              }
+              size="small"
+              variant="outlined"
+              sx={{ fontWeight: 600, fontSize: "0.75rem", color: "#111827", borderColor: "rgba(0,0,0,0.23)" }}
+            />
+          )}
+
+          <Divider sx={{ my: 2.5, borderColor: "rgba(0, 0, 0, 0.08)" }} />
 
           <Stack spacing={2.5}>
             <Box>
-              <Typography variant="caption" sx={{ color: "#94a3b8", fontWeight: 700, display: "block" }}>
+              <Typography variant="caption" sx={{ color: "#64748B", fontWeight: 700, display: "block" }}>
                 AUTOR / CREADOR
               </Typography>
-              <Typography variant="body1" sx={{ color: "white", fontWeight: 700, mt: 0.3 }}>
+              <Typography variant="body1" sx={{ color: "#111827", fontWeight: 700, mt: 0.3 }}>
                 {diseno.autor_nombre || "Sin autor"}
               </Typography>
             </Box>
 
             <Box>
-              <Typography variant="caption" sx={{ color: "#94a3b8", fontWeight: 700, display: "block" }}>
+              <Typography variant="caption" sx={{ color: "#64748B", fontWeight: 700, display: "block" }}>
                 CARRERA Y CICLO
               </Typography>
-              <Typography variant="body1" sx={{ color: "white", fontWeight: 600, mt: 0.3 }}>
+              <Typography variant="body1" sx={{ color: "#111827", fontWeight: 600, mt: 0.3 }}>
                 {diseno.carrera || "N/A"} - {diseno.ciclo || "N/A"}
               </Typography>
             </Box>
 
             <Box>
-              <Typography variant="caption" sx={{ color: "#94a3b8", fontWeight: 700, display: "block" }}>
+              <Typography variant="caption" sx={{ color: "#64748B", fontWeight: 700, display: "block" }}>
                 ARCHIVO 3D (.FBX/.GLB)
               </Typography>
               {diseno.archivo_fbx ? (
                 <a
                   href={diseno.archivo_fbx}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ color: "#38bdf8", fontWeight: 600, display: "inline-block", marginTop: "4px" }}
+                  download
+                  style={{ color: "#0066FF", fontWeight: 600, display: "inline-block", marginTop: "4px" }}
                 >
                   Descargar Modelo Registrado
                 </a>
@@ -246,32 +246,32 @@ export default function Diseno3DFullscreenModal({
             </Box>
 
             <Box>
-              <Typography variant="caption" sx={{ color: "#94a3b8", fontWeight: 700, display: "block" }}>
+              <Typography variant="caption" sx={{ color: "#64748B", fontWeight: 700, display: "block" }}>
                 FECHA DE REGISTRO
               </Typography>
-              <Typography variant="body2" sx={{ color: "#cbd5e1", mt: 0.3 }}>
+              <Typography variant="body2" sx={{ color: "#475569", mt: 0.3 }}>
                 {diseno.created_at ? new Date(diseno.created_at).toLocaleDateString("es-PE") : "N/A"}
               </Typography>
             </Box>
           </Stack>
 
-          <Divider sx={{ my: 2.5, borderColor: "#1e293b" }} />
+          <Divider sx={{ my: 2.5, borderColor: "rgba(0, 0, 0, 0.08)" }} />
 
           <Box>
-            <Typography variant="caption" sx={{ color: "#94a3b8", fontWeight: 700, display: "block", mb: 1 }}>
+            <Typography variant="caption" sx={{ color: "#64748B", fontWeight: 700, display: "block", mb: 1 }}>
               DESCRIPCIÓN DEL DISEÑO
             </Typography>
-            <Typography variant="body2" sx={{ lineHeight: 1.7, color: "#cbd5e1", whiteSpace: "pre-line" }}>
+            <Typography variant="body2" sx={{ lineHeight: 1.7, color: "#475569", whiteSpace: "pre-line" }}>
               {diseno.descripcion || "No se ha proporcionado una descripción detallada para este proyecto 3D."}
             </Typography>
           </Box>
 
           {piezasMoviles.length > 0 && (
-            <Box sx={{ mt: 3, p: 2.5, borderRadius: 2, bgcolor: "rgba(6, 182, 212, 0.1)", border: "1px solid rgba(6, 182, 212, 0.3)" }}>
-              <Typography variant="subtitle2" sx={{ color: "#22d3ee", fontWeight: 800, mb: 0.5 }}>
+            <Box sx={{ mt: 3, p: 2.5, borderRadius: 2, bgcolor: "rgba(0, 43, 73, 0.06)", border: "1px solid rgba(0, 43, 73, 0.2)" }}>
+              <Typography variant="subtitle2" sx={{ color: "#002B49", fontWeight: 800, mb: 0.5 }}>
                 ⚙️ {piezasMoviles.length} Pieza(s) Mecánica(s) Interactiva(s)
               </Typography>
-              <Typography variant="caption" sx={{ color: "#94a3b8", lineHeight: 1.5, display: "block" }}>
+              <Typography variant="caption" sx={{ color: "#475569", lineHeight: 1.5, display: "block" }}>
                 Haz clic y arrastra directamente sobre las partes mecánicas del modelo para accionar su movimiento en 3D.
               </Typography>
             </Box>

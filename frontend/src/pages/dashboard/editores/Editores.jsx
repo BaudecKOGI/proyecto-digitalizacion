@@ -9,8 +9,16 @@ import {
   TextField,
   InputAdornment,
   Snackbar,
-  Alert
+  Alert,
+  Stack,
+  Menu,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Select,
+  Link
 } from "@mui/material";
+import { Link as RouterLink } from "react-router-dom";
 
 import { MagnifyingGlass as SearchIcon } from "@phosphor-icons/react/dist/ssr/MagnifyingGlass";
 import { Plus as PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
@@ -31,6 +39,12 @@ export default function EditoresPage() {
   const [editores, setEditores] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [searchTerm, setSearchTerm] = React.useState("");
+
+  // Filtros desplegables (Estado y Más Filtros)
+  const [statusFilter, setStatusFilter] = React.useState("ALL"); // "ALL" | "ACTIVE" | "INACTIVE"
+  const [moreFilter, setMoreFilter] = React.useState("ALL"); // "ALL" | "WITH_PROJECTS" | "WITHOUT_PROJECTS"
+  const [anchorElStatus, setAnchorElStatus] = React.useState(null);
+  const [anchorElMore, setAnchorElMore] = React.useState(null);
 
   // Vista Detalle Integrada (Ver Proyectos Subidos por un Editor)
   const [viewingEditor, setViewingEditor] = React.useState(null);
@@ -181,8 +195,19 @@ export default function EditoresPage() {
     }
   };
 
+  const filteredEditores = React.useMemo(() => {
+    return editores.filter((e) => {
+      if (statusFilter === "ACTIVE" && !e.is_active) return false;
+      if (statusFilter === "INACTIVE" && e.is_active) return false;
+      const total = (e.proyectos_3d_count || 0) + (e.proyectos_software_count || 0);
+      if (moreFilter === "WITH_PROJECTS" && total === 0) return false;
+      if (moreFilter === "WITHOUT_PROJECTS" && total > 0) return false;
+      return true;
+    });
+  }, [editores, statusFilter, moreFilter]);
+
   return (
-    <Box sx={{ pt: 0, pb: 4, px: 2, maxWidth: 1280, margin: "0 auto" }}>
+    <Box sx={{ pb: 4, maxWidth: 1360, margin: "0 auto" }}>
       {/* Si estamos viendo la producción/proyectos de un editor en particular */}
       {viewingEditor ? (
         <EditorDetailView
@@ -195,90 +220,197 @@ export default function EditoresPage() {
         />
       ) : (
         <>
-          {/* Encabezado Principal (Estilo Senior Limpio) */}
+          {/* Encabezado Principal*/}
           <Box
             sx={{
               display: "flex",
-              flexDirection: { xs: "column", md: "row" },
+              flexDirection: { xs: "column", sm: "row" },
               justifyContent: "space-between",
-              alignItems: { xs: "flex-start", md: "center" },
+              alignItems: { xs: "flex-start", sm: "center" },
               gap: 2,
-              mb: 3
+              mb: 2
             }}
           >
             <Box>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: "text.primary", mb: 0.5 }}>
-                Gestión de Editores
+              <Typography variant="caption" sx={{ color: "#64748B", fontWeight: 500, display: "block", mb: 0.5 }}>
+                <Link component={RouterLink} to="/dashboard" color="inherit" underline="hover">Inicio</Link> / Editores
               </Typography>
-              <Typography variant="body1" color="text.secondary">
-                Administra a los editores y supervisa la producción y proyectos subidos por cada encargado.
+              <Typography variant="h4" sx={{ fontWeight: 700, color: "#111827", fontSize: { xs: "1.5rem", md: "1.75rem" } }}>
+                Gestión de editores
               </Typography>
             </Box>
 
             <Button
               variant="contained"
-              size="large"
-              startIcon={<PlusIcon weight="bold" />}
-              onClick={handleOpenCreate}
+              elevation={0}
               sx={{
-                borderRadius: 1.5,
-                px: 3,
-                py: 1.2,
+                bgcolor: "#F1F5F9",
+                color: "#1E293B",
                 fontWeight: 600,
                 textTransform: "none",
+                borderRadius: "6px",
                 boxShadow: "none",
-                backgroundColor: "#6366F1",
-                "&:hover": {
-                  backgroundColor: "#4F46E5",
-                  boxShadow: "none"
-                }
+                px: 2.2,
+                py: 0.8,
+                "&:hover": { bgcolor: "#E2E8F0", boxShadow: "none" }
               }}
             >
-              Nuevo Editor
+              Exportar
             </Button>
           </Box>
 
-          {/* Barra de Búsqueda y Filtros */}
-          <Card
+          <Box sx={{ borderBottom: "1px solid rgba(0, 0, 0, 0.06)", mb: 3 }} />
+
+          {/* Barra de Acciones y Filtros (Posición original en escritorio, 100% responsive en móvil) */}
+          <Box
             sx={{
-              mb: 3,
-              borderRadius: 2,
-              boxShadow: "none",
-              border: "1px solid",
-              borderColor: "divider",
-              bgcolor: "background.paper"
+              display: "flex",
+              flexDirection: { xs: "column", md: "row" },
+              justifyContent: "space-between",
+              alignItems: { xs: "stretch", md: "center" },
+              gap: 2,
+              mb: 3
             }}
           >
-            <CardContent sx={{ p: 2 }}>
-              <Grid container spacing={2} alignItems="center">
-                <Grid size={{ xs: 12, sm: 8, md: 6 }}>
-                  <TextField
-                    fullWidth
-                    placeholder="Buscar editor por nombre o correo..."
-                    value={searchTerm}
-                    onChange={handleSearchChange}
-                    size="small"
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <SearchIcon size={18} color="#6B7280" />
-                        </InputAdornment>
-                      )
-                    }}
-                  />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 4, md: 6 }} sx={{ textAlign: { sm: "right" } }}>
-                  <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                    Total registrados: <strong>{editores.length}</strong>
-                  </Typography>
-                </Grid>
-              </Grid>
-            </CardContent>
-          </Card>
+            {/* Izquierda: Botón Nuevo Editor + Buscador */}
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} alignItems="center">
+              <Button
+                variant="contained"
+                startIcon={<PlusIcon weight="bold" />}
+                onClick={handleOpenCreate}
+                elevation={0}
+                sx={{
+                  bgcolor: "#002B49",
+                  color: "#FFFFFF",
+                  fontWeight: 600,
+                  textTransform: "none",
+                  borderRadius: "2px",
+                  boxShadow: "none",
+                  px: 3.5,
+                  py: 1,
+                  whiteSpace: "nowrap",
+                  "&:hover": { bgcolor: "#001e33", boxShadow: "none" }
+                }}
+              >
+                Nuevo Editor
+              </Button>
+              <TextField
+                placeholder="Buscar editor..."
+                label="Buscar"
+                value={searchTerm}
+                onChange={handleSearchChange}
+                size="small"
+                sx={{
+                  width: { xs: "100%", sm: 280 },
+                  "& .MuiOutlinedInput-root": {
+                    bgcolor: "#FFFFFF",
+                    borderRadius: "2px",
+                    "& fieldset": { borderColor: "rgba(0, 0, 0, 0.23)" },
+                    "&:hover fieldset": { borderColor: "rgba(0, 0, 0, 0.4)" },
+                    "&.Mui-focused fieldset": { borderColor: "#002B49" }
+                  }
+                }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon size={18} color="#64748B" />
+                    </InputAdornment>
+                  )
+                }}
+              />
+            </Stack>
+
+            {/* Derecha: Filtros estilo Select con etiqueta flotante */}
+            <Stack
+              direction="row"
+              spacing={2}
+              alignItems="center"
+              flexWrap="wrap"
+              useFlexGap
+              sx={{ pt: { xs: 1, md: 0 } }}
+            >
+              <FormControl
+                size="small"
+                sx={{
+                  minWidth: 160,
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "2px",
+                    bgcolor: "#FFFFFF",
+                    "& fieldset": { borderColor: "rgba(0, 0, 0, 0.23)" },
+                    "&:hover fieldset": { borderColor: "rgba(0, 0, 0, 0.4)" },
+                    "&.Mui-focused fieldset": { borderColor: "#002B49" }
+                  },
+                  "& .MuiInputLabel-root.Mui-focused": { color: "#002B49" }
+                }}
+              >
+                <InputLabel>Estado</InputLabel>
+                <Select
+                  value={statusFilter}
+                  label="Estado"
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <MenuItem value="ALL"><em>Todos los estados</em></MenuItem>
+                  <MenuItem value="ACTIVE">Activo</MenuItem>
+                  <MenuItem value="INACTIVE">Inactivo</MenuItem>
+                </Select>
+              </FormControl>
+
+              <FormControl
+                size="small"
+                sx={{
+                  minWidth: 200,
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "2px",
+                    bgcolor: "#FFFFFF",
+                    "& fieldset": { borderColor: "rgba(0, 0, 0, 0.23)" },
+                    "&:hover fieldset": { borderColor: "rgba(0, 0, 0, 0.4)" },
+                    "&.Mui-focused fieldset": { borderColor: "#002B49" }
+                  },
+                  "& .MuiInputLabel-root.Mui-focused": { color: "#002B49" }
+                }}
+              >
+                <InputLabel>Filtro Proyectos</InputLabel>
+                <Select
+                  value={moreFilter}
+                  label="Filtro Proyectos"
+                  onChange={(e) => setMoreFilter(e.target.value)}
+                >
+                  <MenuItem value="ALL"><em>Todos los editores</em></MenuItem>
+                  <MenuItem value="WITH_PROJECTS">Con proyectos subidos</MenuItem>
+                  <MenuItem value="WITHOUT_PROJECTS">Sin proyectos subidos</MenuItem>
+                </Select>
+              </FormControl>
+
+              {(searchTerm || statusFilter !== "ALL" || moreFilter !== "ALL") && (
+                <Button
+                  size="small"
+                  variant="outlined"
+                  color="inherit"
+                  onClick={() => {
+                    setSearchTerm("");
+                    setStatusFilter("ALL");
+                    setMoreFilter("ALL");
+                  }}
+                  sx={{
+                    textTransform: "none",
+                    fontWeight: 600,
+                    borderRadius: "2px",
+                    borderColor: "rgba(0, 0, 0, 0.23)",
+                    color: "#475569",
+                    px: 2,
+                    py: 0.8,
+                    "&:hover": { borderColor: "#002B49", bgcolor: "rgba(0, 43, 73, 0.04)", color: "#002B49" }
+                  }}
+                >
+                  Limpiar
+                </Button>
+              )}
+            </Stack>
+          </Box>
 
           {/* Tabla Senior con Subcolumnas y Botón de Ver Proyectos */}
           <EditoresTable
-            editores={editores}
+            editores={filteredEditores}
             loading={loading}
             searchTerm={searchTerm}
             onViewProjects={(editor) => setViewingEditor(editor)}

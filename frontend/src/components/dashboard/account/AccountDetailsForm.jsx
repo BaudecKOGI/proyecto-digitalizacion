@@ -23,13 +23,28 @@ import { EyeSlash as EyeSlashIcon } from "@phosphor-icons/react/dist/ssr/EyeSlas
 import { User as UserIcon } from "@phosphor-icons/react/dist/ssr/User";
 import { Envelope as EmailIcon } from "@phosphor-icons/react/dist/ssr/Envelope";
 import { ShieldCheck as RoleIcon } from "@phosphor-icons/react/dist/ssr/ShieldCheck";
+import { Keyhole as PasswordIcon } from "@phosphor-icons/react/dist/ssr/Keyhole";
 import { LockKey as LockIcon } from "@phosphor-icons/react/dist/ssr/LockKey";
 
 import { useUser } from "@/hooks/use-user";
 import { authClient } from "@/lib/auth/client";
+import ConfirmDialog from "@/components/core/ConfirmDialog";
 
 export function AccountDetailsForm() {
   const { user, checkSession } = useUser();
+
+  const fieldSx = {
+    bgcolor: "#F8FAFC",
+    borderRadius: "2px 2px 0 0",
+    "& .MuiOutlinedInput-root": {
+      bgcolor: "#F8FAFC",
+      borderRadius: "2px 2px 0 0",
+      "& fieldset": { border: "none", borderBottom: "1px solid #002B49" },
+      "&:hover fieldset": { border: "none", borderBottom: "1.5px solid #002B49" },
+      "&.Mui-focused fieldset": { border: "none", borderBottom: "2px solid #002B49" }
+    },
+    "& .MuiInputBase-input": { py: 1.2, px: 1.5, fontSize: "0.95rem", color: "#0F172A", fontWeight: 500 }
+  };
 
   // Estado formulario Información Personal
   const [nombre, setNombre] = React.useState("");
@@ -40,9 +55,13 @@ export function AccountDetailsForm() {
   const [currentPassword, setCurrentPassword] = React.useState("");
   const [newPassword, setNewPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
+  const [loadingPassword, setLoadingPassword] = React.useState(false);
+
+  // Controladores visibilidad contraseñas
   const [showCurrentPassword, setShowCurrentPassword] = React.useState(false);
   const [showNewPassword, setShowNewPassword] = React.useState(false);
-  const [loadingPassword, setLoadingPassword] = React.useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
+  const [showConfirmPasswordDialog, setShowConfirmPasswordDialog] = React.useState(false);
 
   // Notificaciones Snackbar
   const [snackbar, setSnackbar] = React.useState({
@@ -59,33 +78,29 @@ export function AccountDetailsForm() {
     setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
-  // Sincronizar estado cuando carga el usuario
+  // Cargar datos al montar o cambiar el usuario
   React.useEffect(() => {
     if (user) {
-      setNombre(user.name || `${user.firstName || ""} ${user.lastName || ""}`.trim());
+      setNombre(user.name || user.nombre || user.firstName || "");
       setEmail(user.email || "");
     }
   }, [user]);
 
-  // Guardar cambios en perfil
+  // Actualizar Información Personal
   const handleSaveProfile = async (event) => {
     event.preventDefault();
-    if (!nombre.trim() || !email.trim()) {
-      showSnackbar("El nombre y el correo son obligatorios.", "error");
+    if (!nombre || !email) {
+      showSnackbar("El nombre y el correo electrónico son obligatorios.", "error");
       return;
     }
 
     setLoadingProfile(true);
     try {
-      const res = await authClient.updateProfile({
-        nombre: nombre.trim(),
-        email: email.trim(),
-      });
-
+      const res = await authClient.updateProfile({ nombre, email });
       if (res.error) {
         showSnackbar(res.error, "error");
       } else {
-        showSnackbar("Perfil actualizado correctamente.", "success");
+        showSnackbar("Información personal actualizada con éxito.", "success");
         if (checkSession) {
           await checkSession();
         }
@@ -98,23 +113,34 @@ export function AccountDetailsForm() {
   };
 
   // Cambiar contraseña
-  const handleSavePassword = async (event) => {
+  const handleSavePassword = (event) => {
     event.preventDefault();
+    
+    let hasError = false;
+
     if (!currentPassword || !newPassword || !confirmPassword) {
       showSnackbar("Todos los campos de contraseña son obligatorios.", "error");
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
+      hasError = true;
+    } else if (newPassword !== confirmPassword) {
       showSnackbar("La nueva contraseña y su confirmación no coinciden.", "error");
-      return;
-    }
-
-    if (newPassword.length < 6) {
+      hasError = true;
+    } else if (newPassword.length < 6) {
       showSnackbar("La nueva contraseña debe tener al menos 6 caracteres.", "error");
+      hasError = true;
+    }
+
+    if (hasError) {
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
       return;
     }
 
+    setShowConfirmPasswordDialog(true);
+  };
+
+  const executePasswordUpdate = async () => {
+    setShowConfirmPasswordDialog(false);
     setLoadingPassword(true);
     try {
       const res = await authClient.updatePassword({
@@ -126,37 +152,40 @@ export function AccountDetailsForm() {
         showSnackbar(res.error, "error");
       } else {
         showSnackbar("Contraseña actualizada correctamente.", "success");
-        setCurrentPassword("");
-        setNewPassword("");
-        setConfirmPassword("");
       }
     } catch (err) {
       showSnackbar("Error al actualizar la contraseña.", "error");
     } finally {
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
       setLoadingPassword(false);
     }
   };
 
   return (
     <Stack spacing={4}>
-      {/* TARJETA 1: INFORMACIÓN DEL PERFIL */}
+      {/* TARJETA 1: INFORMACIÓN PERSONAL */}
       <form onSubmit={handleSaveProfile}>
-        <Card sx={{ borderRadius: 3, boxShadow: 2 }}>
+        <Card elevation={0} sx={{ borderRadius: "6px", border: "1px solid rgba(0, 0, 0, 0.05)", boxShadow: "0 1px 2px rgba(0, 0, 0, 0.02)", bgcolor: "#FFFFFF" }}>
           <CardHeader
-            title="Información de la Cuenta"
-            subheader="Actualiza tu nombre de administrador y correo de acceso"
+            title="Información Personal"
+            subheader="Actualiza los datos básicos de tu cuenta administrativa"
             titleTypographyProps={{ fontWeight: 700 }}
           />
           <Divider />
           <CardContent sx={{ pt: 3 }}>
             <Grid container spacing={3}>
               <Grid size={{ xs: 12, md: 6 }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: "#1E293B", mb: 0.6, fontSize: "0.85rem" }}>
+                  Nombre de Administrador *
+                </Typography>
                 <TextField
                   fullWidth
-                  label="Nombre de Administrador"
                   value={nombre}
                   onChange={(e) => setNombre(e.target.value)}
                   required
+                  sx={fieldSx}
                   slotProps={{
                     input: {
                       startAdornment: (
@@ -170,13 +199,16 @@ export function AccountDetailsForm() {
               </Grid>
 
               <Grid size={{ xs: 12, md: 6 }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: "#1E293B", mb: 0.6, fontSize: "0.85rem" }}>
+                  Correo Electrónico *
+                </Typography>
                 <TextField
                   fullWidth
-                  label="Correo Electrónico (Usuario)"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  sx={fieldSx}
                   slotProps={{
                     input: {
                       startAdornment: (
@@ -190,11 +222,14 @@ export function AccountDetailsForm() {
               </Grid>
 
               <Grid size={{ xs: 12, md: 6 }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: "#1E293B", mb: 0.6, fontSize: "0.85rem" }}>
+                  Rol Asignado
+                </Typography>
                 <TextField
                   fullWidth
-                  label="Rol Asignado"
                   value={user?.rol === "ADMIN" ? "ADMINISTRADOR GENERAL" : "EDITOR"}
                   disabled
+                  sx={fieldSx}
                   slotProps={{
                     input: {
                       startAdornment: (
@@ -208,11 +243,14 @@ export function AccountDetailsForm() {
               </Grid>
 
               <Grid size={{ xs: 12, md: 6 }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: "#1E293B", mb: 0.6, fontSize: "0.85rem" }}>
+                  Estado de la cuenta
+                </Typography>
                 <TextField
                   fullWidth
-                  label="Estado de la cuenta"
-                  value={user?.is_active !== false ? "Activa (En línea)" : "Inactiva"}
+                  value={user?.is_active !== false ? "Activa" : "Inactiva"}
                   disabled
+                  sx={fieldSx}
                 />
               </Grid>
             </Grid>
@@ -224,7 +262,17 @@ export function AccountDetailsForm() {
               variant="contained"
               disabled={loadingProfile}
               startIcon={loadingProfile ? <CircularProgress size={16} color="inherit" /> : null}
-              sx={{ fontWeight: 600, borderRadius: 2, px: 3 }}
+              sx={{
+                fontWeight: 600,
+                borderRadius: "2px",
+                px: 3.5,
+                py: 0.9,
+                textTransform: "none",
+                bgcolor: "#002B49",
+                color: "#FFFFFF",
+                boxShadow: "none",
+                "&:hover": { bgcolor: "#001e33", boxShadow: "none" }
+              }}
             >
               {loadingProfile ? "Guardando..." : "Guardar Información"}
             </Button>
@@ -234,23 +282,26 @@ export function AccountDetailsForm() {
 
       {/* TARJETA 2: CAMBIAR CONTRASEÑA */}
       <form onSubmit={handleSavePassword}>
-        <Card sx={{ borderRadius: 3, boxShadow: 2 }}>
+        <Card elevation={0} sx={{ borderRadius: "6px", border: "1px solid rgba(0, 0, 0, 0.05)", boxShadow: "0 1px 2px rgba(0, 0, 0, 0.02)", bgcolor: "#FFFFFF" }}>
           <CardHeader
             title="Seguridad y Contraseña"
-            subheader="Modifica tu clave secreta de inicio de sesión en React"
+            subheader="Modifica tu clave secreta de inicio de sesión"
             titleTypographyProps={{ fontWeight: 700 }}
           />
           <Divider />
           <CardContent sx={{ pt: 3 }}>
             <Grid container spacing={3}>
               <Grid size={{ xs: 12 }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: "#1E293B", mb: 0.6, fontSize: "0.85rem" }}>
+                  Contraseña Actual *
+                </Typography>
                 <TextField
                   fullWidth
-                  label="Contraseña Actual"
                   type={showCurrentPassword ? "text" : "password"}
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
                   required
+                  sx={fieldSx}
                   slotProps={{
                     input: {
                       startAdornment: (
@@ -274,14 +325,17 @@ export function AccountDetailsForm() {
               </Grid>
 
               <Grid size={{ xs: 12, md: 6 }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: "#1E293B", mb: 0.6, fontSize: "0.85rem" }}>
+                  Nueva Contraseña *
+                </Typography>
                 <TextField
                   fullWidth
-                  label="Nueva Contraseña"
                   type={showNewPassword ? "text" : "password"}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   required
                   helperText="Mínimo 6 caracteres"
+                  sx={fieldSx}
                   slotProps={{
                     input: {
                       startAdornment: (
@@ -305,18 +359,31 @@ export function AccountDetailsForm() {
               </Grid>
 
               <Grid size={{ xs: 12, md: 6 }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: "#1E293B", mb: 0.6, fontSize: "0.85rem" }}>
+                  Confirmar Nueva Contraseña *
+                </Typography>
                 <TextField
                   fullWidth
-                  label="Confirmar Nueva Contraseña"
-                  type={showNewPassword ? "text" : "password"}
+                  type={showConfirmPassword ? "text" : "password"}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
+                  sx={fieldSx}
                   slotProps={{
                     input: {
                       startAdornment: (
                         <InputAdornment position="start">
                           <LockIcon size={20} />
+                        </InputAdornment>
+                      ),
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            edge="end"
+                          >
+                            {showConfirmPassword ? <EyeSlashIcon size={20} /> : <EyeIcon size={20} />}
+                          </IconButton>
                         </InputAdornment>
                       ),
                     },
@@ -330,10 +397,19 @@ export function AccountDetailsForm() {
             <Button
               type="submit"
               variant="contained"
-              color="secondary"
               disabled={loadingPassword}
               startIcon={loadingPassword ? <CircularProgress size={16} color="inherit" /> : null}
-              sx={{ fontWeight: 600, borderRadius: 2, px: 3 }}
+              sx={{
+                fontWeight: 600,
+                borderRadius: "2px",
+                px: 3.5,
+                py: 0.9,
+                textTransform: "none",
+                bgcolor: "#002B49",
+                color: "#FFFFFF",
+                boxShadow: "none",
+                "&:hover": { bgcolor: "#001e33", boxShadow: "none" }
+              }}
             >
               {loadingPassword ? "Actualizando..." : "Cambiar Contraseña"}
             </Button>
@@ -357,6 +433,16 @@ export function AccountDetailsForm() {
           {snackbar.message}
         </Alert>
       </Snackbar>
+
+      <ConfirmDialog
+        open={showConfirmPasswordDialog}
+        onClose={() => setShowConfirmPasswordDialog(false)}
+        onConfirm={executePasswordUpdate}
+        title="¿Confirmar actualización?"
+        message="¿Estás seguro de que deseas cambiar tu contraseña? La nueva contraseña reemplazará a la actual inmediatamente."
+        confirmText="Sí, actualizar contraseña"
+        cancelText="Cancelar"
+      />
     </Stack>
   );
 }

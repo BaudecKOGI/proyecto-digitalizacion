@@ -20,14 +20,15 @@ import { Cube as CubeIcon } from "@phosphor-icons/react/dist/ssr/Cube";
 import { Maximize2 } from "lucide-react";
 import { OdsBadge } from "@/pages/dashboard/digitalProjects/odsData";
 
-// --- IMPORTACIONES 3D Y COMPONENTES MODULARES ---
+// IMPORTACIONES 3D Y COMPONENTES MODULARES
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Stage, Html } from "@react-three/drei";
-import FBXInteractiveModel from "./FBXInteractiveModel";
+import FBXInteractiveModel, { FBXErrorBoundary } from "./FBXInteractiveModel";
 import Diseno3DFullscreenModal from "./Diseno3DFullscreenModal";
 
 export default function Diseno3DDetailView({
   diseno,
+  categorias = [],
   onBack,
   onEdit,
   onDelete
@@ -99,7 +100,7 @@ export default function Diseno3DDetailView({
         </Stack>
       </Box>
 
-      {/* 2. CONTENIDO PRINCIPAL EN DOS COLUMNAS - LAYOUT FLEXBOX SIN SALTO DE LÍNEA */}
+      {/* CONTENIDO PRINCIPAL EN DOS COLUMNAS */}
       <Box
         sx={{
           display: "flex",
@@ -109,7 +110,7 @@ export default function Diseno3DDetailView({
           alignItems: "stretch"
         }}
       >
-        {/* COLUMNA IZQUIERDA: VISOR 3D EN VIVO (50% de ancho estricto) */}
+        {/* COLUMNA IZQUIERDA: VISOR 3D EN VIVO  */}
         <Box
           sx={{
             flex: { xs: "1 1 100%", md: "0 0 calc(50% - 12px)" },
@@ -122,10 +123,10 @@ export default function Diseno3DDetailView({
             sx={{
               p: 2,
               width: "100%",
-              borderRadius: 3,
-              border: "1px solid",
-              borderColor: "divider",
-              bgcolor: "background.paper",
+              borderRadius: "6px",
+              border: "1px solid rgba(0, 0, 0, 0.05)",
+              boxShadow: "0 1px 2px rgba(0, 0, 0, 0.02)",
+              bgcolor: "#FFFFFF",
               display: "flex",
               flexDirection: "column",
               overflow: "hidden"
@@ -196,13 +197,15 @@ export default function Diseno3DDetailView({
                       </Html>
                     }
                   >
-                    <Stage environment="city" intensity={0.6}>
-                      <FBXInteractiveModel
-                        url={fbxUrl}
-                        piezasMoviles={piezasMoviles}
-                        setHabilitarCamara={setHabilitarCamara}
-                      />
-                    </Stage>
+                    <FBXErrorBoundary>
+                      <Stage environment="city" intensity={0.6}>
+                        <FBXInteractiveModel
+                          url={fbxUrl}
+                          piezasMoviles={piezasMoviles}
+                          setHabilitarCamara={setHabilitarCamara}
+                        />
+                      </Stage>
+                    </FBXErrorBoundary>
                   </Suspense>
                   <OrbitControls makeDefault enabled={habilitarCamara} />
                 </Canvas>
@@ -230,7 +233,7 @@ export default function Diseno3DDetailView({
           </Paper>
         </Box>
 
-        {/* COLUMNA DERECHA: DATOS GENERALES DEL PROYECTO 3D (EL RECUADRO ROJO DE LA IMAGEN) */}
+        {/* COLUMNA DERECHA: DATOS GENERALES DEL PROYECTO 3D */}
         <Box
           sx={{
             flex: { xs: "1 1 100%", md: "0 0 calc(50% - 12px)" },
@@ -243,37 +246,27 @@ export default function Diseno3DDetailView({
             sx={{
               p: 3.5,
               width: "100%",
-              borderRadius: 3,
-              border: "1px solid",
-              borderColor: "divider",
-              bgcolor: "background.paper",
+              borderRadius: "6px",
+              border: "1px solid rgba(0, 0, 0, 0.05)",
+              boxShadow: "0 1px 2px rgba(0, 0, 0, 0.02)",
+              bgcolor: "#FFFFFF",
               display: "flex",
               flexDirection: "column",
               justifyContent: "space-between"
             }}
           >
             <Box>
-              <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1.5 }}>
+              <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1.5 }}>
+                <Typography variant="h4" fontWeight={800} sx={{ color: "text.primary", mb: 0 }}>
+                  {diseno.titulo}
+                </Typography>
                 <Chip
                   label={diseno.estado_publicacion || "BORRADOR"}
                   size="small"
                   color={diseno.estado_publicacion === "PUBLICADO" ? "success" : "default"}
                   sx={{ fontWeight: 700, fontSize: "0.75rem" }}
                 />
-                {diseno.categoria && (
-                  <Chip
-                    label={typeof diseno.categoria === "object" ? diseno.categoria.nombre : `Categoría #${diseno.categoria}`}
-                    size="small"
-                    variant="outlined"
-                    color="primary"
-                    sx={{ fontWeight: 600, fontSize: "0.75rem" }}
-                  />
-                )}
               </Stack>
-
-              <Typography variant="h4" fontWeight={800} gutterBottom sx={{ color: "text.primary" }}>
-                {diseno.titulo}
-              </Typography>
 
               {diseno.ods && (
                 <Box sx={{ mt: 1, mb: 2 }}>
@@ -281,10 +274,25 @@ export default function Diseno3DDetailView({
                 </Box>
               )}
 
+              {diseno.categoria && (
+                <Chip
+                  label={
+                    typeof diseno.categoria === "object"
+                      ? diseno.categoria.nombre
+                      : categorias.find((c) => c.id === Number(diseno.categoria))?.nombre
+                        || `Categoría #${diseno.categoria}`
+                  }
+                  size="small"
+                  variant="outlined"
+                  color="primary"
+                  sx={{ fontWeight: 600, fontSize: "0.75rem" }}
+                />
+              )}
+
               <Divider sx={{ my: 2.5 }} />
 
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
+                <Grid size={{ xs: 12, sm: 6 }}>
                   <Typography variant="caption" color="text.secondary" fontWeight={700} display="block">
                     AUTOR / CREADOR
                   </Typography>
@@ -293,7 +301,7 @@ export default function Diseno3DDetailView({
                   </Typography>
                 </Grid>
 
-                <Grid item xs={12} sm={6}>
+                <Grid size={{ xs: 12, sm: 6 }}>
                   <Typography variant="caption" color="text.secondary" fontWeight={700} display="block">
                     CARRERA Y CICLO
                   </Typography>
@@ -302,7 +310,7 @@ export default function Diseno3DDetailView({
                   </Typography>
                 </Grid>
 
-                <Grid item xs={12} sm={6}>
+                <Grid size={{ xs: 12, sm: 6 }}>
                   <Typography variant="caption" color="text.secondary" fontWeight={700} display="block">
                     ARCHIVO 3D REGISTRADO
                   </Typography>
@@ -310,8 +318,7 @@ export default function Diseno3DDetailView({
                     {diseno.archivo_fbx ? (
                       <a
                         href={diseno.archivo_fbx}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        download
                         style={{ color: "#0066FF", fontWeight: 600 }}
                       >
                         Descargar Modelo (.fbx/.glb)
@@ -322,7 +329,7 @@ export default function Diseno3DDetailView({
                   </Typography>
                 </Grid>
 
-                <Grid item xs={12} sm={6}>
+                <Grid size={{ xs: 12, sm: 6 }}>
                   <Typography variant="caption" color="text.secondary" fontWeight={700} display="block">
                     FECHA DE REGISTRO
                   </Typography>
@@ -356,7 +363,6 @@ export default function Diseno3DDetailView({
                     height: 80,
                     width: 140,
                     objectFit: "cover",
-                    borderRadius: 1.5,
                     border: "1px solid",
                     borderColor: "divider"
                   }}
@@ -374,6 +380,7 @@ export default function Diseno3DDetailView({
         diseno={diseno}
         fbxUrl={fbxUrl}
         piezasMoviles={piezasMoviles}
+        categorias={categorias}
       />
     </Box>
   );

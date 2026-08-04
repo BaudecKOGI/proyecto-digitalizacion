@@ -1,14 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { ODS_LIST } from '@/pages/dashboard/digitalProjects/odsData';
 
-/**
- * Sección institucional que presenta un Ticker/Marquee infinito horizontal
- * con los 17 Objetivos de Desarrollo Sostenible (ODS) de la ONU en formato
- * de CUADROS OFICIALES (tiles cuadrados 160x160px con color sólido, número, título y símbolo).
- * 
- * Implementa un bucle de animación 100% garantizado por requestAnimationFrame (JS)
- * que avanza de manera continua y solo se pausa cuando el cursor se sitúa sobre el contenedor.
- */
+//CUADROS OFICIALES
 export default function OdsTickerSection({ onSelectOds }) {
   // Duplicamos el array para que el desplazamiento infinito sea continuo
   const tickerItems = [...ODS_LIST, ...ODS_LIST];
@@ -40,11 +33,10 @@ export default function OdsTickerSection({ onSelectOds }) {
   }, [isHovered]);
 
   return (
-    <section className="relative w-full overflow-hidden border-y border-line/40 bg-transparent py-14 px-0">
+    <section className="relative w-full overflow-hidden border-t border-line/40 bg-transparent pt-14 px-0">
       {/* Encabezado Institucional Centrado y Orientado al Proyecto */}
       <div className="mx-auto max-w-4xl px-6 text-center mb-10">
         <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 bg-panel border border-line mb-4">
-          <span className="h-2 w-2 bg-c3d" />
           <span className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-text">
             Agenda 2030 · ONU
           </span>
@@ -52,9 +44,6 @@ export default function OdsTickerSection({ onSelectOds }) {
         <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-text mb-3">
           Innovación al Servicio de los <span className="text-c3d">ODS</span>
         </h2>
-        <p className="text-muted font-sans text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
-          Los proyectos de fabricación digital y desarrollo de software del Fab Lab Continental están alineados para resolver desafíos reales y contribuir de manera activa a los Objetivos de Desarrollo Sostenible.
-        </p>
       </div>
 
       {/* Contenedor del Marquee Infinito (con detección de hover clara) */}
@@ -77,39 +66,64 @@ export default function OdsTickerSection({ onSelectOds }) {
             const IconComponent = ods.icon;
 
             return (
-              <button
+              <div
                 key={`${ods.id}-${index}`}
-                onClick={() => onSelectOds?.(ods.id)}
                 style={{ backgroundColor: ods.color }}
-                className="group relative flex h-[160px] w-[160px] shrink-0 flex-col justify-between p-3.5 text-left text-white transition-all duration-300 hover:scale-[1.05] hover:shadow-xl cursor-pointer rounded-[3px] select-none shadow-md"
+                className="group relative flex h-[160px] w-[160px] shrink-0 flex-col justify-between p-3.5 text-left text-white transition-all duration-300 hover:scale-[1.05] hover:shadow-xl cursor-default rounded-[3px] select-none shadow-md overflow-hidden"
               >
                 {/* Cabecera del cuadro ODS: Número en la izquierda + Título oficial en mayúsculas */}
                 <div className="flex items-start gap-2">
-                  <span className="font-display text-3xl font-black leading-none tracking-tight">
+                  <span className="font-display text-3xl font-black leading-none tracking-tight transition-opacity duration-300 group-hover:opacity-10">
                     {ods.id}
                   </span>
-                  <span className="text-[10px] font-extrabold uppercase leading-[1.1] tracking-tight line-clamp-3 text-white/95">
+                  <span className="text-[10px] font-extrabold uppercase leading-[1.1] tracking-tight line-clamp-3 text-white/95 transition-opacity duration-300 group-hover:opacity-10">
                     {ods.fullTitle}
                   </span>
                 </div>
 
                 {/* Centro-inferior: Símbolo / Icono oficial en blanco */}
-                <div className="flex flex-1 items-end justify-center pb-1">
+                <div className="flex flex-1 items-end justify-center pb-1 transition-opacity duration-300 group-hover:opacity-10">
                   {IconComponent && (
                     <IconComponent
                       size={54}
                       weight="fill"
                       color="#FFFFFF"
-                      className="transition-transform duration-300 group-hover:scale-110 drop-shadow-sm"
+                      className="transition-transform duration-300 drop-shadow-sm"
                     />
                   )}
                 </div>
 
                 {/* Borde de realce al hacer hover */}
-                <div className="pointer-events-none absolute inset-0 border border-white/0 transition-colors duration-300 group-hover:border-white/40 rounded-[3px]" />
-              </button>
+                <div className="pointer-events-none absolute inset-0 border border-white/0 transition-colors duration-300 group-hover:border-white/20 rounded-[3px]" />
+
+                {/* Overlay con botones en hover */}
+                <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/85 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                  <button 
+                    onClick={() => onSelectOds?.('software', ods.id)}
+                    className="w-full flex-1 flex items-center justify-center font-sans text-[12px] font-bold uppercase tracking-widest text-white hover:bg-white/10 transition-colors"
+                  >
+                    Digitales
+                  </button>
+                  <div className="h-[1px] w-16 bg-white/20"></div>
+                  <button 
+                    onClick={() => onSelectOds?.('3d', ods.id)}
+                    className="w-full flex-1 flex items-center justify-center font-sans text-[12px] font-bold uppercase tracking-widest text-white hover:bg-white/10 transition-colors"
+                  >
+                    Diseños 3D
+                  </button>
+                </div>
+              </div>
             );
           })}
+        </div>
+      </div>
+
+      {/* Introducción a los proyectos */}
+      <div className="w-full bg-surface py-20 px-6 mt-16">
+        <div className="mx-auto max-w-5xl text-center">
+          <p className="text-[clamp(20px,3vw,30px)] leading-relaxed text-muted max-w-4xl mx-auto" style={{ fontFamily: '"Open Sans", sans-serif' }}>
+            Explora nuestro catálogo en constante crecimiento. Desde piezas anatómicas y mecánicas impresas en 3D de alta fidelidad, hasta soluciones de software y plataformas digitales que impactan en nuestro entorno.
+          </p>
         </div>
       </div>
     </section>

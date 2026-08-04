@@ -1,10 +1,16 @@
 import * as React from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation, Outlet } from "react-router-dom";
 
 // Importación de las rutas del editor y la landing page
 import PublicHome from './pages/PublicHome';
+import PublicViewer3DPage from './pages/public/Viewer3D/PublicViewer3DPage';
+import Gallery3DPage from './pages/public/Gallery/Gallery3DPage';
+import GallerySoftwarePage from './pages/public/Gallery/GallerySoftwarePage';
+import PublicODSPage from './pages/public/ODS/PublicODSPage';
+import PublicFabLabPage from './pages/public/FabLab/PublicFabLabPage';
 import EditorLayout from './layouts/EditorLayout';
 import { Hub as EditorHub } from './pages/editor/Hub';
+import { AssistantWidget } from './components/assistant';
 
 // --- RUTAS DE 3D ---
 import { Overview as EditorOverview } from './pages/editor/3d/Dashboard3D';
@@ -30,7 +36,7 @@ import Disenos3DPage from "@/pages/dashboard/3DDesigns/Disenos3D";
 import ProyectosDigitalesPage from "@/pages/dashboard/digitalProjects/ProyectosDigitales";
 import EditoresPage from "@/pages/dashboard/editores/Editores";
 import CategoriasPage from "@/pages/dashboard/categorias/Categorias";
-import VisualizacionesPage from "@/pages/dashboard/Visualizaciones";
+import VisualizacionesPage from "@/pages/dashboard/visualizaciones/Visualizaciones";
 
 // Importación de los layouts para la autenticación y el dashboard
 import { Layout as AuthLayout } from "@/layouts/AuthLayout";
@@ -38,66 +44,75 @@ import { Layout as DashboardLayout } from "@/layouts/DashboardLayout";
 
 export default function App() {
   return (
-    <Routes>
-      {/* Ruta del landing page */}
-      <Route path="/" element={<PublicHome />} />
+    <>
+      <Routes>
+        {/* Rutas públicas — el asistente flota sobre todas ellas y mantiene su estado */}
+        <Route element={<><Outlet /><AssistantWidget /></>}>
+          <Route path="/" element={<PublicHome />} />
+          <Route path="/proyecto/3d/:id" element={<PublicViewer3DPage />} />
+          <Route path="/galeria/3d" element={<Gallery3DPage />} />
+          <Route path="/galeria/software" element={<GallerySoftwarePage />} />
+          <Route path="/ods" element={<PublicODSPage />} />
+          <Route path="/fablab" element={<PublicFabLabPage />} />
+        </Route>
 
-      {/* Ruta del editor o encargado */}
-      <Route path="/editor">
-        {/* Rutas sin el Sidebar/Navbar */}
-        <Route index element={<Navigate to="/auth/sign-in" replace />} />
-        <Route path="login" element={<Navigate to="/auth/sign-in" replace />} />
-        <Route path="hub" element={<EditorHub />} />
+        {/* Ruta del editor o encargado */}
+        <Route path="/editor">
+          {/* Rutas sin el Sidebar/Navbar */}
+          <Route index element={<Navigate to="/auth/sign-in" replace />} />
+          <Route path="login" element={<Navigate to="/auth/sign-in" replace />} />
+          <Route path="hub" element={<EditorHub />} />
 
-        {/* Rutas CON el Sidebar/Navbar (el EditorLayout) */}
-        <Route element={<EditorLayout />}>
-          
-          {/* SECCIÓN 3D */}
-          <Route path="3d">
-            <Route index element={<Navigate to="dashboard" replace />} />
-            <Route path="dashboard" element={<EditorOverview isDig={false} projectsCount={0} />} />
-            <Route path="proyectos" element={<EditorProjectsList mode="3d" projects={[]} />} />
-            <Route path="nuevo" element={<EditorNewProject />} />
-            <Route path="editar/:id" element={<EditorEditProject />} />
-            <Route path="perfil" element={<EditorProfile />} />
+          {/* Rutas CON el Sidebar/Navbar (el EditorLayout) */}
+          <Route element={<EditorLayout />}>
+
+            {/* SECCIÓN 3D */}
+            <Route path="3d">
+              <Route index element={<Navigate to="dashboard" replace />} />
+              <Route path="dashboard" element={<EditorOverview isDig={false} projectsCount={0} />} />
+              <Route path="proyectos" element={<EditorProjectsList mode="3d" projects={[]} />} />
+              <Route path="nuevo" element={<EditorNewProject />} />
+              <Route path="editar/:id" element={<EditorEditProject />} />
+              <Route path="perfil" element={<EditorProfile />} />
+            </Route>
+
+            {/* SECCIÓN SOFTWARE (PROYECTOS DIGITALES) */}
+            <Route path="software">
+              <Route index element={<Navigate to="dashboard" replace />} />
+              <Route path="dashboard" element={<DashboardSoftware />} />
+              <Route path="proyectos" element={<ProjectsListSoftware />} />
+              <Route path="nuevo" element={<NewProjectSoftware />} />
+              <Route path="editar/:id" element={<EditProjectSoftware />} />
+              <Route path="perfil" element={<EditorProfile />} />
+            </Route>
+
           </Route>
+        </Route>
 
-          {/* SECCIÓN SOFTWARE (PROYECTOS DIGITALES) */}
-          <Route path="software">
-            <Route index element={<Navigate to="dashboard" replace />} />
-            <Route path="dashboard" element={<DashboardSoftware />} />
-            <Route path="proyectos" element={<ProjectsListSoftware />} />
-            <Route path="nuevo" element={<NewProjectSoftware />} />
-            <Route path="editar/:id" element={<EditProjectSoftware />} />
-            <Route path="perfil" element={<EditorProfile />} />
+        {/* Ruta de autenticación del Admin */}
+        <Route path="/auth">
+          <Route element={<AuthLayout />}>
+            <Route path="sign-in" element={<SignInPage />} />
+            <Route path="reset-password" element={<ResetPasswordPage />} />
           </Route>
-
         </Route>
-      </Route>
 
-      {/* Ruta de autenticación del Admin */}
-      <Route path="/auth">
-        <Route element={<AuthLayout />}>
-          <Route path="sign-in" element={<SignInPage />} />
-          <Route path="reset-password" element={<ResetPasswordPage />} />
+        {/* Rutas del panel del Admin o dashboard */}
+        <Route path="/dashboard">
+          <Route element={<DashboardLayout />}>
+            <Route index element={<DashboardOverviewPage />} />
+            <Route path="cuenta" element={<AccountPage />} />
+            <Route path="disenos-3d" element={<Disenos3DPage />} />
+            <Route path="proyectos-digitales" element={<ProyectosDigitalesPage />} />
+            <Route path="editores" element={<EditoresPage />} />
+            <Route path="categorias" element={<CategoriasPage />} />
+            <Route path="visualizaciones" element={<VisualizacionesPage />} />
+          </Route>
         </Route>
-      </Route>
 
-      {/* Rutas del panel del Admin o dashboard */}
-      <Route path="/dashboard">
-        <Route element={<DashboardLayout />}>
-          <Route index element={<DashboardOverviewPage />} />
-          <Route path="cuenta" element={<AccountPage />} />
-          <Route path="disenos-3d" element={<Disenos3DPage />} />
-          <Route path="proyectos-digitales" element={<ProyectosDigitalesPage />} />
-          <Route path="editores" element={<EditoresPage />} />
-          <Route path="categorias" element={<CategoriasPage />} />
-          <Route path="visualizaciones" element={<VisualizacionesPage />} />
-        </Route>
-      </Route>
-
-      {/* CATCH-ALL: Si el usuario escribe una ruta que no existe, regresa al inicio */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        {/* CATCH-ALL: Si el usuario escribe una ruta que no existe, regresa al inicio */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </>
   );
 }

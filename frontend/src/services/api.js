@@ -41,11 +41,10 @@ async function handleResponse(res) {
 }
 
 // PROYECTOS LANDING PAGE / 3D
-export const fetchProyectos3D = async () => {
+export const fetchProyectos3D = async (isPublic = false) => {
   try {
-    const res = await fetch(`${API_BASE_URL}/proyectos-3d/`, {
-      headers: getAuthHeaders(false)
-    });
+    const headers = isPublic ? { "Content-Type": "application/json" } : getAuthHeaders(false);
+    const res = await fetch(`${API_BASE_URL}/proyectos-3d/`, { headers });
     if (!res.ok) throw new Error("Error");
     return await res.json();
   } catch (error) {
@@ -100,11 +99,10 @@ export const deleteProyecto3D = async (id) => {
   return handleResponse(res);
 };
 
-export const fetchProyectosSoftware = async () => {
+export const fetchProyectosSoftware = async (isPublic = false) => {
   try {
-    const res = await fetch(`${API_BASE_URL}/proyectos-software/`, {
-      headers: getAuthHeaders(false)
-    });
+    const headers = isPublic ? { "Content-Type": "application/json" } : getAuthHeaders(false);
+    const res = await fetch(`${API_BASE_URL}/proyectos-software/`, { headers });
     if (!res.ok) throw new Error("Error");
     return await res.json();
   } catch (error) {

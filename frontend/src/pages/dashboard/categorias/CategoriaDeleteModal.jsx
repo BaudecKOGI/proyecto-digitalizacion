@@ -43,8 +43,19 @@ export default function CategoriaDeleteModal({
       <DialogActions sx={{ px: 3, pb: 2 }}>
         <Button
           onClick={onClose}
-          sx={{ textTransform: "none", fontWeight: 700 }}
+          variant="outlined"
           disabled={submitting}
+          sx={{
+            borderRadius: "2px",
+            textTransform: "none",
+            fontWeight: 600,
+            fontSize: "0.95rem",
+            color: "#002B49",
+            borderColor: "#002B49",
+            px: 3.5,
+            py: 0.9,
+            "&:hover": { borderColor: "#002B49", bgcolor: "rgba(0, 43, 73, 0.04)" }
+          }}
         >
           Cancelar
         </Button>

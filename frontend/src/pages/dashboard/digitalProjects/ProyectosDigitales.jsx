@@ -9,15 +9,15 @@ import {
   Paper,
   CircularProgress,
   Stack,
-  Tabs,
-  Tab,
   MenuItem,
   Select,
   FormControl,
   InputLabel,
   Snackbar,
-  Alert
+  Alert,
+  Link
 } from "@mui/material";
+import { Link as RouterLink } from "react-router-dom";
 
 import { MagnifyingGlass as SearchIcon } from "@phosphor-icons/react/dist/ssr/MagnifyingGlass";
 import { Plus as PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
@@ -42,6 +42,8 @@ import ProyectoFormModal from "./ProyectoFormModal";
 import TecnologiaFormModal from "./TecnologiaFormModal";
 import ProjectDetailView from "./ProjectDetailView";
 import VideoPlayerModal from "./VideoPlayerModal";
+import ProyectoDeleteModal from "./ProyectoDeleteModal";
+import TecnologiaDeleteModal from "./TecnologiaDeleteModal";
 
 export default function ProyectosDigitalesPage() {
   const [activeTab, setActiveTab] = useState(0);
@@ -66,7 +68,7 @@ export default function ProyectosDigitalesPage() {
     descripcion: "",
     autor_nombre: "",
     carrera: "",
-    ciclo: "VI",
+    ciclo: "",
     categoria: "",
     ods: "",
     estado_publicacion: "BORRADOR",
@@ -93,6 +95,10 @@ export default function ProyectosDigitalesPage() {
   // Notificaciones
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
   const [formError, setFormError] = useState("");
+
+  // Modales de eliminación
+  const [deleteProyectoModal, setDeleteProyectoModal] = useState({ open: false, id: null, submitting: false });
+  const [deleteTechModal, setDeleteTechModal] = useState({ open: false, ids: [], submitting: false });
 
   const showSnackbar = (message, severity = "success") => {
     setSnackbar({ open: true, message, severity });
@@ -142,8 +148,8 @@ export default function ProyectosDigitalesPage() {
       descripcion: "",
       autor_nombre: "",
       carrera: "",
-      ciclo: "VI",
-      categoria: categorias[0]?.id || "",
+      ciclo: "",
+      categoria: "",
       ods: "",
       estado_publicacion: "BORRADOR",
       url_repositorio: "",
@@ -158,13 +164,14 @@ export default function ProyectosDigitalesPage() {
   };
 
   const handleOpenEditProyecto = (p) => {
+    setViewingProyecto(null);
     setEditingProyecto(p);
     setFormProyecto({
       titulo: p.titulo || "",
       descripcion: p.descripcion || "",
       autor_nombre: p.autor_nombre || "",
       carrera: p.carrera || "",
-      ciclo: p.ciclo || "VI",
+      ciclo: p.ciclo || "",
       categoria: p.categoria || "",
       ods: p.ods || "",
       estado_publicacion: p.estado_publicacion || "BORRADOR",
@@ -235,17 +242,23 @@ export default function ProyectosDigitalesPage() {
     }
   };
 
-  const handleDeleteProyecto = async (id) => {
-    if (!window.confirm("¿Estás seguro de eliminar este proyecto de software?")) return;
+  const handleDeleteProyecto = (id) => {
+    setDeleteProyectoModal({ open: true, id, submitting: false });
+  };
+
+  const handleConfirmDeleteProyecto = async () => {
+    setDeleteProyectoModal((prev) => ({ ...prev, submitting: true }));
     try {
-      await deleteProyectoSoftware(id);
+      await deleteProyectoSoftware(deleteProyectoModal.id);
       showSnackbar("Proyecto eliminado correctamente", "success");
-      if (viewingProyecto && viewingProyecto.id === id) {
+      if (viewingProyecto && viewingProyecto.id === deleteProyectoModal.id) {
         setViewingProyecto(null);
       }
       loadAllData();
     } catch (err) {
       showSnackbar("Error al eliminar el proyecto", "error");
+    } finally {
+      setDeleteProyectoModal({ open: false, id: null, submitting: false });
     }
   };
 
@@ -285,19 +298,34 @@ export default function ProyectosDigitalesPage() {
     }
   };
 
-  const handleDeleteTech = async (id) => {
-    if (!window.confirm("¿Eliminar esta tecnología del catálogo?")) return;
+  const handleDeleteTech = (id) => {
+    setDeleteTechModal({ open: true, ids: [id], submitting: false });
+  };
+
+  const handleDeleteMultipleTech = (ids) => {
+    setDeleteTechModal({ open: true, ids, submitting: false });
+  };
+
+  const handleConfirmDeleteTech = async () => {
+    setDeleteTechModal((prev) => ({ ...prev, submitting: true }));
     try {
-      await deleteTecnologia(id);
-      showSnackbar("Tecnología eliminada", "success");
+      await Promise.all(deleteTechModal.ids.map((id) => deleteTecnologia(id)));
+      showSnackbar(
+        deleteTechModal.ids.length > 1
+          ? `${deleteTechModal.ids.length} tecnologías eliminadas`
+          : "Tecnología eliminada",
+        "success"
+      );
       loadAllData();
     } catch (err) {
       showSnackbar("No se pudo eliminar la tecnología", "error");
+    } finally {
+      setDeleteTechModal({ open: false, ids: [], submitting: false });
     }
   };
 
   return (
-    <Box sx={{ pt: 0, pb: 4, px: { xs: 1, sm: 2 }, maxWidth: 1280, margin: "0 auto" }}>
+    <Box sx={{ pb: 4, maxWidth: 1360, margin: "0 auto" }}>
       {/* SI ESTAMOS EN VISTA TÉCNICA DETALLADA O FORMULARIO INTEGRADO, RENDERIZAMOS LA VISTA */}
       {viewingProyecto ? (
         <ProjectDetailView
@@ -336,6 +364,9 @@ export default function ProyectosDigitalesPage() {
             }}
           >
             <Box>
+              <Typography variant="caption" sx={{ color: "#64748B", fontWeight: 500, display: "block", mb: 0.5 }}>
+                <Link component={RouterLink} to="/dashboard" color="inherit" underline="hover">Inicio</Link> / Proyectos Digitales
+              </Typography>
               <Typography variant="h4" sx={{ fontWeight: 800, color: "text.primary", mb: 0.5 }}>
                 Gestión de Proyectos Digitales
               </Typography>
@@ -351,11 +382,18 @@ export default function ProyectosDigitalesPage() {
                   startIcon={<PlusIcon />}
                   onClick={handleOpenCreateProyecto}
                   sx={{
-                    borderRadius: 1.5,
+                    borderRadius: "2px",
                     textTransform: "none",
                     fontWeight: 600,
-                    px: 3,
-                    boxShadow: "0px 4px 12px rgba(99, 102, 241, 0.25)"
+                    px: 3.5,
+                    py: 1,
+                    bgcolor: "#002B49",
+                    color: "#FFFFFF",
+                    boxShadow: "none",
+                    "&:hover": {
+                      bgcolor: "#001e33",
+                      boxShadow: "none"
+                    }
                   }}
                 >
                   Nuevo Proyecto Software
@@ -366,10 +404,18 @@ export default function ProyectosDigitalesPage() {
                   startIcon={<PlusIcon />}
                   onClick={handleOpenCreateTech}
                   sx={{
-                    borderRadius: 2.5,
+                    borderRadius: "2px",
                     textTransform: "none",
                     fontWeight: 600,
-                    px: 3
+                    px: 3.5,
+                    py: 1,
+                    bgcolor: "#002B49",
+                    color: "#FFFFFF",
+                    boxShadow: "none",
+                    "&:hover": {
+                      bgcolor: "#001e33",
+                      boxShadow: "none"
+                    }
                   }}
                 >
                   Nueva Tecnología
@@ -378,32 +424,57 @@ export default function ProyectosDigitalesPage() {
             </Stack>
           </Box>
 
-          {/* Pestañas (Proyectos vs Tecnologías) */}
-          <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
-            <Tabs
-              value={activeTab}
-              onChange={(e, val) => setActiveTab(val)}
-              sx={{
-                "& .MuiTab-root": { textTransform: "none", fontWeight: 700, fontSize: "0.95rem" }
-              }}
-            >
-              <Tab label={`Proyectos Software (${proyectos.length})`} />
-              <Tab label={`Catálogo de Tecnologías (${tecnologias.length})`} />
-            </Tabs>
+          {/* Pestañas (Proyectos vs Tecnologías) - Estilo Minimalista Negro sin Paréntesis como 3D */}
+          <Box sx={{ borderBottom: "1px solid rgba(0, 0, 0, 0.08)", mb: 3.5 }}>
+            <Stack direction="row" spacing={4}>
+              {[
+                { label: `Proyectos Software: ${proyectos.length}`, value: 0 },
+                { label: `Catálogo de Tecnologías: ${tecnologias.length}`, value: 1 }
+              ].map((tab) => {
+                const isSelected = activeTab === tab.value;
+                return (
+                  <Box
+                    key={tab.value}
+                    onClick={() => setActiveTab(tab.value)}
+                    sx={{
+                      position: "relative",
+                      pb: 1.5,
+                      cursor: "pointer",
+                      color: isSelected ? "#111827" : "#94A3B8",
+                      fontWeight: isSelected ? 700 : 600,
+                      fontSize: "0.98rem",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        color: "#111827"
+                      },
+                      "&::after": isSelected
+                        ? {
+                          content: '""',
+                          position: "absolute",
+                          bottom: -1,
+                          left: 0,
+                          right: 0,
+                          height: "2.5px",
+                          backgroundColor: "#111827",
+                          borderRadius: "2px 2px 0 0"
+                        }
+                        : {}
+                    }}
+                  >
+                    {tab.label}
+                  </Box>
+                );
+              })}
+            </Stack>
           </Box>
 
           {/* PESTAÑA 0: PROYECTOS SOFTWARE */}
           {activeTab === 0 && (
             <Box>
               {/* Barra de Búsqueda y Filtros */}
-              <Paper
-                elevation={0}
+              <Box
                 sx={{
-                  p: 2.5,
                   mb: 3,
-                  borderRadius: 3,
-                  border: "1px solid",
-                  borderColor: "divider",
                   display: "flex",
                   flexWrap: "wrap",
                   gap: 2,
@@ -413,25 +484,62 @@ export default function ProyectosDigitalesPage() {
                 <TextField
                   size="small"
                   placeholder="Buscar por título, autor o carrera..."
+                  label="Buscar"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  sx={{ minWidth: 260, flex: 1 }}
+                  sx={{
+                    minWidth: 260,
+                    flex: 1,
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "2px",
+                      bgcolor: "#FFFFFF",
+                      "& fieldset": { borderColor: "rgba(0, 0, 0, 0.23)" },
+                      "&:hover fieldset": { borderColor: "rgba(0, 0, 0, 0.4)" },
+                      "&.Mui-focused fieldset": { borderColor: "#002B49" }
+                    },
+                    "& .MuiInputLabel-root.Mui-focused": { color: "#002B49" }
+                  }}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <SearchIcon size={20} />
+                        <SearchIcon size={20} color="#64748B" />
                       </InputAdornment>
                     )
                   }}
                 />
 
                 {/* Filtro por ODS */}
-                <FormControl size="small" sx={{ minWidth: 180 }}>
+                <FormControl
+                  size="small"
+                  sx={{
+                    minWidth: 180,
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "2px",
+                      bgcolor: "#FFFFFF",
+                      "& fieldset": { borderColor: "rgba(0, 0, 0, 0.23)" },
+                      "&:hover fieldset": { borderColor: "rgba(0, 0, 0, 0.4)" },
+                      "&.Mui-focused fieldset": { borderColor: "#002B49" }
+                    },
+                    "& .MuiInputLabel-root.Mui-focused": { color: "#002B49" }
+                  }}
+                >
                   <InputLabel>Filtrar ODS</InputLabel>
                   <Select
                     value={filterOds}
                     label="Filtrar ODS"
                     onChange={(e) => setFilterOds(e.target.value)}
+                    MenuProps={{
+                      PaperProps: {
+                        sx: {
+                          borderRadius: "6px",
+                          "& .MuiMenuItem-root.Mui-selected": {
+                            bgcolor: "#002B49",
+                            color: "#FFFFFF",
+                            "&:hover": { bgcolor: "#001e33" }
+                          }
+                        }
+                      }
+                    }}
                   >
                     <MenuItem value=""><em>Todos los ODS</em></MenuItem>
                     {ODS_LIST.map((o) => (
@@ -441,12 +549,37 @@ export default function ProyectosDigitalesPage() {
                 </FormControl>
 
                 {/* Filtro por Categoría */}
-                <FormControl size="small" sx={{ minWidth: 170 }}>
-                  <InputLabel>Categoría</InputLabel>
+                <FormControl
+                  size="small"
+                  sx={{
+                    minWidth: 170,
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "2px",
+                      bgcolor: "#FFFFFF",
+                      "& fieldset": { borderColor: "rgba(0, 0, 0, 0.23)" },
+                      "&:hover fieldset": { borderColor: "rgba(0, 0, 0, 0.4)" },
+                      "&.Mui-focused fieldset": { borderColor: "#002B49" }
+                    },
+                    "& .MuiInputLabel-root.Mui-focused": { color: "#002B49" }
+                  }}
+                >
+                  <InputLabel>Categorías</InputLabel>
                   <Select
                     value={filterCategoria}
-                    label="Categoría"
+                    label="Categorías"
                     onChange={(e) => setFilterCategoria(e.target.value)}
+                    MenuProps={{
+                      PaperProps: {
+                        sx: {
+                          borderRadius: "6px",
+                          "& .MuiMenuItem-root.Mui-selected": {
+                            bgcolor: "#002B49",
+                            color: "#FFFFFF",
+                            "&:hover": { bgcolor: "#001e33" }
+                          }
+                        }
+                      }
+                    }}
                   >
                     <MenuItem value=""><em>Todas las Categorías</em></MenuItem>
                     {categorias.map((c) => (
@@ -456,12 +589,37 @@ export default function ProyectosDigitalesPage() {
                 </FormControl>
 
                 {/* Filtro por Estado */}
-                <FormControl size="small" sx={{ minWidth: 140 }}>
+                <FormControl
+                  size="small"
+                  sx={{
+                    minWidth: 140,
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "2px",
+                      bgcolor: "#FFFFFF",
+                      "& fieldset": { borderColor: "rgba(0, 0, 0, 0.23)" },
+                      "&:hover fieldset": { borderColor: "rgba(0, 0, 0, 0.4)" },
+                      "&.Mui-focused fieldset": { borderColor: "#002B49" }
+                    },
+                    "& .MuiInputLabel-root.Mui-focused": { color: "#002B49" }
+                  }}
+                >
                   <InputLabel>Estado</InputLabel>
                   <Select
                     value={filterEstado}
                     label="Estado"
                     onChange={(e) => setFilterEstado(e.target.value)}
+                    MenuProps={{
+                      PaperProps: {
+                        sx: {
+                          borderRadius: "6px",
+                          "& .MuiMenuItem-root.Mui-selected": {
+                            bgcolor: "#002B49",
+                            color: "#FFFFFF",
+                            "&:hover": { bgcolor: "#001e33" }
+                          }
+                        }
+                      }
+                    }}
                   >
                     <MenuItem value=""><em>Todos</em></MenuItem>
                     <MenuItem value="PUBLICADO">Publicado</MenuItem>
@@ -480,17 +638,18 @@ export default function ProyectosDigitalesPage() {
                     sx={{
                       textTransform: "none",
                       fontWeight: 600,
-                      borderRadius: 1.5,
-                      borderColor: "divider",
-                      color: "text.secondary",
+                      borderRadius: "2px",
+                      borderColor: "rgba(0, 0, 0, 0.23)",
+                      color: "#475569",
                       px: 2,
-                      py: 0.8
+                      py: 0.8,
+                      "&:hover": { borderColor: "#002B49", bgcolor: "rgba(0, 43, 73, 0.04)", color: "#002B49" }
                     }}
                   >
                     Limpiar filtros
                   </Button>
                 )}
-              </Paper>
+              </Box>
 
               {/* Contenido (Tabla Responsiva) */}
               {loading ? (
@@ -516,10 +675,27 @@ export default function ProyectosDigitalesPage() {
               tecnologias={tecnologias}
               onEdit={handleOpenEditTech}
               onDelete={handleDeleteTech}
+              onDeleteMultiple={handleDeleteMultipleTech}
             />
           )}
         </>
       )}
+
+      {/* MODALES DE ELIMINACIÓN */}
+      <ProyectoDeleteModal
+        open={deleteProyectoModal.open}
+        onClose={() => setDeleteProyectoModal({ open: false, id: null, submitting: false })}
+        onConfirm={handleConfirmDeleteProyecto}
+        submitting={deleteProyectoModal.submitting}
+      />
+
+      <TecnologiaDeleteModal
+        open={deleteTechModal.open}
+        onClose={() => setDeleteTechModal({ open: false, ids: [], submitting: false })}
+        onConfirm={handleConfirmDeleteTech}
+        submitting={deleteTechModal.submitting}
+        count={deleteTechModal.ids.length}
+      />
 
       {/* MODAL FORMULARIO TECNOLOGÍA */}
       <TecnologiaFormModal

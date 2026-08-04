@@ -86,6 +86,9 @@ class TecnologiaSerializer(serializers.ModelSerializer):
 class ProyectoSerializer(serializers.ModelSerializer):
     creado_por_nombre = serializers.CharField(source='creado_por.nombre', read_only=True)
     categoria_nombre = serializers.CharField(source='categoria.nombre', read_only=True)
+    vistas_totales = serializers.SerializerMethodField()
+    likes_totales = serializers.SerializerMethodField()
+    compartidos_totales = serializers.SerializerMethodField()
     creado_por = serializers.PrimaryKeyRelatedField(
         queryset=Usuario.objects.all(),
         required=False,
@@ -102,9 +105,19 @@ class ProyectoSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'titulo', 'descripcion', 'autor_nombre', 'carrera', 'ciclo',
             'estado_publicacion', 'ods', 'creado_por', 'creado_por_nombre', 'categoria',
-            'categoria_nombre', 'created_at', 'updated_at'
+            'categoria_nombre', 'vistas_totales', 'likes_totales', 'compartidos_totales',
+            'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
+
+    def get_vistas_totales(self, obj):
+        return getattr(obj, 'metricas', None).vistas_totales if hasattr(obj, 'metricas') and obj.metricas else 0
+
+    def get_likes_totales(self, obj):
+        return getattr(obj, 'metricas', None).likes_totales if hasattr(obj, 'metricas') and obj.metricas else 0
+
+    def get_compartidos_totales(self, obj):
+        return getattr(obj, 'metricas', None).compartidos_totales if hasattr(obj, 'metricas') and obj.metricas else 0
 
     def create(self, validated_data):
         if not validated_data.get('creado_por'):

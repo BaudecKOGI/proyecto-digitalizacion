@@ -1,16 +1,15 @@
-import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import Navbar from '../components/landing/navigation/PublicNavbar';
 import SideNav from '../components/landing/navigation/SideNav';
 import Footer from '../components/landing/navigation/PublicFooter';
-import GalleryScreen from '../components/landing/navigation/GalleryScreen';
 import Hero from '../components/landing/sections/Hero';
 import AssemblySection from '../components/landing/sections/AssemblySection';
+import CallToActionSection from '../components/landing/sections/CallToActionSection';
 import DualitySection from '../components/landing/sections/DualitySection';
 import OdsTickerSection from '../components/landing/sections/OdsTickerSection';
 import Showcase3D from '../components/landing/showcase/Showcase3D';
 import ShowcaseSoftware from '../components/landing/showcase/ShowcaseSoftware';
-import { fetchProyectos3D, fetchProyectosSoftware } from '../services/api';
 
 const SECTIONS = [
   { id: 'hero', label: 'Inicio' },
@@ -21,12 +20,14 @@ const SECTIONS = [
 ];
 
 export default function PublicHome() {
-  const [activeGallery, setActiveGallery] = useState(null);
-  const [selectedOdsFilter, setSelectedOdsFilter] = useState(null);
+  const navigate = useNavigate();
 
   const handleOpenGallery = (type, odsId = null) => {
-    setSelectedOdsFilter(odsId);
-    setActiveGallery(type);
+    if (odsId) {
+      navigate(`/galeria/${type}?ods=${odsId}`);
+    } else {
+      navigate(`/galeria/${type}`);
+    }
   };
 
   return (
@@ -37,34 +38,11 @@ export default function PublicHome() {
       <Hero />
       <AssemblySection />
       <DualitySection />
-      <OdsTickerSection onSelectOds={(odsId) => handleOpenGallery('dig', odsId)} />
+      <OdsTickerSection onSelectOds={(type, odsId) => handleOpenGallery(type, odsId)} />
       <Showcase3D onOpenGallery={() => handleOpenGallery('3d', null)} />
-      <ShowcaseSoftware onOpenGallery={() => handleOpenGallery('dig', null)} />
+      <ShowcaseSoftware onOpenGallery={() => handleOpenGallery('software', null)} />
+      <CallToActionSection />
       <Footer />
-
-      <GalleryScreen
-        id="gallery-3d"
-        active={activeGallery === '3d'}
-        onClose={() => setActiveGallery(null)}
-        type="3d"
-        fetchFn={fetchProyectos3D}
-        tag="Fabricación digital"
-        title="Proyectos 3D"
-        description="Todo lo diseñado y fabricado en el Fab Lab, con su propio visor interactivo."
-        initialOds={selectedOdsFilter}
-      />
-      <GalleryScreen
-        id="gallery-dig"
-        active={activeGallery === 'dig'}
-        activeGallery={activeGallery}
-        onClose={() => setActiveGallery(null)}
-        type="software"
-        fetchFn={fetchProyectosSoftware}
-        tag="Desarrollo de software"
-        title="Proyectos Digitales"
-        description="Apps, webs y sistemas creados por alumnos, con vista previa en video."
-        initialOds={selectedOdsFilter}
-      />
     </div>
   );
 }

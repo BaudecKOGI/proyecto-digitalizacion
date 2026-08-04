@@ -9,6 +9,7 @@ import Link from "@mui/material/Link";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
 import { Controller, useForm } from "react-hook-form";
 import { Link as RouterLink } from "react-router-dom";
 import { z as zod } from "zod";
@@ -33,6 +34,37 @@ export function ResetPasswordForm() {
 		formState: { errors },
 	} = useForm({ defaultValues, resolver: zodResolver(schema) });
 
+	const fieldSx = {
+		bgcolor: "#F8FAFC",
+		borderRadius: "2px 2px 0 0",
+		"& .MuiOutlinedInput-notchedOutline, & fieldset": {
+			border: "none",
+			borderBottom: "1px solid #002B49"
+		},
+		"&:hover .MuiOutlinedInput-notchedOutline, &:hover fieldset": {
+			border: "none",
+			borderBottom: "1.5px solid #002B49"
+		},
+		"&.Mui-focused .MuiOutlinedInput-notchedOutline, &.Mui-focused fieldset": {
+			border: "none",
+			borderBottom: "2px solid #002B49"
+		},
+		"& .MuiInputBase-input": {
+			py: 1.2,
+			px: 1.5,
+			fontSize: "0.95rem",
+			color: "#0F172A",
+			fontWeight: 500
+		}
+	};
+
+	const labelSx = {
+		fontWeight: 600,
+		color: "#1E293B",
+		mb: 0.6,
+		fontSize: "0.85rem"
+	};
+
 	const onSubmit = React.useCallback(
 		async (values) => {
 			setIsPending(true);
@@ -53,30 +85,64 @@ export function ResetPasswordForm() {
 
 	return (
 		<Stack spacing={4}>
-			<Typography variant="h4">Restablecer contraseña</Typography>
+			<Stack spacing={1}>
+				<Typography variant="h4" fontWeight={800} sx={{ color: "#002B49" }}>
+					Restablecer contraseña
+				</Typography>
+				<Typography variant="body2" color="text.secondary">
+					Ingresa el correo electrónico asociado a tu cuenta para enviarte un enlace de recuperación
+				</Typography>
+			</Stack>
 			<form onSubmit={handleSubmit(onSubmit)}>
-				<Stack spacing={2}>
+				<Stack spacing={3}>
 					<Controller
 						control={control}
 						name="email"
 						render={({ field }) => (
-							<FormControl error={Boolean(errors.email)}>
-								<InputLabel>Correo electrónico</InputLabel>
-								<OutlinedInput {...field} label="Correo electrónico" type="email" />
-								{errors.email ? <FormHelperText>{errors.email.message}</FormHelperText> : null}
-							</FormControl>
+							<Box>
+								<Typography variant="body2" sx={labelSx}>
+									Correo electrónico *
+								</Typography>
+								<FormControl fullWidth error={Boolean(errors.email)}>
+									<OutlinedInput
+										{...field}
+										placeholder="ejemplo@fablab.pe"
+										type="email"
+										sx={fieldSx}
+									/>
+									{errors.email ? <FormHelperText>{errors.email.message}</FormHelperText> : null}
+								</FormControl>
+							</Box>
 						)}
 					/>
-					{errors.root ? <Alert color="error">{errors.root.message}</Alert> : null}
-					{isSent ? <Alert color="success">Se ha enviado un enlace de recuperación a tu correo.</Alert> : null}
-					<Button disabled={isPending || isSent} type="submit" variant="contained">
+					{errors.root ? <Alert color="error" sx={{ borderRadius: "2px" }}>{errors.root.message}</Alert> : null}
+					{isSent ? <Alert color="success" sx={{ borderRadius: "2px" }}>Se ha enviado un enlace de recuperación a tu correo.</Alert> : null}
+					<Button
+						disabled={isPending || isSent}
+						type="submit"
+						variant="contained"
+						sx={{
+							borderRadius: "2px",
+							py: 1.3,
+							textTransform: "none",
+							fontWeight: 700,
+							fontSize: "0.95rem",
+							bgcolor: "#002B49",
+							color: "#FFFFFF",
+							boxShadow: "none",
+							"&:hover": {
+								bgcolor: "#001e33",
+								boxShadow: "none"
+							}
+						}}
+					>
 						Enviar enlace de recuperación
 					</Button>
 				</Stack>
 			</form>
             <Typography color="text.secondary" variant="body2" sx={{ textAlign: "center" }}>
                 ¿Recuerdas tu contraseña?{" "}
-                <Link component={RouterLink} to={paths.auth.signIn} underline="hover" variant="subtitle2">
+                <Link component={RouterLink} to={paths.auth.signIn} underline="hover" variant="subtitle2" sx={{ color: "#002B49", fontWeight: 600 }}>
                     Iniciar sesión
                 </Link>
             </Typography>

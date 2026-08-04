@@ -3,9 +3,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight } from "@phosphor-icons/react/dist/ssr/ArrowRight";
 
 /**
- * Sección Duality - Fondo Estático al hacer scroll (Parallax con la imagen '/assets/dos-mundos.jpg')
- * Estilo cinematográfico y elegante, con tarjetas en cristal templado (Glassmorphism),
- * tipografía en blanco de alto contraste y mínimo texto. Cero clichés de IA.
+ * Sección Duality 
  */
 export default function DualitySection({ onOpen3D, onOpenDigital }) {
   const containerVariants = {

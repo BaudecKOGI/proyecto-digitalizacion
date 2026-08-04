@@ -41,12 +41,12 @@ export default function GalleryScreen({
       .then((data) => {
         // 1. Obtenemos el arreglo de proyectos original
         const todosLosProyectos = Array.isArray(data) ? data : data.results || [];
-        
+
         // 2. Filtramos para guardar en el estado SOLAMENTE los publicados
         const proyectosPublicados = todosLosProyectos.filter(
           (p) => p.estado_publicacion === 'PUBLICADO'
         );
-        
+
         setProyectos(proyectosPublicados);
         setStatus('success');
       })
@@ -159,11 +159,10 @@ export default function GalleryScreen({
               <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
                 <button
                   onClick={() => setSelectedOds(null)}
-                  className={`shrink-0 border px-4 py-1.5 font-sans text-[11px] font-bold uppercase tracking-widest transition-colors ${
-                    selectedOds === null
+                  className={`shrink-0 border px-4 py-1.5 font-sans text-[11px] font-bold uppercase tracking-widest transition-colors ${selectedOds === null
                       ? 'border-text bg-text text-bg'
                       : 'border-line bg-panel text-muted hover:border-text hover:text-text'
-                  }`}
+                    }`}
                 >
                   Todos ({proyectos.length})
                 </button>
@@ -174,11 +173,10 @@ export default function GalleryScreen({
                     <button
                       key={ods.id}
                       onClick={() => setSelectedOds(isSelected ? null : ods.id)}
-                      className={`group shrink-0 flex items-center gap-2 border px-3.5 py-1.5 font-sans text-[11px] font-bold transition-all ${
-                        isSelected
+                      className={`group shrink-0 flex items-center gap-2 border px-3.5 py-1.5 font-sans text-[11px] font-bold transition-all ${isSelected
                           ? 'border-text bg-panel text-text shadow-sm'
                           : 'border-line/80 bg-panel/60 text-muted hover:border-text hover:text-text'
-                      }`}
+                        }`}
                     >
                       <span
                         className="h-2 w-2 rounded-full shrink-0"
@@ -232,8 +230,8 @@ export default function GalleryScreen({
                   {status === 'error'
                     ? 'Error de conexión con el repositorio principal.'
                     : selectedOds
-                    ? `No hay proyectos catalogados en el ODS ${selectedOds < 10 ? '0' + selectedOds : selectedOds} para esta categoría.`
-                    : 'Aún no hay proyectos publicados en esta categoría.'}
+                      ? `No hay proyectos catalogados en el ODS ${selectedOds < 10 ? '0' + selectedOds : selectedOds} para esta categoría.`
+                      : 'Aún no hay proyectos publicados en esta categoría.'}
                 </div>
               </>
             )}
@@ -245,8 +243,9 @@ export default function GalleryScreen({
                   key={p.id}
                   className="group cursor-pointer"
                   onClick={() => {
-                    // Al hacer clic, si es la galería 3D, abrimos el visor
                     if (type === '3d') {
+                      window.open(`/proyecto/3d/${p.id}`, '_blank');
+                    } else {
                       setProyectoSeleccionado(p);
                     }
                   }}
@@ -293,7 +292,7 @@ export default function GalleryScreen({
                       <span>{p.carrera}</span>
                     </div>
 
-                    {/* Stack Tecnológico (Senior Monospace Badges) */}
+                    {/* Stack Tecnológico*/}
                     {(() => {
                       const techList = p.tecnologias_detalle || p.tecnologias || [];
                       if (techList.length === 0) return null;
@@ -315,6 +314,9 @@ export default function GalleryScreen({
                         </div>
                       );
                     })()}
+
+                    {/* Barra de Acciones y Métricas Reales en Tarjeta*/}
+                    <ProjectCardActions proyecto={p} />
                   </div>
                 </motion.div>
               ))}
@@ -322,11 +324,72 @@ export default function GalleryScreen({
         </motion.div>
       )}
 
-      {/* Visor 3D que se sobrepone a la galería */}
-      <ProjectViewer3D 
-        project={proyectoSeleccionado} 
-        onClose={() => setProyectoSeleccionado(null)} 
+      {/* Visor 3D o Modal de Detalles que se sobrepone a la galería */}
+      <ProjectViewer3D
+        project={proyectoSeleccionado}
+        onClose={() => setProyectoSeleccionado(null)}
       />
     </AnimatePresence>
+  );
+}
+
+function ProjectCardActions({ proyecto }) {
+  const [likes, setLikes] = useState(proyecto.likes_totales || 0);
+  const [shares, setShares] = useState(proyecto.compartidos_totales || 0);
+  const [liked, setLiked] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const handleLike = (e) => {
+    e.stopPropagation();
+    if (liked) return;
+    setLiked(true);
+    setLikes((prev) => prev + 1);
+    fetch(`http://127.0.0.1:8000/api/metricas/por-proyecto/${proyecto.id}/like/`, {
+      method: 'POST',
+    }).catch(() => { });
+  };
+
+  const handleShare = (e) => {
+    e.stopPropagation();
+    setShares((prev) => prev + 1);
+    const url = window.location.href;
+    navigator.clipboard?.writeText(url).catch(() => { });
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+    fetch(`http://127.0.0.1:8000/api/metricas/por-proyecto/${proyecto.id}/share/`, {
+      method: 'POST',
+    }).catch(() => { });
+  };
+
+  return (
+    <div className="mt-4 pt-3 border-t border-line/60 flex items-center justify-between text-muted">
+      <div className="flex items-center gap-3">
+        <button
+          onClick={handleLike}
+          disabled={liked}
+          className={`flex items-center gap-1 font-mono text-[11px] transition-colors ${liked ? 'text-rose-500 font-bold' : 'hover:text-rose-400'
+            }`}
+          title="Me Gusta"
+        >
+          <span>{liked ? '♥' : '♡'}</span>
+          <span>{likes}</span>
+        </button>
+
+        <button
+          onClick={handleShare}
+          className="flex items-center gap-1 font-mono text-[11px] hover:text-text transition-colors"
+          title="Compartir proyecto"
+        >
+          <span>⎘</span>
+          <span>{copied ? '¡Copiado!' : 'Compartir'}</span>
+          {shares > 0 && <span>({shares})</span>}
+        </button>
+      </div>
+
+      <div className="flex items-center gap-1 font-mono text-[11px]" title="Vistas reales">
+        <span>👁</span>
+        <span>{proyecto.vistas_totales || 0}</span>
+      </div>
+    </div>
   );
 }

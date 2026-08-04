@@ -23,11 +23,11 @@ export default function EditorDeleteModal({
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: 2,
+          borderRadius: "6px",
           p: 1,
-          boxShadow: "none",
-          border: "1px solid",
-          borderColor: "divider"
+          boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+          border: "1px solid rgba(0, 0, 0, 0.05)",
+          bgcolor: "#FFFFFF"
         }
       }}
     >
@@ -40,8 +40,19 @@ export default function EditorDeleteModal({
       <DialogActions sx={{ px: 3, pb: 2 }}>
         <Button
           onClick={onClose}
-          sx={{ textTransform: "none", fontWeight: 600 }}
+          variant="outlined"
           disabled={submitting}
+          sx={{
+            borderRadius: "2px",
+            textTransform: "none",
+            fontWeight: 600,
+            fontSize: "0.95rem",
+            color: "#002B49",
+            borderColor: "#002B49",
+            px: 3.5,
+            py: 0.9,
+            "&:hover": { borderColor: "#002B49", bgcolor: "rgba(0, 43, 73, 0.04)" }
+          }}
         >
           Cancelar
         </Button>

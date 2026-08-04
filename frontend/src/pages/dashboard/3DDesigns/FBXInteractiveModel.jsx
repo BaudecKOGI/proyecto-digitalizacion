@@ -1,11 +1,57 @@
 import * as React from "react";
-import { useRef, useEffect, useMemo } from "react";
-import { useFBX } from "@react-three/drei";
+import { useRef, useEffect, useMemo, Component } from "react";
+import { useFBX, Html } from "@react-three/drei";
+
+/**
+ * BOUNDARY DE ERROR PARA EVITAR PANTALLA BLANCA CUANDO EL FBX FALLA EN CARGAR
+ */
+export class FBXErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.warn("Error cargando o procesando modelo 3D FBX:", error);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <Html center>
+          <div
+            style={{
+              background: "rgba(15, 23, 42, 0.95)",
+              border: "1px solid rgba(239, 68, 68, 0.3)",
+              padding: "20px 24px",
+              borderRadius: "8px",
+              textAlign: "center",
+              color: "#ffffff",
+              minWidth: "260px",
+              boxShadow: "0 10px 25px rgba(0,0,0,0.5)",
+              fontFamily: "system-ui, -apple-system, sans-serif"
+            }}
+          >
+            <div style={{ color: "#ef4444", fontWeight: 700, marginBottom: "8px", fontSize: "14px" }}>
+              ⚠️ Modelo 3D no disponible
+            </div>
+            <div style={{ color: "#94a3b8", fontSize: "12px", lineHeight: "1.4" }}>
+              No se pudo cargar el archivo FBX en la ruta indicada o el formato es incompatible.
+            </div>
+          </div>
+        </Html>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 /**
  * COMPONENTE DE MODELO FBX INTERACTIVO
- * Maneja carga FBX con clonación en memoria (para que cada Canvas sea independiente)
- * y manipulación directa en 3D de piezas mecánicas configuradas.
  */
 export default function FBXInteractiveModel({ url, piezasMoviles, setHabilitarCamara }) {
   const fbxRaw = useFBX(url);

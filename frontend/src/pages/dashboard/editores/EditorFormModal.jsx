@@ -13,7 +13,8 @@ import {
   InputAdornment,
   IconButton,
   FormControlLabel,
-  Switch
+  Switch,
+  Box
 } from "@mui/material";
 
 import { Eye as EyeIcon } from "@phosphor-icons/react/dist/ssr/Eye";
@@ -45,11 +46,11 @@ export default function EditorFormModal({
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: 2,
+          borderRadius: "6px",
           p: 1,
-          boxShadow: "none",
-          border: "1px solid",
-          borderColor: "divider"
+          boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+          border: "1px solid rgba(0, 0, 0, 0.05)",
+          bgcolor: "#FFFFFF"
         }
       }}
     >
@@ -71,53 +72,97 @@ export default function EditorFormModal({
           )}
 
           <Stack spacing={2.5}>
-            <TextField
-              label="Nombre completo"
-              fullWidth
-              required
-              placeholder="Ej. Ing. Carlos Mendoza"
-              value={formData.nombre}
-              onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-              size="medium"
-            />
+            <Box>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: "#1E293B", mb: 0.6, fontSize: "0.85rem" }}>
+                Nombre completo *
+              </Typography>
+              <TextField
+                fullWidth
+                required
+                placeholder="Ej. Ing. Carlos Mendoza"
+                value={formData.nombre}
+                onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                sx={{
+                  bgcolor: "#F8FAFC",
+                  borderRadius: "2px 2px 0 0",
+                  "& .MuiOutlinedInput-root": {
+                    bgcolor: "#F8FAFC",
+                    borderRadius: "2px 2px 0 0",
+                    "& fieldset": { border: "none", borderBottom: "1px solid #002B49" },
+                    "&:hover fieldset": { border: "none", borderBottom: "1.5px solid #002B49" },
+                    "&.Mui-focused fieldset": { border: "none", borderBottom: "2px solid #002B49" }
+                  },
+                  "& .MuiInputBase-input": { py: 1.2, px: 1.5, fontSize: "0.95rem", color: "#0F172A", fontWeight: 500 }
+                }}
+              />
+            </Box>
 
-            <TextField
-              label="Correo electrónico"
-              type="email"
-              fullWidth
-              required
-              placeholder="carlos.mendoza@fablab.pe"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              size="medium"
-            />
+            <Box>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: "#1E293B", mb: 0.6, fontSize: "0.85rem" }}>
+                Correo electrónico *
+              </Typography>
+              <TextField
+                type="email"
+                fullWidth
+                required
+                placeholder="carlos.mendoza@fablab.pe"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                sx={{
+                  bgcolor: "#F8FAFC",
+                  borderRadius: "2px 2px 0 0",
+                  "& .MuiOutlinedInput-root": {
+                    bgcolor: "#F8FAFC",
+                    borderRadius: "2px 2px 0 0",
+                    "& fieldset": { border: "none", borderBottom: "1px solid #002B49" },
+                    "&:hover fieldset": { border: "none", borderBottom: "1.5px solid #002B49" },
+                    "&.Mui-focused fieldset": { border: "none", borderBottom: "2px solid #002B49" }
+                  },
+                  "& .MuiInputBase-input": { py: 1.2, px: 1.5, fontSize: "0.95rem", color: "#0F172A", fontWeight: 500 }
+                }}
+              />
+            </Box>
 
-            <TextField
-              label={
-                editingEditor
+            <Box>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: "#1E293B", mb: 0.6, fontSize: "0.85rem" }}>
+                {editingEditor
                   ? "Nueva contraseña (dejar vacía para conservar actual)"
-                  : "Contraseña temporal"
-              }
-              type={showPassword ? "text" : "password"}
-              fullWidth
-              required={!editingEditor}
-              placeholder="••••••••••••"
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      onClick={() => setShowPassword(!showPassword)}
-                      edge="end"
-                      size="small"
-                    >
-                      {showPassword ? <EyeSlashIcon size={18} /> : <EyeIcon size={18} />}
-                    </IconButton>
-                  </InputAdornment>
-                )
-              }}
-            />
+                  : "Contraseña temporal *"}
+              </Typography>
+              <TextField
+                type={showPassword ? "text" : "password"}
+                fullWidth
+                required={!editingEditor}
+                placeholder="••••••••••••"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                sx={{
+                  bgcolor: "#F8FAFC",
+                  borderRadius: "2px 2px 0 0",
+                  "& .MuiOutlinedInput-root": {
+                    bgcolor: "#F8FAFC",
+                    borderRadius: "2px 2px 0 0",
+                    "& fieldset": { border: "none", borderBottom: "1px solid #002B49" },
+                    "&:hover fieldset": { border: "none", borderBottom: "1.5px solid #002B49" },
+                    "&.Mui-focused fieldset": { border: "none", borderBottom: "2px solid #002B49" }
+                  },
+                  "& .MuiInputBase-input": { py: 1.2, px: 1.5, fontSize: "0.95rem", color: "#0F172A", fontWeight: 500 }
+                }}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowPassword(!showPassword)}
+                        edge="end"
+                        size="small"
+                      >
+                        {showPassword ? <EyeSlashIcon size={18} /> : <EyeIcon size={18} />}
+                      </IconButton>
+                    </InputAdornment>
+                  )
+                }}
+              />
+            </Box>
 
             <FormControlLabel
               control={
@@ -129,7 +174,7 @@ export default function EditorFormModal({
                   color="primary"
                 />
               }
-              label="Cuenta activa (puede iniciar sesión y administrar proyectos)"
+              label="Cuenta activa"
             />
           </Stack>
         </DialogContent>
@@ -137,8 +182,19 @@ export default function EditorFormModal({
         <DialogActions sx={{ px: 3, pb: 3, pt: 1 }}>
           <Button
             onClick={onClose}
-            sx={{ textTransform: "none", fontWeight: 600 }}
+            variant="outlined"
             disabled={submitting}
+            sx={{
+              borderRadius: "2px",
+              textTransform: "none",
+              fontWeight: 600,
+              fontSize: "0.95rem",
+              color: "#002B49",
+              borderColor: "#002B49",
+              px: 3.5,
+              py: 0.9,
+              "&:hover": { borderColor: "#002B49", bgcolor: "rgba(0, 43, 73, 0.04)" }
+            }}
           >
             Cancelar
           </Button>
@@ -147,13 +203,15 @@ export default function EditorFormModal({
             variant="contained"
             disabled={submitting}
             sx={{
-              borderRadius: 1.5,
-              px: 3,
+              borderRadius: "2px",
+              px: 3.5,
+              py: 0.9,
               textTransform: "none",
               fontWeight: 600,
               boxShadow: "none",
-              backgroundColor: "#6366F1",
-              "&:hover": { backgroundColor: "#4F46E5", boxShadow: "none" }
+              backgroundColor: "#002B49",
+              color: "#FFFFFF",
+              "&:hover": { backgroundColor: "#001e33", boxShadow: "none" }
             }}
           >
             {submitting ? (

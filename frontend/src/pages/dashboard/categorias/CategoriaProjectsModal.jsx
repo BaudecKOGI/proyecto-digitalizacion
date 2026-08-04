@@ -34,7 +34,6 @@ import { fetchProyectos3DAdmin, fetchProyectosSoftwareAdmin } from "@/services/a
 
 /**
  * MODAL DE PROYECTOS RELACIONADOS A UNA CATEGORÍA
- * Muestra el detalle de la categoría y las listas de Diseños 3D y Proyectos de Software que le pertenecen.
  */
 export default function CategoriaProjectsModal({ open, categoria, onClose }) {
   const [tabIndex, setTabIndex] = React.useState(0);

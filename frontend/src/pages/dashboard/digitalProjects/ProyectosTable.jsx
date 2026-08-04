@@ -18,7 +18,8 @@ import {
   Card,
   Grid,
   useMediaQuery,
-  useTheme
+  useTheme,
+  TablePagination
 } from "@mui/material";
 import { Plus as PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
 import { PencilSimple as EditIcon } from "@phosphor-icons/react/dist/ssr/PencilSimple";
@@ -41,6 +42,22 @@ export default function ProyectosTable({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
+  const [page, setPage] = React.useState(0);
+  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const paginatedProyectos = React.useMemo(() => {
+    return proyectos.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  }, [proyectos, page, rowsPerPage]);
+
   if (proyectos.length === 0) {
     return (
       <Card
@@ -59,7 +76,7 @@ export default function ProyectosTable({
             height: 64,
             margin: "0 auto 16px",
             backgroundColor: "rgba(99, 102, 241, 0.1)",
-            color: "#6366F1"
+            color: "#9CA3AF"
           }}
         >
           <CodeIcon size={32} />
@@ -70,14 +87,6 @@ export default function ProyectosTable({
         <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
           Comienza publicando el primer proyecto de software o aplicación con repositorios y ODS.
         </Typography>
-        <Button
-          variant="outlined"
-          startIcon={<PlusIcon />}
-          onClick={onOpenCreate}
-          sx={{ borderRadius: 2, textTransform: "none", fontWeight: 600 }}
-        >
-          Crear primer proyecto software
-        </Button>
       </Card>
     );
   }
@@ -85,16 +94,18 @@ export default function ProyectosTable({
   // VISTA MÓVIL RESPONSIVA (Tarjetas)
   if (isMobile) {
     return (
-      <Grid container spacing={2}>
-        {proyectos.map((p) => (
-          <Grid item xs={12} key={p.id}>
+      <Box>
+        <Grid container spacing={2}>
+          {paginatedProyectos.map((p) => (
+            <Grid size={{ xs: 12 }} key={p.id}>
             <Card
               elevation={0}
               sx={{
                 p: 2.5,
-                borderRadius: 3,
-                border: "1px solid",
-                borderColor: "divider"
+                borderRadius: "6px",
+                border: "1px solid rgba(0, 0, 0, 0.05)",
+                boxShadow: "0 1px 2px rgba(0, 0, 0, 0.02)",
+                bgcolor: "#FFFFFF"
               }}
             >
               <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }}>
@@ -107,8 +118,8 @@ export default function ProyectosTable({
                 >
                   <Avatar
                     src={p.imagen_portada}
-                    variant="rounded"
-                    sx={{ width: 56, height: 56, bgcolor: "primary.main" }}
+                    variant="square"
+                    sx={{ width: 56, height: 56, bgcolor: "primary.main", borderRadius: 0 }}
                   >
                     <CodeIcon size={28} />
                   </Avatar>
@@ -157,8 +168,8 @@ export default function ProyectosTable({
                     p.estado_publicacion === "PUBLICADO"
                       ? "success"
                       : p.estado_publicacion === "BORRADOR"
-                      ? "warning"
-                      : "default"
+                        ? "warning"
+                        : "default"
                   }
                   sx={{ fontWeight: 700, fontSize: "0.72rem" }}
                 />
@@ -196,36 +207,77 @@ export default function ProyectosTable({
             </Card>
           </Grid>
         ))}
-      </Grid>
+        </Grid>
+        <Box sx={{ mt: 3 }}>
+          <TablePagination
+            component="div"
+            count={proyectos.length}
+            page={page}
+            onPageChange={handleChangePage}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            rowsPerPageOptions={[5, 10, 25]}
+            labelRowsPerPage="Filas por página:"
+            labelDisplayedRows={({ from, to, count }) => `${from}–${to} de ${count !== -1 ? count : `más de ${to}`}`}
+            sx={{
+              borderTop: "1px solid rgba(0, 0, 0, 0.06)",
+              color: "#475569",
+              ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows": {
+                fontSize: "0.85rem",
+                fontWeight: 500,
+                margin: 0
+              },
+              ".MuiTablePagination-select": {
+                borderRadius: "6px",
+                border: "1px solid rgba(0, 0, 0, 0.08)",
+                bgcolor: "#F8FAFC",
+                py: 0.4,
+                px: 1.2
+              }
+            }}
+          />
+        </Box>
+      </Box>
     );
   }
 
   // VISTA ESCRITORIO (Tabla elegante)
   return (
-    <TableContainer
-      component={Paper}
+    <Paper
       elevation={0}
       sx={{
-        borderRadius: 3,
-        border: "1px solid",
-        borderColor: "divider",
-        overflowX: "auto"
+        borderRadius: "6px",
+        border: "1px solid rgba(0, 0, 0, 0.05)",
+        boxShadow: "0 1px 2px rgba(0, 0, 0, 0.02)",
+        bgcolor: "#FFFFFF",
+        overflow: "hidden"
       }}
     >
-      <Table sx={{ minWidth: 800 }}>
-        <TableHead sx={{ backgroundColor: "action.hover" }}>
-          <TableRow>
-            <TableCell sx={{ fontWeight: 700, py: 2 }}>PROYECTO & AUTOR</TableCell>
-            <TableCell sx={{ fontWeight: 700, py: 2 }}>CARRERA / CATEGORÍA</TableCell>
-            <TableCell sx={{ fontWeight: 700, py: 2 }}>ODS DE IMPACTO</TableCell>
-            <TableCell sx={{ fontWeight: 700, py: 2 }}>TECNOLOGÍAS</TableCell>
-            <TableCell sx={{ fontWeight: 700, py: 2 }}>ESTADO</TableCell>
-            <TableCell sx={{ fontWeight: 700, py: 2, textAlign: "right" }}>ACCIONES</TableCell>
+      <TableContainer sx={{ overflowX: "auto" }}>
+        <Table sx={{ minWidth: 800 }}>
+        <TableHead
+          sx={{
+            bgcolor: "#FFFFFF",
+            "& .MuiTableCell-root, & .MuiTableCell-head": {
+              bgcolor: "#FFFFFF !important",
+              color: "#000000 !important",
+              fontWeight: "700 !important",
+              textTransform: "none !important"
+            }
+          }}
+        >
+          <TableRow sx={{ bgcolor: "#FFFFFF" }}>
+            <TableCell sx={{ fontWeight: 700, color: "#000000", textTransform: "none", py: 1.8, fontSize: "0.85rem", borderBottom: "1px solid rgba(0, 0, 0, 0.08)", bgcolor: "#FFFFFF" }}>Proyecto & Autor</TableCell>
+            <TableCell sx={{ fontWeight: 700, color: "#000000", textTransform: "none", py: 1.8, fontSize: "0.85rem", borderBottom: "1px solid rgba(0, 0, 0, 0.08)", bgcolor: "#FFFFFF" }}>Carrera / Categoría</TableCell>
+            <TableCell sx={{ fontWeight: 700, color: "#000000", textTransform: "none", py: 1.8, fontSize: "0.85rem", borderBottom: "1px solid rgba(0, 0, 0, 0.08)", bgcolor: "#FFFFFF" }}>ODS de Impacto</TableCell>
+            <TableCell sx={{ fontWeight: 700, color: "#000000", textTransform: "none", py: 1.8, fontSize: "0.85rem", borderBottom: "1px solid rgba(0, 0, 0, 0.08)", bgcolor: "#FFFFFF" }}>Tecnologías</TableCell>
+            <TableCell sx={{ fontWeight: 700, color: "#000000", textTransform: "none", py: 1.8, fontSize: "0.85rem", borderBottom: "1px solid rgba(0, 0, 0, 0.08)", bgcolor: "#FFFFFF" }}>Estado</TableCell>
+            <TableCell sx={{ fontWeight: 700, color: "#000000", textTransform: "none", py: 1.8, fontSize: "0.85rem", borderBottom: "1px solid rgba(0, 0, 0, 0.08)", bgcolor: "#FFFFFF", textAlign: "right" }}>Acciones</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {proyectos.map((p) => (
-            <TableRow key={p.id} hover>
+          {paginatedProyectos.map((p) => (
+            <TableRow key={p.id} hover sx={{ "& td": { borderBottom: "1px solid rgba(0, 0, 0, 0.04)" }, "&:last-child td, &:last-child th": { border: 0 } }}>
               <TableCell>
                 <Stack direction="row" spacing={2} alignItems="center">
                   <Tooltip title={p.archivo_video ? "Haz clic para ver el video en vivo" : "Sin video MP4"}>
@@ -234,17 +286,13 @@ export default function ProyectosTable({
                       sx={{
                         position: "relative",
                         cursor: p.archivo_video ? "pointer" : "default",
-                        display: "inline-flex",
-                        "&:hover .play-overlay": {
-                          opacity: 1,
-                          transform: "scale(1.1)"
-                        }
+                        display: "inline-flex"
                       }}
                     >
                       <Avatar
                         src={p.imagen_portada}
-                        variant="rounded"
-                        sx={{ width: 48, height: 48, bgcolor: "primary.main" }}
+                        variant="square"
+                        sx={{ width: 48, height: 48, bgcolor: "primary.main", borderRadius: 0 }}
                       >
                         <CodeIcon size={24} />
                       </Avatar>
@@ -351,8 +399,8 @@ export default function ProyectosTable({
                     p.estado_publicacion === "PUBLICADO"
                       ? "success"
                       : p.estado_publicacion === "BORRADOR"
-                      ? "warning"
-                      : "default"
+                        ? "warning"
+                        : "default"
                   }
                   sx={{ fontWeight: 700, fontSize: "0.75rem" }}
                 />
@@ -397,6 +445,34 @@ export default function ProyectosTable({
           ))}
         </TableBody>
       </Table>
-    </TableContainer>
+      </TableContainer>
+      <TablePagination
+        component="div"
+        count={proyectos.length}
+        page={page}
+        onPageChange={handleChangePage}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+        rowsPerPageOptions={[5, 10, 25]}
+        labelRowsPerPage="Filas por página:"
+        labelDisplayedRows={({ from, to, count }) => `${from}–${to} de ${count !== -1 ? count : `más de ${to}`}`}
+        sx={{
+          borderTop: "1px solid rgba(0, 0, 0, 0.06)",
+          color: "#475569",
+          ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows": {
+            fontSize: "0.85rem",
+            fontWeight: 500,
+            margin: 0
+          },
+          ".MuiTablePagination-select": {
+            borderRadius: "6px",
+            border: "1px solid rgba(0, 0, 0, 0.08)",
+            bgcolor: "#F8FAFC",
+            py: 0.4,
+            px: 1.2
+          }
+        }}
+      />
+    </Paper>
   );
 }

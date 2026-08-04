@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Chip } from "@mui/material";
+import { Typography } from "@mui/material";
 
 import { UsersThree } from "@phosphor-icons/react/dist/ssr/UsersThree";
 import { BowlFood } from "@phosphor-icons/react/dist/ssr/BowlFood";
@@ -44,16 +44,18 @@ export function OdsBadge({ odsNum }) {
   const found = ODS_LIST.find((item) => item.id === Number(odsNum));
   if (!found) return null;
   return (
-    <Chip
-      label={found.label}
-      size="small"
+    <Typography
+      component="span"
+      variant="caption"
       sx={{
-        backgroundColor: found.color,
-        color: "#fff",
-        fontWeight: 700,
-        fontSize: "0.72rem",
-        boxShadow: "0px 2px 6px rgba(0,0,0,0.15)"
+        color: "text.secondary",
+        fontWeight: 600,
+        fontSize: "0.78rem",
+        display: "inline-flex",
+        alignItems: "center",
       }}
-    />
+    >
+      {found.label}
+    </Typography>
   );
 }

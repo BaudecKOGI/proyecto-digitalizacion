@@ -23,7 +23,7 @@ export default function VideoPlayerModal({ open, onClose, proyecto }) {
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: 3,
+          borderRadius: 1,
           backgroundColor: "#0F172A",
           color: "#fff",
           overflow: "hidden",

@@ -66,7 +66,7 @@ export default function EditorDetailView({ editor, onBack, showSnackbar }) {
   // Modales de confirmación para borrado
   const [deleteDialog, setDeleteDialog] = React.useState({
     open: false,
-    type: null, // "3D" | "SOFTWARE"
+    type: null,
     id: null,
     titulo: ""
   });
@@ -166,16 +166,16 @@ export default function EditorDetailView({ editor, onBack, showSnackbar }) {
         </Button>
       </Box>
 
-      {/* Cabecera del Editor (Estilo Senior Limpio) */}
+      {/* Cabecera del Editor*/}
       <Paper
+        elevation={0}
         sx={{
           p: 3,
           mb: 4,
-          borderRadius: 2,
-          border: "1px solid",
-          borderColor: "divider",
-          boxShadow: "none",
-          bgcolor: "background.paper"
+          borderRadius: "6px",
+          border: "1px solid rgba(0, 0, 0, 0.05)",
+          boxShadow: "0 1px 2px rgba(0, 0, 0, 0.02)",
+          bgcolor: "#FFFFFF"
         }}
       >
         <Grid container spacing={3} alignItems="center">
@@ -199,7 +199,7 @@ export default function EditorDetailView({ editor, onBack, showSnackbar }) {
                   </Typography>
                   <Chip
                     icon={<RoleIcon size={14} />}
-                    label="Editor FAB LAB"
+                    label="Editor"
                     size="small"
                     sx={{
                       fontWeight: 600,
@@ -222,9 +222,6 @@ export default function EditorDetailView({ editor, onBack, showSnackbar }) {
                     <EmailIcon size={16} />
                     <Typography variant="body2">{editor.email}</Typography>
                   </Stack>
-                  <Typography variant="caption" sx={{ bgcolor: "action.hover", px: 1, py: 0.3, borderRadius: 1 }}>
-                    ID #{editor.id}
-                  </Typography>
                 </Stack>
               </Box>
             </Stack>
@@ -336,13 +333,13 @@ export default function EditorDetailView({ editor, onBack, showSnackbar }) {
         </Box>
       ) : filteredList.length === 0 ? (
         <Paper
+          elevation={0}
           sx={{
             p: 6,
             textAlign: "center",
-            borderRadius: 2,
-            border: "1px dashed",
-            borderColor: "divider",
-            boxShadow: "none"
+            borderRadius: "6px",
+            border: "1px dashed rgba(0, 0, 0, 0.12)",
+            bgcolor: "#FFFFFF"
           }}
         >
           <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.5, color: "text.primary" }}>
@@ -485,7 +482,7 @@ export default function EditorDetailView({ editor, onBack, showSnackbar }) {
         onClose={() => setDeleteDialog({ ...deleteDialog, open: false })}
         maxWidth="xs"
         fullWidth
-        PaperProps={{ sx: { borderRadius: 2, p: 1, boxShadow: "none", border: "1px solid", borderColor: "divider" } }}
+        PaperProps={{ sx: { borderRadius: "6px", p: 1, boxShadow: "0 4px 20px rgba(0,0,0,0.08)", border: "1px solid rgba(0, 0, 0, 0.05)", bgcolor: "#FFFFFF" } }}
       >
         <DialogTitle sx={{ fontWeight: 700 }}>¿Eliminar proyecto?</DialogTitle>
         <DialogContent>

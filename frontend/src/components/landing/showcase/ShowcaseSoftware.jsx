@@ -5,7 +5,7 @@ export default function ShowcaseSoftware({ onOpenGallery }) {
   useReveal();
 
   return (
-    <section id="showcase-dig" className="py-32 px-[8vw] bg-bg">
+    <section id="showcase-dig" className="py-32 px-[8vw] bg-[#F4F4F4]">
       <div className="mx-auto max-w-[1400px]">
         <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-[1.5fr_1fr] lg:gap-24">
 

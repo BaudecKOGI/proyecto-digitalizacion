@@ -16,14 +16,16 @@ import {
   Stack,
   CircularProgress,
   Button,
-  Card
+  Card,
+  Menu,
+  MenuItem,
+  TablePagination
 } from "@mui/material";
 
 import { Eye as EyeIcon } from "@phosphor-icons/react/dist/ssr/Eye";
 import { PencilSimple as EditIcon } from "@phosphor-icons/react/dist/ssr/PencilSimple";
 import { Trash as TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
-import { Envelope as EmailIcon } from "@phosphor-icons/react/dist/ssr/Envelope";
-import { ShieldCheck as RoleIcon } from "@phosphor-icons/react/dist/ssr/ShieldCheck";
+import { DotsThreeVertical } from "@phosphor-icons/react/dist/ssr/DotsThreeVertical";
 import { UserPlus as UserPlusIcon } from "@phosphor-icons/react/dist/ssr/UserPlus";
 import { Plus as PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
 
@@ -41,6 +43,21 @@ function stringToColor(string) {
   return color;
 }
 
+function formatCreationDate(dateString) {
+  if (!dateString) return "—";
+  try {
+    const d = new Date(dateString);
+    if (isNaN(d.getTime())) return "—";
+    return d.toLocaleDateString("es-ES", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric"
+    });
+  } catch {
+    return "—";
+  }
+}
+
 export default function EditoresTable({
   editores = [],
   loading = false,
@@ -50,6 +67,44 @@ export default function EditoresTable({
   onDelete,
   onOpenCreate
 }) {
+  const [sortOrder, setSortOrder] = React.useState("asc");
+  const [page, setPage] = React.useState(0);
+  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [menuAnchorEl, setMenuAnchorEl] = React.useState(null);
+  const [selectedEditorForMenu, setSelectedEditorForMenu] = React.useState(null);
+
+  const handleOpenActionMenu = (event, editor) => {
+    setMenuAnchorEl(event.currentTarget);
+    setSelectedEditorForMenu(editor);
+  };
+
+  const handleCloseActionMenu = () => {
+    setMenuAnchorEl(null);
+    setSelectedEditorForMenu(null);
+  };
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const sortedEditores = React.useMemo(() => {
+    return [...editores].sort((a, b) => {
+      const nameA = (a.nombre || "").toLowerCase();
+      const nameB = (b.nombre || "").toLowerCase();
+      if (sortOrder === "asc") return nameA.localeCompare(nameB);
+      return nameB.localeCompare(nameA);
+    });
+  }, [editores, sortOrder]);
+
+  const paginatedEditores = React.useMemo(() => {
+    return sortedEditores.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  }, [sortedEditores, page, rowsPerPage]);
+
   if (loading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
@@ -88,258 +143,296 @@ export default function EditoresTable({
         <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 420, margin: "0 auto 24px" }}>
           {searchTerm
             ? "Intenta buscar con otro nombre o correo electrónico."
-            : "Crea el primer perfil de Editor para permitir que los encargados gestionen proyectos y veas su producción."}
+            : "Crea el primer perfil de Editor para permitir que gestionen proyectos y veas su producción."}
         </Typography>
-        {!searchTerm && (
-          <Button
-            variant="outlined"
-            startIcon={<PlusIcon />}
-            onClick={onOpenCreate}
-            sx={{ borderRadius: 1.5, textTransform: "none", fontWeight: 600 }}
-          >
-            Crear primer editor
-          </Button>
-        )}
       </Card>
     );
   }
 
   return (
-    <TableContainer
-      component={Paper}
-      sx={{
-        borderRadius: 2,
-        boxShadow: "none",
-        border: "1px solid",
-        borderColor: "divider",
-        overflowX: "auto"
-      }}
-    >
-      <Table sx={{ minWidth: 780 }}>
-        <TableHead sx={{ backgroundColor: "action.hover" }}>
-          <TableRow>
-            <TableCell rowSpan={2} sx={{ fontWeight: 700, py: 2, fontSize: "0.75rem", borderBottom: "2px solid var(--mui-palette-divider)" }}>
-              EDITOR
-            </TableCell>
-            <TableCell rowSpan={2} sx={{ fontWeight: 700, py: 2, fontSize: "0.75rem", borderBottom: "2px solid var(--mui-palette-divider)" }}>
-              CORREO ELECTRÓNICO
-            </TableCell>
-            <TableCell rowSpan={2} sx={{ fontWeight: 700, py: 2, fontSize: "0.75rem", borderBottom: "2px solid var(--mui-palette-divider)" }}>
-              ROL
-            </TableCell>
-            <TableCell
-              colSpan={2}
-              align="center"
-              sx={{
-                fontWeight: 800,
-                py: 1.2,
-                fontSize: "0.75rem",
-                color: "#059669",
-                borderBottom: "1px solid var(--mui-palette-divider)",
-                borderLeft: "1px solid var(--mui-palette-divider)",
-                borderRight: "1px solid var(--mui-palette-divider)",
-                backgroundColor: "rgba(16, 185, 129, 0.04)"
-              }}
-            >
-              TOTAL PROYECTOS
-            </TableCell>
-            <TableCell rowSpan={2} sx={{ fontWeight: 700, py: 2, fontSize: "0.75rem", borderBottom: "2px solid var(--mui-palette-divider)" }}>
-              ESTADO
-            </TableCell>
-            <TableCell rowSpan={2} align="right" sx={{ fontWeight: 700, py: 2, fontSize: "0.75rem", borderBottom: "2px solid var(--mui-palette-divider)" }}>
-              ACCIONES
-            </TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell
-              align="center"
-              sx={{
-                fontWeight: 700,
-                py: 1,
-                fontSize: "0.75rem",
-                color: "#059669",
-                borderBottom: "2px solid var(--mui-palette-divider)",
-                borderLeft: "1px solid var(--mui-palette-divider)",
-                backgroundColor: "rgba(16, 185, 129, 0.04)"
-              }}
-            >
-              DISEÑOS 3D
-            </TableCell>
-            <TableCell
-              align="center"
-              sx={{
-                fontWeight: 700,
-                py: 1,
-                fontSize: "0.75rem",
-                color: "#059669",
-                borderBottom: "2px solid var(--mui-palette-divider)",
-                borderRight: "1px solid var(--mui-palette-divider)",
-                backgroundColor: "rgba(16, 185, 129, 0.04)"
-              }}
-            >
-              DIGITALES
-            </TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {editores.map((editor) => {
-            const avatarColor = stringToColor(editor.nombre);
-            const initials = (editor.nombre || "?")
-              .split(" ")
-              .map((n) => n[0])
-              .slice(0, 2)
-              .join("")
-              .toUpperCase();
-
-            const p3dCount = editor.proyectos_3d_count || 0;
-            const pSoftwareCount = editor.proyectos_software_count || 0;
-
-            return (
-              <TableRow
-                key={editor.id}
-                hover
-                sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+    <>
+      <TableContainer
+        component={Paper}
+        elevation={0}
+        sx={{
+          borderRadius: "6px",
+          border: "1px solid rgba(0, 0, 0, 0.05)",
+          boxShadow: "0 1px 2px rgba(0, 0, 0, 0.02)",
+          bgcolor: "#FFFFFF",
+          overflowX: "auto"
+        }}
+      >
+        <Table sx={{ minWidth: 780 }}>
+          <TableHead
+            sx={{
+              bgcolor: "#FFFFFF",
+              "& .MuiTableCell-root, & .MuiTableCell-head": {
+                bgcolor: "#FFFFFF !important",
+                color: "#000000 !important",
+                fontWeight: "700 !important",
+                textTransform: "none !important"
+              }
+            }}
+          >
+            <TableRow sx={{ bgcolor: "#FFFFFF" }}>
+              <TableCell
+                sx={{
+                  fontWeight: 700,
+                  color: "#000000",
+                  textTransform: "none",
+                  py: 1.8,
+                  fontSize: "0.85rem",
+                  borderBottom: "1px solid rgba(0, 0, 0, 0.08)",
+                  bgcolor: "#FFFFFF"
+                }}
               >
-                {/* Editor / Avatar */}
-                <TableCell sx={{ py: 1.8 }}>
-                  <Stack direction="row" spacing={2} alignItems="center">
-                    <Avatar
-                      sx={{
-                        bgcolor: avatarColor,
-                        fontWeight: 700,
-                        width: 40,
-                        height: 40,
-                        fontSize: "0.9rem"
-                      }}
-                    >
-                      {initials}
-                    </Avatar>
-                    <Box>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 600, color: "text.primary" }}>
-                        {editor.nombre}
-                      </Typography>
-                    </Box>
-                  </Stack>
-                </TableCell>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                  <Box component="span">Nombre</Box>
+                  <Box
+                    component="span"
+                    onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+                    title="Ordenar por iniciales (A-Z / Z-A)"
+                    sx={{
+                      cursor: "pointer",
+                      userSelect: "none",
+                      color: "#64748B",
+                      fontSize: "0.95rem",
+                      fontWeight: 600,
+                      px: 0.5,
+                      py: 0.2,
+                      borderRadius: "4px",
+                      transition: "all 0.15s ease",
+                      "&:hover": { color: "#2563EB", bgcolor: "rgba(37, 99, 235, 0.08)" }
+                    }}
+                  >
+                    {sortOrder === "asc" ? "↑" : "↓"}
+                  </Box>
+                </Box>
+              </TableCell>
+              <TableCell sx={{ fontWeight: 700, color: "#000000", textTransform: "none", py: 1.8, fontSize: "0.85rem", borderBottom: "1px solid rgba(0, 0, 0, 0.08)", bgcolor: "#FFFFFF" }}>
+                Email
+              </TableCell>
+              <TableCell sx={{ fontWeight: 700, color: "#000000", textTransform: "none", py: 1.8, fontSize: "0.85rem", borderBottom: "1px solid rgba(0, 0, 0, 0.08)", bgcolor: "#FFFFFF" }}>
+                Rol
+              </TableCell>
+              <TableCell sx={{ fontWeight: 700, color: "#000000", textTransform: "none", py: 1.8, fontSize: "0.85rem", borderBottom: "1px solid rgba(0, 0, 0, 0.08)", bgcolor: "#FFFFFF" }}>
+                Creación
+              </TableCell>
+              <TableCell align="center" sx={{ fontWeight: 700, color: "#000000", textTransform: "none", py: 1.8, fontSize: "0.85rem", borderBottom: "1px solid rgba(0, 0, 0, 0.08)", bgcolor: "#FFFFFF" }}>
+                Diseños 3D
+              </TableCell>
+              <TableCell align="center" sx={{ fontWeight: 700, color: "#000000", textTransform: "none", py: 1.8, fontSize: "0.85rem", borderBottom: "1px solid rgba(0, 0, 0, 0.08)", bgcolor: "#FFFFFF" }}>
+                Software
+              </TableCell>
+              <TableCell sx={{ fontWeight: 700, color: "#000000", textTransform: "none", py: 1.8, fontSize: "0.85rem", borderBottom: "1px solid rgba(0, 0, 0, 0.08)", bgcolor: "#FFFFFF" }}>
+                Estado
+              </TableCell>
+              <TableCell align="center" sx={{ fontWeight: 700, color: "#000000", textTransform: "none", py: 1.8, fontSize: "0.85rem", borderBottom: "1px solid rgba(0, 0, 0, 0.08)", bgcolor: "#FFFFFF" }}>
+                Acciones
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {paginatedEditores.map((editor) => {
+              const avatarColor = stringToColor(editor.nombre);
+              const initials = (editor.nombre || "?")
+                .split(" ")
+                .map((n) => n[0])
+                .slice(0, 2)
+                .join("")
+                .toUpperCase();
 
-                {/* Correo */}
-                <TableCell>
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    <EmailIcon size={16} color="#6B7280" />
-                    <Typography variant="body2" sx={{ color: "text.primary" }}>
+              const p3dCount = editor.proyectos_3d_count || 0;
+              const pSoftwareCount = editor.proyectos_software_count || 0;
+
+              return (
+                <TableRow
+                  key={editor.id}
+                  hover
+                  sx={{ "& td": { borderBottom: "1px solid rgba(0, 0, 0, 0.04)" }, "&:last-child td, &:last-child th": { border: 0 } }}
+                >
+                  {/* Editor / Avatar + Nombre */}
+                  <TableCell sx={{ py: 1.8 }}>
+                    <Stack direction="row" spacing={2} alignItems="center">
+                      <Avatar
+                        sx={{
+                          bgcolor: avatarColor,
+                          fontWeight: 700,
+                          width: 38,
+                          height: 38,
+                          fontSize: "0.88rem"
+                        }}
+                      >
+                        {initials}
+                      </Avatar>
+                      <Box>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: "#111827", fontSize: "0.88rem" }}>
+                          {editor.nombre}
+                        </Typography>
+                      </Box>
+                    </Stack>
+                  </TableCell>
+
+                  {/* Correo Electrónico */}
+                  <TableCell>
+                    <Typography variant="body2" sx={{ color: "#475569", fontWeight: 500 }}>
                       {editor.email}
                     </Typography>
-                  </Stack>
-                </TableCell>
+                  </TableCell>
 
-                {/* Rol */}
-                <TableCell>
-                  <Chip
-                    icon={<RoleIcon size={14} />}
-                    label="Editor FAB LAB"
-                    size="small"
-                    sx={{
-                      fontWeight: 600,
-                      fontSize: "0.75rem",
-                      bgcolor: "rgba(99, 102, 241, 0.08)",
-                      color: "#6366F1",
-                      border: "none"
-                    }}
-                  />
-                </TableCell>
+                  {/* Rol */}
+                  <TableCell>
+                    <Typography variant="body2" sx={{ color: "#475569", fontWeight: 500 }}>
+                      Editor
+                    </Typography>
+                  </TableCell>
 
-                {/* TOTAL PROYECTOS -> DISEÑOS 3D */}
-                <TableCell
-                  align="center"
-                  sx={{
-                    fontWeight: 700,
-                    fontSize: "0.95rem",
-                    color: p3dCount > 0 ? "text.primary" : "text.disabled",
-                    borderLeft: "1px solid var(--mui-palette-divider)",
-                    backgroundColor: "rgba(16, 185, 129, 0.015)"
-                  }}
-                >
-                  {p3dCount}
-                </TableCell>
+                  {/* Fecha de creación */}
+                  <TableCell>
+                    <Typography variant="body2" sx={{ color: "#475569", fontWeight: 500 }}>
+                      {formatCreationDate(editor.date_joined || editor.created_at)}
+                    </Typography>
+                  </TableCell>
 
-                {/* TOTAL PROYECTOS -> DIGITALES */}
-                <TableCell
-                  align="center"
-                  sx={{
-                    fontWeight: 700,
-                    fontSize: "0.95rem",
-                    color: pSoftwareCount > 0 ? "text.primary" : "text.disabled",
-                    borderRight: "1px solid var(--mui-palette-divider)",
-                    backgroundColor: "rgba(16, 185, 129, 0.015)"
-                  }}
-                >
-                  {pSoftwareCount}
-                </TableCell>
+                  {/* Diseños 3D */}
+                  <TableCell align="center">
+                    <Typography variant="body2" sx={{ color: p3dCount > 0 ? "#111827" : "#94A3B8", fontWeight: 600 }}>
+                      {p3dCount}
+                    </Typography>
+                  </TableCell>
 
-                {/* Estado */}
-                <TableCell>
-                  <Chip
-                    label={editor.is_active ? "Activo" : "Inactivo"}
-                    size="small"
-                    color={editor.is_active ? "success" : "default"}
-                    variant="outlined"
-                    sx={{ fontWeight: 600, fontSize: "0.75rem" }}
-                  />
-                </TableCell>
+                  {/* Software */}
+                  <TableCell align="center">
+                    <Typography variant="body2" sx={{ color: pSoftwareCount > 0 ? "#111827" : "#94A3B8", fontWeight: 600 }}>
+                      {pSoftwareCount}
+                    </Typography>
+                  </TableCell>
 
-                {/* Acciones */}
-                <TableCell align="right">
-                  <Stack direction="row" spacing={0.5} justifyContent="flex-end">
-                    <Tooltip title="Ver proyectos subidos">
+                  {/* Estado */}
+                  <TableCell>
+                    <Box
+                      component="span"
+                      sx={{
+                        display: "inline-block",
+                        bgcolor: editor.is_active ? "#DCFCE7" : "#FEE2E2",
+                        color: editor.is_active ? "#166534" : "#991B1B",
+                        fontWeight: 700,
+                        fontSize: "0.75rem",
+                        borderRadius: "6px",
+                        px: 1.3,
+                        py: 0.35
+                      }}
+                    >
+                      {editor.is_active ? "Activo" : "Inactivo"}
+                    </Box>
+                  </TableCell>
+
+                  {/* Acciones centradas */}
+                  <TableCell align="center">
+                    <Tooltip title="Opciones">
                       <IconButton
                         size="small"
-                        onClick={() => onViewProjects && onViewProjects(editor)}
+                        onClick={(e) => handleOpenActionMenu(e, editor)}
                         sx={{
-                          color: "#10B981",
-                          border: "1px solid rgba(16, 185, 129, 0.3)",
-                          borderRadius: 1,
+                          color: "#64748B",
                           p: 0.8,
-                          "&:hover": {
-                            backgroundColor: "rgba(16, 185, 129, 0.1)"
-                          }
+                          borderRadius: "6px",
+                          "&:hover": { color: "#111827", bgcolor: "rgba(0,0,0,0.04)" }
                         }}
                       >
-                        <EyeIcon size={18} weight="bold" />
+                        <DotsThreeVertical size={20} weight="bold" />
                       </IconButton>
                     </Tooltip>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
-                    <Tooltip title="Editar cuenta">
-                      <IconButton
-                        size="small"
-                        onClick={() => onEdit && onEdit(editor)}
-                        sx={{
-                          color: "text.secondary",
-                          "&:hover": { color: "text.primary", bgcolor: "action.hover" }
-                        }}
-                      >
-                        <EditIcon size={18} />
-                      </IconButton>
-                    </Tooltip>
+      {/* Paginación con estilo de la segunda imagen */}
+      <TablePagination
+        component="div"
+        count={sortedEditores.length}
+        page={page}
+        onPageChange={handleChangePage}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+        rowsPerPageOptions={[5, 10, 25]}
+        labelRowsPerPage="Filas por página:"
+        labelDisplayedRows={({ from, to, count }) => `${from}–${to} de ${count !== -1 ? count : `más de ${to}`}`}
+        sx={{
+          borderTop: "1px solid rgba(0, 0, 0, 0.06)",
+          color: "#475569",
+          ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows": {
+            fontSize: "0.85rem",
+            fontWeight: 500,
+            margin: 0
+          },
+          ".MuiTablePagination-select": {
+            borderRadius: "6px",
+            border: "1px solid rgba(0, 0, 0, 0.08)",
+            bgcolor: "#F8FAFC",
+            py: 0.4,
+            px: 1.2
+          }
+        }}
+      />
 
-                    <Tooltip title="Eliminar cuenta">
-                      <IconButton
-                        size="small"
-                        onClick={() => onDelete && onDelete(editor)}
-                        sx={{
-                          color: "text.secondary",
-                          "&:hover": { color: "error.main", bgcolor: "error.lighter" }
-                        }}
-                      >
-                        <TrashIcon size={18} />
-                      </IconButton>
-                    </Tooltip>
-                  </Stack>
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
-    </TableContainer>
+      {/* Menú desplegable para los 3 puntos de acción */}
+      <Menu
+        anchorEl={menuAnchorEl}
+        open={Boolean(menuAnchorEl)}
+        onClose={handleCloseActionMenu}
+        PaperProps={{
+          elevation: 0,
+          sx: {
+            borderRadius: "6px",
+            border: "1px solid rgba(0, 0, 0, 0.06)",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+            minWidth: 190,
+            py: 0.5
+          }
+        }}
+        transformOrigin={{ horizontal: "right", vertical: "top" }}
+        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+      >
+        <MenuItem
+          onClick={() => {
+            if (selectedEditorForMenu && onViewProjects) onViewProjects(selectedEditorForMenu);
+            handleCloseActionMenu();
+          }}
+          sx={{ fontSize: "0.85rem", fontWeight: 500, color: "#1E293B", py: 1 }}
+        >
+          <Box component="span" sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <EyeIcon size={18} color="#10B981" /> Ver
+          </Box>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            if (selectedEditorForMenu && onEdit) onEdit(selectedEditorForMenu);
+            handleCloseActionMenu();
+          }}
+          sx={{ fontSize: "0.85rem", fontWeight: 500, color: "#1E293B", py: 1 }}
+        >
+          <Box component="span" sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <EditIcon size={18} color="#64748B" /> Editar
+          </Box>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            if (selectedEditorForMenu && onDelete) onDelete(selectedEditorForMenu);
+            handleCloseActionMenu();
+          }}
+          sx={{ fontSize: "0.85rem", fontWeight: 500, color: "#EF4444", py: 1 }}
+        >
+          <Box component="span" sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <TrashIcon size={18} color="#EF4444" /> Eliminar
+          </Box>
+        </MenuItem>
+      </Menu>
+    </>
   );
 }
+
