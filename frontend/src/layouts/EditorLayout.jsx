@@ -9,6 +9,9 @@ export default function EditorLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const [isCollapsed, setIsCollapsed] = useState(true);
+  
+  // ¡AQUÍ ESTÁ EL ESTADO QUE FALTABA PARA EL CELULAR!
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Detectamos si estamos en la sección de software o 3d
   const isSoftware = location.pathname.includes('software');
@@ -34,12 +37,18 @@ export default function EditorLayout() {
         <EditorSidebar 
           isCollapsed={isCollapsed} 
           setIsCollapsed={setIsCollapsed} 
+          // Pasamos los estados del celular al sidebar
+          isMobileMenuOpen={isMobileMenuOpen}
+          setIsMobileMenuOpen={setIsMobileMenuOpen}
         />
 
         <div className="flex flex-1 flex-col min-w-0 transition-all duration-300">
           
-          {/* Pasamos la función inteligente al Navbar */}
-          <EditorNavbar onGoToProfile={handleGoToProfile} />
+          <EditorNavbar 
+            onGoToProfile={handleGoToProfile} 
+            // Pasamos la función para abrir el menú al navbar
+            onToggleMobileMenu={() => setIsMobileMenuOpen(prev => !prev)}
+          />
 
           <main 
             onClick={() => setIsCollapsed(true)}

@@ -9,35 +9,31 @@ export const Hub = () => {
   return (
     <AuthGuard requiredRole={["EDITOR"]}>
       <style>{`
-        /* =========================================
-           1. ESTRUCTURA Y ELIMINACIÓN DEL FONDO DEL TÍTULO
-           ========================================= */
         .hub-wrapper {
           background-color: transparent !important;
           color: #1a1a1a !important;
-          height: 100vh;
-          overflow: hidden;
+          min-height: 100vh;
+          height: 100%;
+          overflow-x: hidden;
+          overflow-y: auto;
         }
 
-        /* QUITAMOS CUALQUIER BLOQUE O BARRA BLANCA DEL TÍTULO */
         .hub-title {
           position: absolute !important;
-          top: 3rem;
+          top: 2.5rem;
           left: 50%;
           transform: translateX(-50%);
           z-index: 30;
-          background: transparent !important; /* 100% transparente */
-          background-color: transparent !important;
-          box-shadow: none !important;
-          border: none !important;
-          pointer-events: none; /* Para que no bloquee los clics */
+          background: transparent !important;
           text-align: center;
           width: 100%;
+          padding: 0 1rem;
+          pointer-events: none;
         }
 
         .hub-title h1 {
           color: #111827 !important;
-          font-size: 2.25rem !important;
+          font-size: clamp(1.6rem, 4vw, 2.25rem) !important;
           font-weight: 800 !important;
           margin: 0 !important;
         }
@@ -51,53 +47,47 @@ export const Hub = () => {
           margin-bottom: 0.5rem !important;
         }
 
-        /* =========================================
-           2. PANELES QUE OCUPAN EL 100% DE ALTO
-           ========================================= */
         .split { 
           position: relative;
-          height: 100vh;
-          width: 100vw;
+          min-height: 100vh;
+          width: 100%;
           display: flex;
+          flex-direction: row;
         }
 
         .split .half { 
-          height: 100%;
+          flex: 1;
+          min-height: 100vh;
           display: flex;
           align-items: center;
           justify-content: center;
           transition: all 0.7s cubic-bezier(0.25, 1, 0.5, 1) !important;
           cursor: pointer;
+          padding: 6rem 1.5rem 3rem;
         }
 
-        /* Fondos continuos hasta arriba del todo */
         .hub-wrapper .side-3d { background-color: #f4fbfb !important; }
         .hub-wrapper .side-dig { background-color: #f8fafb !important; }
 
-        /* =========================================
-           3. LAS TARJETAS (LOS CUADRITOS BLANCOS)
-           ========================================= */
         .hub-wrapper .half-content {
           background-color: #ffffff !important; 
           border-radius: 20px !important;
-          padding: 3.5rem 2.5rem !important;
+          padding: 2.5rem 2rem !important;
           width: 100%;
           max-width: 380px;
           margin: 0 auto;
           box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05) !important;
           border: 1px solid #f3f4f6 !important;
-          
           display: flex;
           flex-direction: column;
           align-items: center;
           text-align: center;
-          
           transition: transform 0.7s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.7s ease !important;
         }
 
         .hub-wrapper .half-title {
           color: #111827 !important;
-          font-size: 1.5rem !important;
+          font-size: 1.4rem !important;
           font-weight: 800 !important;
           margin-bottom: 0.75rem !important;
         }
@@ -121,26 +111,31 @@ export const Hub = () => {
         .hub-wrapper .icon-wrap {
           width: 72px !important;
           height: 72px !important;
-          border-radius: 50% !important;
           display: flex !important;
           align-items: center !important;
           justify-content: center !important;
-          font-size: 1.5rem !important;
-          font-weight: bold !important;
           margin-bottom: 1.5rem !important;
+          background: none !important;
+          border-radius: 0 !important;
+          border: none !important; 
+          outline: none !important;
         }
-        .side-3d .icon-wrap { background-color: #e0f2f1 !important; color: #0ebab1 !important; }
-        .side-dig .icon-wrap { background-color: #f3e8ff !important; color: #5b21b6 !important; }
 
-        /* =========================================
-           4. ANIMACIONES Y EL VS CENTRADO
-           ========================================= */
+        .hub-wrapper .icon-wrap img.hub-icon {
+          width: 72px;
+          height: 72px;
+          object-fit: contain;
+          display: block;
+          border: none !important;
+          outline: none !important;
+        }
+
         .half.hot { flex: 1.25 !important; }
         
         .half.dim {
           flex: 0.75 !important;
-          opacity: 0.5 !important;
-          filter: blur(6px) grayscale(20%) !important;
+          opacity: 0.55 !important;
+          filter: blur(4px) grayscale(15%) !important;
         }
 
         .half.hot .half-content { 
@@ -151,7 +146,6 @@ export const Hub = () => {
           transform: scale(0.95) !important; 
         }
 
-        /* Divisor VS fijado al centro exacto */
         .hub-wrapper .divider-label {
           position: absolute;
           left: 50%;
@@ -178,6 +172,81 @@ export const Hub = () => {
           opacity: 0 !important;
           transform: translate(-50%, -50%) scale(0.5) !important;
         }
+
+        @media (max-width: 900px) {
+          .hub-wrapper {
+            overflow-y: auto;
+          }
+
+          .hub-title {
+            position: relative !important;
+            top: 0 !important;
+            left: 0 !important;
+            transform: none !important;
+            padding: 2rem 1.25rem 1.5rem !important;
+            pointer-events: auto;
+          }
+
+          .split {
+            flex-direction: column !important;
+            min-height: auto !important;
+          }
+
+          .split .half {
+            flex: none !important;
+            min-height: auto !important;
+            width: 100% !important;
+            padding: 1.5rem 1.25rem !important;
+            opacity: 1 !important;
+            filter: none !important;
+          }
+
+          .half.hot,
+          .half.dim {
+            flex: none !important;
+            opacity: 1 !important;
+            filter: none !important;
+          }
+
+          .half.hot .half-content,
+          .half.dim .half-content {
+            transform: none !important;
+          }
+
+          .hub-wrapper .half-content {
+            max-width: 100% !important;
+            padding: 2rem 1.5rem !important;
+          }
+
+          .hub-wrapper .divider-label {
+            display: none !important;
+          }
+
+          .side-3d {
+            border-bottom: 1px solid #e5e7eb;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .hub-title h1 {
+            font-size: 1.5rem !important;
+          }
+
+          .hub-wrapper .half-content {
+            padding: 1.75rem 1.25rem !important;
+          }
+
+          .hub-wrapper .icon-wrap {
+            width: 60px !important;
+            height: 60px !important;
+            margin-bottom: 1rem !important;
+          }
+
+          .hub-wrapper .icon-wrap img.hub-icon {
+            width: 60px;
+            height: 60px;
+          }
+        }
       `}</style>
 
       <div className="hub-wrapper">
@@ -185,20 +254,20 @@ export const Hub = () => {
           className={`split ${activeSide !== null ? 'is-hovered' : ''}`}
           onMouseLeave={() => setActiveSide(null)}
         >
-          {/* EL TÍTULO AHORA ES UN ELEMENTO FLOTANTE SIN FONDO */}
           <div className="hub-title">
             <div className="eyebrow">¿Qué quieres gestionar hoy?</div>
             <h1>Proyectos del Fab Lab</h1>
           </div>
 
-          {/* PANEL 3D */}
           <div
             className={`half side-3d ${activeSide === '3d' ? 'hot' : activeSide === 'dig' ? 'dim' : ''}`}
             onMouseEnter={() => setActiveSide('3d')}
             onClick={() => navigate('/editor/3d')}
           >
             <div className="half-content">
-              <div className="icon-wrap">▲</div>
+              <div className="icon-wrap">
+                <img src="/assets/icons/icon-3d.png" alt="Proyectos 3D" className="hub-icon" />
+              </div>
               <div className="half-tag">Fabricación digital</div>
               <div className="half-title">Proyectos 3D</div>
               <div className="half-desc">
@@ -207,17 +276,17 @@ export const Hub = () => {
             </div>
           </div>
 
-          {/* DIVISOR VS */}
           <div className="divider-label mono">VS</div>
 
-          {/* PANEL DIGITAL */}
           <div
             className={`half side-dig ${activeSide === 'dig' ? 'hot' : activeSide === '3d' ? 'dim' : ''}`}
             onMouseEnter={() => setActiveSide('dig')}
             onClick={() => navigate('/editor/software')}
           >
             <div className="half-content">
-              <div className="icon-wrap">&lt;/&gt;</div>
+              <div className="icon-wrap">
+                <img src="/assets/icons/icon-software.png" alt="Proyectos Digitales" className="hub-icon" />
+              </div>
               <div className="half-tag">Desarrollo de software</div>
               <div className="half-title">Proyectos Digitales</div>
               <div className="half-desc">
