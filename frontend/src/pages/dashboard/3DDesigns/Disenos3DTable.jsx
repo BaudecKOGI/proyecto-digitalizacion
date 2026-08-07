@@ -26,7 +26,7 @@ import { PencilSimple as EditIcon } from "@phosphor-icons/react/dist/ssr/PencilS
 import { Trash as TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
 import { Cube as CubeIcon } from "@phosphor-icons/react/dist/ssr/Cube";
 
-import { ODS_LIST } from "@/pages/dashboard/digitalProjects/odsData";
+import { ODS_LIST, OdsBadges } from "@/pages/dashboard/digitalProjects/odsData";
 
 const formatCategoriaName = (item, categorias = []) => {
   if (item.categoria_nombre && String(item.categoria_nombre).trim() !== "") {
@@ -40,12 +40,6 @@ const formatCategoriaName = (item, categorias = []) => {
     if (found) return found.nombre;
   }
   return `Categoría #${item.categoria}`;
-};
-
-const formatOdsName = (odsNum) => {
-  if (!odsNum) return "-";
-  const found = ODS_LIST.find((item) => item.id === Number(odsNum));
-  return found ? found.label : `ODS #${odsNum}`;
 };
 
 export default function Disenos3DTable({
@@ -187,7 +181,7 @@ export default function Disenos3DTable({
                     {item.titulo}
                   </Typography>
                   <Typography variant="caption" color="text.secondary" display="block">
-                    Por: {item.autor_nombre || "Autor anónimo"} ({item.carrera || "Sin carrera"})
+                    Por: {item.autor_nombre || "Autor anónimo"} ({item.carrera_nombre || "Sin carrera"})
                   </Typography>
                 </TableCell>
 
@@ -204,17 +198,9 @@ export default function Disenos3DTable({
                   )}
                 </TableCell>
 
-                {/* ODS */}
+                {/* ODS MÚLTIPLES */}
                 <TableCell>
-                  {item.ods ? (
-                    <Typography variant="body2" sx={{ color: "#111827", fontWeight: 500 }}>
-                      {formatOdsName(item.ods)}
-                    </Typography>
-                  ) : (
-                    <Typography variant="caption" color="text.disabled">
-                      -
-                    </Typography>
-                  )}
+                  <OdsBadges odsIds={item.ods_detalle?.map(o => o.id) || []} />
                 </TableCell>
 
                 {/* Estado */}
@@ -326,7 +312,6 @@ export default function Disenos3DTable({
                 }
               }}
             >
-              {/* Imagen miniatura */}
               <Box
                 onClick={() => onView(item)}
                 sx={{
@@ -362,7 +347,6 @@ export default function Disenos3DTable({
                   </Stack>
                 )}
 
-                {/* Badges superiores en tarjeta */}
                 <Box sx={{ position: "absolute", top: 12, right: 12, display: "flex", gap: 1 }}>
                   <Chip
                     label={item.estado_publicacion || "BORRADOR"}
@@ -430,20 +414,12 @@ export default function Disenos3DTable({
                       textOverflow: "ellipsis"
                     }}
                   >
-                    Autor: {item.autor_nombre || "Anónimo"} ({item.carrera || "N/A"})
+                    Autor: {item.autor_nombre || "Anónimo"} ({item.carrera_nombre || "N/A"})
                   </Typography>
                 </Box>
 
-                <Box sx={{ mt: 1, minHeight: 28, display: "flex", alignItems: "center" }}>
-                  {item.ods ? (
-                    <Typography variant="body2" sx={{ color: "#111827", fontWeight: 500 }}>
-                      {formatOdsName(item.ods)}
-                    </Typography>
-                  ) : (
-                    <Typography variant="caption" color="text.disabled">
-                      Sin ODS asignado
-                    </Typography>
-                  )}
+                <Box sx={{ mt: 1, minHeight: 28, display: "flex", alignItems: "center", flexWrap: "wrap", gap: 0.5 }}>
+                  <OdsBadges odsIds={item.ods_detalle?.map(o => o.id) || []} />
                 </Box>
               </CardContent>
 

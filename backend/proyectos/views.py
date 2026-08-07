@@ -13,11 +13,6 @@ from proyectos.serializers import (
 )
 
 def filtrar_proyectos_por_usuario(queryset, request):
-    """
-    Separa el contenido para Administrador vs Editor y Editor vs otro Editor:
-    - Administrador General o superuser: ve TODOS los proyectos en el sistema.
-    - Editor: SOLO ve sus propios proyectos (creado_por=request.user).
-    """
     user = getattr(request, "user", None)
     if user and user.is_authenticated:
         if not (user.is_superuser or getattr(user, "rol", "") == "ADMIN"):
@@ -43,22 +38,23 @@ class ProyectoViewSet(viewsets.ModelViewSet):
     queryset = Proyecto.objects.all().order_by('-created_at')
     serializer_class = ProyectoSerializer
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    search_fields = ['titulo', 'descripcion', 'autor_nombre', 'carrera']
+    search_fields = ['titulo', 'descripcion', 'autor_nombre', 'carrera__nombre']
     ordering_fields = ['created_at', 'titulo']
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        ods = self.request.query_params.get('ods')
-        if ods:
-            queryset = queryset.filter(ods=ods)
+        ods_param = self.request.query_params.get('ods')
+        if ods_param:
+            ods_list = [int(x) for x in ods_param.split(',') if x.isdigit()]
+            if ods_list:
+                # CORREGIDO: usar ods_relacionados (related_name del modelo ProyectoODS)
+                queryset = queryset.filter(ods_relacionados__ods_id__in=ods_list).distinct()
         categoria = self.request.query_params.get('categoria')
         if categoria:
             queryset = queryset.filter(categoria=categoria)
         estado = self.request.query_params.get('estado')
         if estado:
             queryset = queryset.filter(estado_publicacion=estado)
-        
-        # Aislamiento por rol: Editor solo ve lo suyo, Admin ve todo
         queryset = filtrar_proyectos_por_usuario(queryset, self.request)
         return queryset
 
@@ -77,22 +73,22 @@ class Proyecto3DViewSet(viewsets.ModelViewSet):
     queryset = Proyecto3D.objects.all().order_by('-created_at')
     serializer_class = Proyecto3DSerializer
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    search_fields = ['titulo', 'descripcion', 'autor_nombre', 'carrera']
+    search_fields = ['titulo', 'descripcion', 'autor_nombre', 'carrera__nombre']
     ordering_fields = ['created_at', 'titulo']
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        ods = self.request.query_params.get('ods')
-        if ods:
-            queryset = queryset.filter(ods=ods)
+        ods_param = self.request.query_params.get('ods')
+        if ods_param:
+            ods_list = [int(x) for x in ods_param.split(',') if x.isdigit()]
+            if ods_list:
+                queryset = queryset.filter(ods_relacionados__ods_id__in=ods_list).distinct()
         categoria = self.request.query_params.get('categoria')
         if categoria:
             queryset = queryset.filter(categoria=categoria)
         estado = self.request.query_params.get('estado')
         if estado:
             queryset = queryset.filter(estado_publicacion=estado)
-
-        # Aislamiento por rol: Editor solo ve lo suyo, Admin ve todo
         queryset = filtrar_proyectos_por_usuario(queryset, self.request)
         return queryset
 
@@ -108,28 +104,25 @@ class Proyecto3DViewSet(viewsets.ModelViewSet):
 
 
 class ProyectoSoftwareViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet para proyectos digitales y de software.
-    """
     queryset = ProyectoSoftware.objects.all().order_by('-created_at')
     serializer_class = ProyectoSoftwareSerializer
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    search_fields = ['titulo', 'descripcion', 'autor_nombre', 'carrera', 'tecnologias__nombre']
+    search_fields = ['titulo', 'descripcion', 'autor_nombre', 'carrera__nombre', 'tecnologias__nombre']
     ordering_fields = ['created_at', 'titulo']
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        ods = self.request.query_params.get('ods')
-        if ods:
-            queryset = queryset.filter(ods=ods)
+        ods_param = self.request.query_params.get('ods')
+        if ods_param:
+            ods_list = [int(x) for x in ods_param.split(',') if x.isdigit()]
+            if ods_list:
+                queryset = queryset.filter(ods_relacionados__ods_id__in=ods_list).distinct()
         categoria = self.request.query_params.get('categoria')
         if categoria:
             queryset = queryset.filter(categoria=categoria)
         estado = self.request.query_params.get('estado')
         if estado:
             queryset = queryset.filter(estado_publicacion=estado)
-
-        # Aislamiento por rol: Editor solo ve lo suyo, Admin ve todo
         queryset = filtrar_proyectos_por_usuario(queryset, self.request)
         return queryset
 

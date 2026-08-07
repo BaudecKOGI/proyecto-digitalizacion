@@ -5,7 +5,7 @@ import {
   Eye, FileEdit, Info 
 } from 'lucide-react';
 import { useUser } from '@/hooks/use-user';
-import { fetchCategorias, createProyecto3D } from '@/services/api';
+import { fetchCategorias, fetchCarreras, createProyecto3D } from '@/services/api';
 import { ODS_LIST } from "@/pages/dashboard/digitalProjects/odsData";
 
 // --- IMPORTACIONES 3D ---
@@ -39,7 +39,6 @@ const FBXModel = ({ url, piezasMoviles, setHabilitarCamara }) => {
       const deltaX = e.clientX - lastX;
       const deltaY = e.clientY - lastY;
 
-      // Aquí aplicamos la lógica de invertir giro
       const sensiblidad = config.invertir_giro ? -0.01 : 0.01;
       const cambioRotacion = (deltaX + deltaY) * sensiblidad;
 
@@ -73,7 +72,6 @@ const FBXModel = ({ url, piezasMoviles, setHabilitarCamara }) => {
     };
   }, [setHabilitarCamara]);
 
-  // Función para buscar el nombre en el objeto tocado o en sus "padres" (Grupos)
   const encontrarConfiguracionDePieza = (objetoTocado) => {
     let nodoActual = objetoTocado;
     
@@ -88,7 +86,6 @@ const FBXModel = ({ url, piezasMoviles, setHabilitarCamara }) => {
         return { config: piezaConfig, mesh: nodoActual };
       }
       
-      // Si no lo encuentra, sube un nivel al grupo padre
       nodoActual = nodoActual.parent;
     }
     return null;
@@ -98,12 +95,11 @@ const FBXModel = ({ url, piezasMoviles, setHabilitarCamara }) => {
     const resultado = encontrarConfiguracionDePieza(e.object);
 
     if (resultado) {
-      // Detenemos el evento para que OrbitControls no mueva toda la escena
       e.stopPropagation(); 
       setHabilitarCamara(false); 
       
       dragRef.current = {
-        mesh: resultado.mesh, // Rotamos el grupo/malla correcto
+        mesh: resultado.mesh,
         config: resultado.config,
         lastX: e.clientX,
         lastY: e.clientY
@@ -139,6 +135,7 @@ export const NewProject3D = () => {
   const navigate = useNavigate();
   const { user } = useUser();
   const [categorias, setCategorias] = useState([]);
+  const [carreras, setCarreras] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -146,8 +143,8 @@ export const NewProject3D = () => {
     titulo: '', 
     descripcion: '', 
     autor_nombre: '',
-    carrera: '', 
-    ciclo: '', 
+    carrera: '',   // ID de carrera
+    ciclo: '',     // número de ciclo (1-12)
     estado_publicacion: 'BORRADOR', 
     categoria: '', 
     ods: '',
@@ -160,17 +157,21 @@ export const NewProject3D = () => {
   const [piezasMoviles, setPiezasMoviles] = useState([]);
   const [habilitarCamara, setHabilitarCamara] = useState(true);
 
+  // Cargar categorías y carreras
   useEffect(() => {
-    const loadCategorias = async () => {
+    const loadData = async () => {
       try {
-        const data = await fetchCategorias();
-        const listaCategorias = Array.isArray(data) ? data : data?.results || [];
-        setCategorias(listaCategorias);
+        const [catsData, carrerasData] = await Promise.all([
+          fetchCategorias(),
+          fetchCarreras('activo=true')
+        ]);
+        setCategorias(Array.isArray(catsData) ? catsData : catsData?.results || []);
+        setCarreras(Array.isArray(carrerasData) ? carrerasData : carrerasData?.results || []);
       } catch (err) {
-        console.error("Error cargando categorías:", err);
+        console.error("Error cargando datos:", err);
       }
     };
-    loadCategorias();
+    loadData();
   }, []);
 
   useEffect(() => {
@@ -230,6 +231,8 @@ export const NewProject3D = () => {
           if (formData.categoria) data.append('categoria', formData.categoria);
         } else if (key === 'ods') {
           if (formData.ods) data.append('ods', formData.ods);
+        } else if (key === 'carrera' || key === 'ciclo') {
+          if (formData[key]) data.append(key, formData[key]);
         } else {
           data.append(key, formData[key]);
         }
@@ -253,6 +256,16 @@ export const NewProject3D = () => {
       setLoading(false);
     }
   };
+
+  // Helper para números romanos
+  const toRoman = (num) => {
+    const romanos = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+    return romanos[num - 1] || num;
+  };
+
+  // Carrera seleccionada actual
+  const carreraSeleccionada = carreras.find(c => String(c.id) === String(formData.carrera));
+  const duracionCiclos = carreraSeleccionada ? carreraSeleccionada.duracion_ciclos : 0;
 
   // Clases predefinidas utilizando tus variables CSS
   const inputClassName = "w-full p-2.5 bg-[var(--bg-general)] border border-[var(--line)] rounded-lg text-[var(--text-main)] text-sm mb-4 outline-none focus:border-[var(--accent)] transition-colors";
@@ -320,11 +333,36 @@ export const NewProject3D = () => {
               </div>
               <div className="flex-[2]">
                 <label className={labelClassName}>Carrera</label>
-                <input className={inputClassName} type="text" name="carrera" value={formData.carrera} onChange={handleChange} required />
+                <select 
+                  className={inputClassName} 
+                  name="carrera" 
+                  value={formData.carrera} 
+                  onChange={(e) => {
+                    setFormData(prev => ({ ...prev, carrera: e.target.value, ciclo: '' }));
+                  }}
+                  required
+                >
+                  <option value="">Seleccionar carrera...</option>
+                  {carreras.map(c => (
+                    <option key={c.id} value={c.id}>{c.nombre}</option>
+                  ))}
+                </select>
               </div>
               <div className="flex-1">
                 <label className={labelClassName}>Ciclo</label>
-                <input className={inputClassName} type="text" name="ciclo" value={formData.ciclo} onChange={handleChange} required />
+                <select 
+                  className={inputClassName} 
+                  name="ciclo" 
+                  value={formData.ciclo} 
+                  onChange={handleChange}
+                  disabled={!formData.carrera}
+                  required
+                >
+                  <option value="">{formData.carrera ? 'Seleccionar ciclo...' : 'Primero selecciona carrera'}</option>
+                  {Array.from({ length: duracionCiclos }, (_, i) => i + 1).map(num => (
+                    <option key={num} value={num}>{toRoman(num)}</option>
+                  ))}
+                </select>
               </div>
             </div>
 

@@ -30,10 +30,6 @@ import Recent3DTable from "./Recent3DTable";
 import RecentSoftwareTable from "./RecentSoftwareTable";
 import OdsImpactCard from "./OdsImpactCard";
 
-/**
- * PANEL DE CONTROL PRINCIPAL (DASHBOARD)
- * Estructurado dentro de la carpeta dashboard/ y modularizado para máxima mantenibilidad.
- */
 export default function Dashboard() {
   const [loading, setLoading] = React.useState(true);
   const [refreshing, setRefreshing] = React.useState(false);
@@ -76,7 +72,6 @@ export default function Dashboard() {
     loadDashboardData();
   }, [loadDashboardData]);
 
-  // Cálculos de métricas reales para las tarjetas KPI
   const total3D = disenos3D.length;
   const totalSoftware = proyectosSoftware.length;
   const totalCategorias = categorias.length;
@@ -99,7 +94,7 @@ export default function Dashboard() {
 
   return (
     <Box sx={{ pb: 4, maxWidth: 1360, margin: "0 auto" }}>
-      {/* CABECERA Y ACCIÓN RÁPIDA DE REFRESCO */}
+      {/* Cabecera */}
       <Stack
         direction={{ xs: "column", sm: "row" }}
         justifyContent="space-between"
@@ -136,85 +131,84 @@ export default function Dashboard() {
         </Button>
       </Stack>
 
-
-      {/* 2. TARJETAS DE ESTADÍSTICAS*/}
+      {/* Tarjetas sin subtítulo */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
           <SummaryStatCard
             title="Total de Proyectos"
-            value={(total3D || 124) + (totalSoftware || 48)}
-            icon={<SparkleIcon />}
+            value={totalGeneral}
+            icon={<SparkleIcon size={18} />}
+            bgIcon={<SparkleIcon size={130} />}
             color="#6366F1"
-            subtitle="Proyectos Digitales y Diseños 3D"
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
           <SummaryStatCard
             title="Diseños 3D"
-            value={total3D || 124}
-            icon={<CubeIcon />}
+            value={total3D}
+            icon={<CubeIcon size={18} />}
+            bgIcon={<CubeIcon size={130} />}
             color="#0EA5E9"
-            subtitle="Modelos FBX y GLB registrados"
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
           <SummaryStatCard
             title="Proyectos Digitales"
-            value={totalSoftware || 48}
-            icon={<FolderIcon />}
+            value={totalSoftware}
+            icon={<FolderIcon size={18} />}
+            bgIcon={<FolderIcon size={130} />}
             color="#F97316"
-            subtitle="Aplicaciones y sistemas web"
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
           <SummaryStatCard
             title="Visualizaciones"
             value="4.2k"
-            icon={<EyeIcon />}
+            icon={<EyeIcon size={18} />}
+            bgIcon={<EyeIcon size={130} />}
             color="#10B981"
-            subtitle="+16% de tráfico mensual"
           />
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
           <SummaryStatCard
             title="Editores Activos"
-            value={totalEditores || 15}
-            icon={<UsersIcon />}
+            value={totalEditores}
+            icon={<UsersIcon size={18} />}
+            bgIcon={<UsersIcon size={130} />}
             color="#8B5CF6"
-            subtitle="Cuentas con acceso de publicación"
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
           <SummaryStatCard
             title="Tecnologías"
-            value={totalTecnologias || 24}
-            icon={<CodeIcon />}
+            value={totalTecnologias}
+            icon={<CodeIcon size={18} />}
+            bgIcon={<CodeIcon size={130} />}
             color="#06B6D4"
-            subtitle="Librerías, frameworks y motores"
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
           <SummaryStatCard
             title="Categorías"
-            value={totalCategorias || 48}
-            icon={<TagIcon />}
+            value={totalCategorias}
+            icon={<TagIcon size={18} />}
+            bgIcon={<TagIcon size={130} />}
             color="#F59E0B"
-            subtitle="Áreas académicas y técnicas"
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
           <SummaryStatCard
             title="ODS Impactados"
             value={17}
-            icon={<GlobeIcon />}
+            icon={<GlobeIcon size={18} />}
+            bgIcon={<GlobeIcon size={130} />}
             color="#3B82F6"
-            subtitle="Objetivos ONU cubiertos"
           />
         </Grid>
       </Grid>
 
-      {/* 3. SECCIÓN DE ACTIVIDAD RECIENTE */}
+      {/* Tablas de actividad reciente */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid size={{ xs: 12, lg: 6 }}>
           <Recent3DTable disenos={disenos3D} categorias={categorias} />
@@ -224,7 +218,7 @@ export default function Dashboard() {
         </Grid>
       </Grid>
 
-      {/* 4. IMPACTO SOSTENIBLE (ODS) Y DISTRIBUCIÓN POR CATEGORÍAS */}
+      {/* ODS Impact */}
       <Grid container spacing={3}>
         <Grid size={{ xs: 12 }}>
           <OdsImpactCard disenos={disenos3D} proyectos={proyectosSoftware} categorias={categorias} />

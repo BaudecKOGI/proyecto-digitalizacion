@@ -2,12 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { 
   Code, Eye, FileEdit, 
   Clock, ArrowRight, FolderKanban, Activity, ExternalLink,
-  Terminal // Cambiamos el Box de 3D por un Terminal para Software
+  Terminal 
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 // Importamos las funciones de tu API para traer los datos reales de SOFTWARE
-// Asegúrate de tener estas funciones en tu api.js
 import { fetchProyectosSoftware, fetchCategorias } from '@/services/api'; 
 
 export const DashboardSoftware = () => {
@@ -83,49 +82,92 @@ export const DashboardSoftware = () => {
         </div>
       </div>
 
-      {/* TARJETAS DE MÉTRICAS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* TARJETAS DE MÉTRICAS - REDISEÑO CUSTOM */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        
         {/* Total Proyectos */}
-        <div className="bg-[var(--panel)] p-5 rounded-xl border border-[var(--line)] flex items-center gap-4 hover:border-[var(--accent)] transition-colors">
-          <div className="w-12 h-12 rounded-full bg-[var(--accent)]/10 text-[var(--accent)] flex items-center justify-center">
-            <Terminal size={24} />
+        <div className="group relative bg-[var(--panel)] rounded-xl border border-[var(--line)] p-6 overflow-hidden transition-all duration-300 hover:shadow-md hover:border-[var(--accent)]">
+          {/* Acento superior */}
+          <div className="absolute top-0 left-0 w-full h-1 bg-[var(--accent)] transition-all duration-300 group-hover:h-1.5" />
+          
+          {/* Ícono gigante de fondo */}
+          <div className="absolute -right-6 -bottom-6 text-[var(--accent)] opacity-[0.04] group-hover:opacity-10 transition-all duration-500 group-hover:rotate-12 group-hover:scale-110">
+            <Terminal size={130} />
           </div>
-          <div>
-            <div className="text-sm font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Total Proyectos</div>
-            <div className="text-2xl font-black text-[var(--text-main)]">{stats.total}</div>
+
+          <div className="relative z-10 flex flex-col gap-2">
+            <div className="flex items-center justify-between w-full">
+               <span className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest">Total Proyectos</span>
+               <div className="text-[var(--accent)] p-1.5 bg-[var(--accent)]/10 rounded-lg">
+                 <Terminal size={16} />
+               </div>
+            </div>
+            <div className="text-5xl font-black text-[var(--text-main)] mt-1 tracking-tight">
+              {stats.total}
+            </div>
           </div>
         </div>
 
         {/* Publicados */}
-        <div className="bg-[var(--panel)] p-5 rounded-xl border border-[var(--line)] flex items-center gap-4 hover:border-emerald-500 transition-colors">
-          <div className="w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
-            <Eye size={24} />
+        <div className="group relative bg-[var(--panel)] rounded-xl border border-[var(--line)] p-6 overflow-hidden transition-all duration-300 hover:shadow-md hover:border-emerald-500">
+          <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500 transition-all duration-300 group-hover:h-1.5" />
+          
+          <div className="absolute -right-6 -bottom-6 text-emerald-500 opacity-[0.04] group-hover:opacity-10 transition-all duration-500 group-hover:rotate-12 group-hover:scale-110">
+            <Eye size={130} />
           </div>
-          <div>
-            <div className="text-sm font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Publicados</div>
-            <div className="text-2xl font-black text-[var(--text-main)]">{stats.publicados}</div>
+
+          <div className="relative z-10 flex flex-col gap-2">
+            <div className="flex items-center justify-between w-full">
+               <span className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest">Publicados</span>
+               <div className="text-emerald-500 p-1.5 bg-emerald-500/10 rounded-lg">
+                 <Eye size={16} />
+               </div>
+            </div>
+            <div className="text-5xl font-black text-[var(--text-main)] mt-1 tracking-tight">
+              {stats.publicados}
+            </div>
           </div>
         </div>
 
         {/* Borradores */}
-        <div className="bg-[var(--panel)] p-5 rounded-xl border border-[var(--line)] flex items-center gap-4 hover:border-amber-500 transition-colors">
-          <div className="w-12 h-12 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center">
-            <FileEdit size={24} />
+        <div className="group relative bg-[var(--panel)] rounded-xl border border-[var(--line)] p-6 overflow-hidden transition-all duration-300 hover:shadow-md hover:border-amber-500">
+          <div className="absolute top-0 left-0 w-full h-1 bg-amber-500 transition-all duration-300 group-hover:h-1.5" />
+          
+          <div className="absolute -right-6 -bottom-6 text-amber-500 opacity-[0.04] group-hover:opacity-10 transition-all duration-500 group-hover:-rotate-12 group-hover:scale-110">
+            <FileEdit size={130} />
           </div>
-          <div>
-            <div className="text-sm font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">En Borrador</div>
-            <div className="text-2xl font-black text-[var(--text-main)]">{stats.borradores}</div>
+
+          <div className="relative z-10 flex flex-col gap-2">
+            <div className="flex items-center justify-between w-full">
+               <span className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest">En Borrador</span>
+               <div className="text-amber-500 p-1.5 bg-amber-500/10 rounded-lg">
+                 <FileEdit size={16} />
+               </div>
+            </div>
+            <div className="text-5xl font-black text-[var(--text-main)] mt-1 tracking-tight">
+              {stats.borradores}
+            </div>
           </div>
         </div>
 
         {/* Categorías */}
-        <div className="bg-[var(--panel)] p-5 rounded-xl border border-[var(--line)] flex items-center gap-4 hover:border-blue-500 transition-colors">
-          <div className="w-12 h-12 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center">
-            <FolderKanban size={24} />
+        <div className="group relative bg-[var(--panel)] rounded-xl border border-[var(--line)] p-6 overflow-hidden transition-all duration-300 hover:shadow-md hover:border-blue-500">
+          <div className="absolute top-0 left-0 w-full h-1 bg-blue-500 transition-all duration-300 group-hover:h-1.5" />
+          
+          <div className="absolute -right-6 -bottom-6 text-blue-500 opacity-[0.04] group-hover:opacity-10 transition-all duration-500 group-hover:-rotate-12 group-hover:scale-110">
+            <FolderKanban size={130} />
           </div>
-          <div>
-            <div className="text-sm font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Categorías</div>
-            <div className="text-2xl font-black text-[var(--text-main)]">{stats.categorias}</div>
+
+          <div className="relative z-10 flex flex-col gap-2">
+            <div className="flex items-center justify-between w-full">
+               <span className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest">Categorías</span>
+               <div className="text-blue-500 p-1.5 bg-blue-500/10 rounded-lg">
+                 <FolderKanban size={16} />
+               </div>
+            </div>
+            <div className="text-5xl font-black text-[var(--text-main)] mt-1 tracking-tight">
+              {stats.categorias}
+            </div>
           </div>
         </div>
       </div>

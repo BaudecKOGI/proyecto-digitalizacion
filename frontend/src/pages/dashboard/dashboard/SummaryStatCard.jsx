@@ -1,96 +1,120 @@
 import * as React from "react";
-import { Card, Box, Typography } from "@mui/material";
+import { Card, Box, Typography, Stack } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 
 /**
  * TARJETA DE ESTADÍSTICA (KPI) DEL DASHBOARD
+ * Diseño inspirado en el panel del Editor, sin subtítulo.
  */
 export default function SummaryStatCard({
   title,
   value,
   icon,
+  bgIcon,
   color = "#6366F1",
-  trend,
-  subtitle
 }) {
-  const renderFooterText = () => {
-    if (subtitle) return subtitle;
-    if (trend) {
-      const sign = trend.direction === "up" ? "+" : "-";
-      return `${sign}${trend.value}% este último mes`;
-    }
-    return "Actualizado en tiempo real";
-  };
+  const theme = useTheme();
 
   return (
     <Card
       elevation={0}
       sx={{
-        height: "100%",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        py: 1.75,
-        px: 2.25,
-        borderRadius: "6px",
-        backgroundColor: color,
-        color: "#ffffff",
-        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.06)",
-        border: "none",
         position: "relative",
-        overflow: "hidden"
+        bgcolor: "background.paper",
+        borderRadius: "12px",
+        border: "1px solid",
+        borderColor: "divider",
+        p: 2.5,
+        overflow: "hidden",
+        height: "100%",
+        transition: "all 0.3s ease",
+        "&:hover": {
+          boxShadow: theme.shadows[4],
+          borderColor: color,
+          "& .accent-bar": {
+            height: "6px",
+          },
+          "& .bg-icon": {
+            opacity: 0.12,
+            transform: "rotate(8deg) scale(1.08)",
+          },
+        },
       }}
     >
-      {/* Columna Izquierda: Título, Valor, Subtítulo */}
-      <Box sx={{ display: "flex", flexDirection: "column", zIndex: 1, pr: 1.5 }}>
-        <Typography
-          sx={{
-            fontSize: "0.85rem",
-            fontWeight: 500,
-            color: "rgba(255, 255, 255, 0.9)",
-            mb: 0.5,
-            lineHeight: 1.2
-          }}
-        >
-          {title}
-        </Typography>
+      {/* Barra superior */}
+      <Box
+        className="accent-bar"
+        sx={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "3px",
+          bgcolor: color,
+          transition: "height 0.3s ease",
+        }}
+      />
+
+      {/* Icono de fondo */}
+      <Box
+        className="bg-icon"
+        sx={{
+          position: "absolute",
+          right: -20,
+          bottom: -20,
+          color: color,
+          opacity: 0.04,
+          transition: "all 0.5s ease",
+          "& svg": {
+            fontSize: 130,
+          },
+        }}
+      >
+        {bgIcon}
+      </Box>
+
+      {/* Contenido */}
+      <Box sx={{ position: "relative", zIndex: 1 }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
+          <Typography
+            variant="caption"
+            sx={{
+              fontWeight: 700,
+              color: "text.secondary",
+              textTransform: "uppercase",
+              letterSpacing: "0.5px",
+              fontSize: "0.7rem",
+            }}
+          >
+            {title}
+          </Typography>
+          <Box
+            sx={{
+              p: 0.6,
+              borderRadius: "8px",
+              bgcolor: `${color}10`,
+              color: color,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            {icon}
+          </Box>
+        </Stack>
 
         <Typography
+          variant="h3"
           sx={{
-            fontSize: "1.65rem",
-            fontWeight: 700,
-            color: "#ffffff",
-            lineHeight: 1.1,
-            mb: 0.5
+            fontWeight: 800,
+            color: "text.primary",
+            fontSize: "2.2rem",
+            lineHeight: 1.2,
+            mt: 0.5,
           }}
         >
           {value}
         </Typography>
-
-        <Typography
-          sx={{
-            fontSize: "0.75rem",
-            fontWeight: 400,
-            color: "rgba(255, 255, 255, 0.85)",
-            lineHeight: 1.2
-          }}
-        >
-          {renderFooterText()}
-        </Typography>
-      </Box>
-
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "rgba(255, 255, 255, 0.25)",
-          zIndex: 0,
-          flexShrink: 0
-        }}
-      >
-        {React.isValidElement(icon)
-          ? React.cloneElement(icon, { size: 52, weight: "regular" })
-          : icon}
       </Box>
     </Card>
   );

@@ -1,6 +1,7 @@
 # Django / Python
 backend/venv/
 backend/__pycache__/
+backend/media/
 backend/config/__pycache__/
 backend/*.pyc
 backend/db.sqlite3

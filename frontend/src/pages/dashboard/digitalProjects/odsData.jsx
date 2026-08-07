@@ -39,6 +39,15 @@ export const ODS_LIST = [
   { id: 17, label: "ODS 17: Alianzas", fullTitle: "ALIANZAS PARA LOGRAR LOS OBJETIVOS", color: "#19486A", icon: Handshake }
 ];
 
+export const getODSById = (id) => {
+  return ODS_LIST.find(item => item.id === Number(id));
+};
+
+export const getODSListByIds = (ids) => {
+  if (!ids || !Array.isArray(ids)) return [];
+  return ids.map(id => getODSById(id)).filter(Boolean);
+};
+
 export function OdsBadge({ odsNum }) {
   if (!odsNum) return null;
   const found = ODS_LIST.find((item) => item.id === Number(odsNum));
@@ -57,5 +66,49 @@ export function OdsBadge({ odsNum }) {
     >
       {found.label}
     </Typography>
+  );
+}
+
+export function OdsBadges({ odsIds, size = "small", maxDisplay = 3 }) {
+  if (!odsIds || odsIds.length === 0) return null;
+  const items = getODSListByIds(odsIds);
+  const displayItems = items.slice(0, maxDisplay);
+  const remaining = items.length - maxDisplay;
+
+  return (
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+      {displayItems.map((ods) => (
+        <span
+          key={ods.id}
+          style={{
+            display: 'inline-block',
+            padding: '2px 8px',
+            borderRadius: '12px',
+            backgroundColor: ods.color || '#ccc',
+            color: '#fff',
+            fontSize: size === 'small' ? '0.65rem' : '0.75rem',
+            fontWeight: 700,
+            whiteSpace: 'nowrap'
+          }}
+        >
+          ODS {ods.id}
+        </span>
+      ))}
+      {remaining > 0 && (
+        <span
+          style={{
+            display: 'inline-block',
+            padding: '2px 8px',
+            borderRadius: '12px',
+            backgroundColor: '#6b7280',
+            color: '#fff',
+            fontSize: '0.65rem',
+            fontWeight: 700
+          }}
+        >
+          +{remaining}
+        </span>
+      )}
+    </div>
   );
 }

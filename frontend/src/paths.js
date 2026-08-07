@@ -8,9 +8,9 @@ export const paths = {
         proyectosDigitales: "/dashboard/proyectos-digitales",
         editores: "/dashboard/editores",
         categorias: "/dashboard/categorias",
+        carreras: "/dashboard/carreras", // NUEVO
         visualizaciones: "/dashboard/visualizaciones",
     },
-    // NUEVO BLOQUE:
     editor: {
         proyectos3D: "/editor/3d/proyectos",
         nuevoProyecto3D: "/editor/3d/proyectos/nuevo",

@@ -35,6 +35,8 @@
     "@splinetool/runtime": "^1.12.98",
     "apexcharts": "^6.6.1",
     "framer-motion": "^12.42.2",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.8",
     "leaflet": "^1.9.4",
     "lucide-react": "^1.26.0",
     "react": "19.1.0",
@@ -45,6 +47,7 @@
     "react-router-dom": "^6.22.3",
     "three": "^0.185.1",
     "topojson-client": "^3.1.0",
+    "xlsx": "^0.18.5",
     "zod": "3.25.57"
   },
   "devDependencies": {

@@ -48,7 +48,6 @@ import TecnologiaDeleteModal from "./TecnologiaDeleteModal";
 export default function ProyectosDigitalesPage() {
   const [activeTab, setActiveTab] = useState(0);
 
-  // Estados Proyectos Software
   const [proyectos, setProyectos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -56,21 +55,19 @@ export default function ProyectosDigitalesPage() {
   const [filterCategoria, setFilterCategoria] = useState("");
   const [filterEstado, setFilterEstado] = useState("");
 
-  // Catálogos auxiliares
   const [tecnologias, setTecnologias] = useState([]);
   const [categorias, setCategorias] = useState([]);
 
-  // Modales Proyecto Form
   const [openModalProyecto, setOpenModalProyecto] = useState(false);
   const [editingProyecto, setEditingProyecto] = useState(null);
   const [formProyecto, setFormProyecto] = useState({
     titulo: "",
     descripcion: "",
     autor_nombre: "",
-    carrera: "",
-    ciclo: "",
+    carrera: null,
+    ciclo: null,
     categoria: "",
-    ods: "",
+    ods_ids: [],
     estado_publicacion: "BORRADOR",
     url_repositorio: "",
     url_demo_live: "",
@@ -80,23 +77,18 @@ export default function ProyectosDigitalesPage() {
   const [archivoPortada, setArchivoPortada] = useState(null);
   const [archivoVideo, setArchivoVideo] = useState(null);
 
-  // VISTA EN DETALLE INTEGRADA (NO FLOTANTE)
   const [viewingProyecto, setViewingProyecto] = useState(null);
 
-  // Modal Reproductor de Video Flotante (Solo para clic en portada de la tabla)
   const [openVideoModal, setOpenVideoModal] = useState(false);
   const [playingProyecto, setPlayingProyecto] = useState(null);
 
-  // Modales Tecnología Form
   const [openModalTech, setOpenModalTech] = useState(false);
   const [editingTech, setEditingTech] = useState(null);
   const [formTechName, setFormTechName] = useState("");
 
-  // Notificaciones
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
   const [formError, setFormError] = useState("");
 
-  // Modales de eliminación
   const [deleteProyectoModal, setDeleteProyectoModal] = useState({ open: false, id: null, submitting: false });
   const [deleteTechModal, setDeleteTechModal] = useState({ open: false, ids: [], submitting: false });
 
@@ -140,17 +132,16 @@ export default function ProyectosDigitalesPage() {
 
   const hasActiveFilters = Boolean(searchTerm || filterOds || filterCategoria || filterEstado);
 
-  // MANEJADORES PROYECTOS SOFTWARE
   const handleOpenCreateProyecto = () => {
     setEditingProyecto(null);
     setFormProyecto({
       titulo: "",
       descripcion: "",
       autor_nombre: "",
-      carrera: "",
-      ciclo: "",
+      carrera: null,
+      ciclo: null,
       categoria: "",
-      ods: "",
+      ods_ids: [],
       estado_publicacion: "BORRADOR",
       url_repositorio: "",
       url_demo_live: "",
@@ -170,10 +161,10 @@ export default function ProyectosDigitalesPage() {
       titulo: p.titulo || "",
       descripcion: p.descripcion || "",
       autor_nombre: p.autor_nombre || "",
-      carrera: p.carrera || "",
-      ciclo: p.ciclo || "",
+      carrera: p.carrera || null,
+      ciclo: p.ciclo || null,
       categoria: p.categoria || "",
-      ods: p.ods || "",
+      ods_ids: p.ods_detalle?.map(o => o.id) || [],
       estado_publicacion: p.estado_publicacion || "BORRADOR",
       url_repositorio: p.url_repositorio || "",
       url_demo_live: p.url_demo_live || "",
@@ -197,7 +188,7 @@ export default function ProyectosDigitalesPage() {
 
   const handleSaveProyecto = async (e) => {
     e.preventDefault();
-    if (!formProyecto.titulo.trim() || !formProyecto.autor_nombre.trim() || !formProyecto.carrera.trim()) {
+    if (!formProyecto.titulo.trim() || !formProyecto.autor_nombre.trim() || !formProyecto.carrera) {
       setFormError("El título, autor y carrera son obligatorios.");
       return;
     }
@@ -208,13 +199,17 @@ export default function ProyectosDigitalesPage() {
       formData.append("titulo", formProyecto.titulo.trim());
       formData.append("descripcion", formProyecto.descripcion.trim());
       formData.append("autor_nombre", formProyecto.autor_nombre.trim());
-      formData.append("carrera", formProyecto.carrera.trim());
-      formData.append("ciclo", formProyecto.ciclo);
+      if (formProyecto.carrera) formData.append("carrera", formProyecto.carrera);
+      if (formProyecto.ciclo) formData.append("ciclo", formProyecto.ciclo);
       formData.append("estado_publicacion", formProyecto.estado_publicacion);
       formData.append("creado_por", formProyecto.creado_por);
 
       if (formProyecto.categoria) formData.append("categoria", formProyecto.categoria);
-      if (formProyecto.ods) formData.append("ods", formProyecto.ods);
+      
+      if (formProyecto.ods_ids && formProyecto.ods_ids.length > 0) {
+        formData.append("ods_ids", JSON.stringify(formProyecto.ods_ids));
+      }
+
       if (formProyecto.url_repositorio) formData.append("url_repositorio", formProyecto.url_repositorio.trim());
       if (formProyecto.url_demo_live) formData.append("url_demo_live", formProyecto.url_demo_live.trim());
 
@@ -262,7 +257,6 @@ export default function ProyectosDigitalesPage() {
     }
   };
 
-  // MANEJADORES TECNOLOGÍAS
   const handleOpenCreateTech = () => {
     setEditingTech(null);
     setFormTechName("");
@@ -326,7 +320,6 @@ export default function ProyectosDigitalesPage() {
 
   return (
     <Box sx={{ pb: 4, maxWidth: 1360, margin: "0 auto" }}>
-      {/* SI ESTAMOS EN VISTA TÉCNICA DETALLADA O FORMULARIO INTEGRADO, RENDERIZAMOS LA VISTA */}
       {viewingProyecto ? (
         <ProjectDetailView
           proyecto={viewingProyecto}
@@ -352,7 +345,6 @@ export default function ProyectosDigitalesPage() {
         />
       ) : (
         <>
-          {/* Encabezado Principal */}
           <Box
             sx={{
               display: "flex",
@@ -424,7 +416,6 @@ export default function ProyectosDigitalesPage() {
             </Stack>
           </Box>
 
-          {/* Pestañas (Proyectos vs Tecnologías) - Estilo Minimalista Negro sin Paréntesis como 3D */}
           <Box sx={{ borderBottom: "1px solid rgba(0, 0, 0, 0.08)", mb: 3.5 }}>
             <Stack direction="row" spacing={4}>
               {[
@@ -468,10 +459,8 @@ export default function ProyectosDigitalesPage() {
             </Stack>
           </Box>
 
-          {/* PESTAÑA 0: PROYECTOS SOFTWARE */}
           {activeTab === 0 && (
             <Box>
-              {/* Barra de Búsqueda y Filtros */}
               <Box
                 sx={{
                   mb: 3,
@@ -508,7 +497,6 @@ export default function ProyectosDigitalesPage() {
                   }}
                 />
 
-                {/* Filtro por ODS */}
                 <FormControl
                   size="small"
                   sx={{
@@ -548,7 +536,6 @@ export default function ProyectosDigitalesPage() {
                   </Select>
                 </FormControl>
 
-                {/* Filtro por Categoría */}
                 <FormControl
                   size="small"
                   sx={{
@@ -588,7 +575,6 @@ export default function ProyectosDigitalesPage() {
                   </Select>
                 </FormControl>
 
-                {/* Filtro por Estado */}
                 <FormControl
                   size="small"
                   sx={{
@@ -651,7 +637,6 @@ export default function ProyectosDigitalesPage() {
                 )}
               </Box>
 
-              {/* Contenido (Tabla Responsiva) */}
               {loading ? (
                 <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
                   <CircularProgress />
@@ -669,7 +654,6 @@ export default function ProyectosDigitalesPage() {
             </Box>
           )}
 
-          {/* PESTAÑA 1: CATÁLOGO DE TECNOLOGÍAS */}
           {activeTab === 1 && (
             <TecnologiasGrid
               tecnologias={tecnologias}
@@ -681,7 +665,6 @@ export default function ProyectosDigitalesPage() {
         </>
       )}
 
-      {/* MODALES DE ELIMINACIÓN */}
       <ProyectoDeleteModal
         open={deleteProyectoModal.open}
         onClose={() => setDeleteProyectoModal({ open: false, id: null, submitting: false })}
@@ -697,7 +680,6 @@ export default function ProyectosDigitalesPage() {
         count={deleteTechModal.ids.length}
       />
 
-      {/* MODAL FORMULARIO TECNOLOGÍA */}
       <TecnologiaFormModal
         open={openModalTech}
         onClose={() => setOpenModalTech(false)}
@@ -708,14 +690,12 @@ export default function ProyectosDigitalesPage() {
         formError={formError}
       />
 
-      {/* MODAL REPRODUCTOR DE VIDEO FLOTANTE (Solo para clic en miniatura del listado) */}
       <VideoPlayerModal
         open={openVideoModal}
         onClose={() => setOpenVideoModal(false)}
         proyecto={playingProyecto}
       />
 
-      {/* SNACKBAR */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}

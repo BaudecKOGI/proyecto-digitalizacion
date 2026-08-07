@@ -21,7 +21,9 @@ import { ODS_LIST } from "./odsData";
 import ProyectoLivePreview from "./ProyectoLivePreview";
 import ConfirmDialog from "@/components/core/ConfirmDialog";
 
-//FORMULARIO DE REGISTRO INTEGRADO
+// IMPORTAR SERVICIO DE CARRERAS
+import { fetchCarreras } from "@/services/api";
+
 export default function ProyectoFormModal({
   open,
   onClose,
@@ -41,6 +43,62 @@ export default function ProyectoFormModal({
 
   const [showCancelDialog, setShowCancelDialog] = React.useState(false);
   const [initialFormState, setInitialFormState] = React.useState(null);
+
+  const [carreras, setCarreras] = React.useState([]);
+  const [carreraSeleccionada, setCarreraSeleccionada] = React.useState(null);
+  const [cicloSeleccionado, setCicloSeleccionado] = React.useState(null);
+
+  React.useEffect(() => {
+    const loadCarreras = async () => {
+      try {
+        const data = await fetchCarreras("activo=true");
+        setCarreras(Array.isArray(data) ? data : data.results || []);
+      } catch (error) {
+        console.error("Error cargando carreras:", error);
+        setCarreras([]);
+      }
+    };
+    loadCarreras();
+  }, []);
+
+  React.useEffect(() => {
+    if (editingProyecto) {
+      if (editingProyecto.carrera) {
+        const found = carreras.find(c => c.id === editingProyecto.carrera);
+        if (found) {
+          setCarreraSeleccionada(found.id);
+          if (editingProyecto.ciclo) {
+            setCicloSeleccionado(editingProyecto.ciclo);
+          }
+        }
+      }
+    }
+  }, [editingProyecto, carreras]);
+
+  React.useEffect(() => {
+    if (carreraSeleccionada !== undefined) {
+      setFormProyecto(prev => ({ ...prev, carrera: carreraSeleccionada }));
+    }
+  }, [carreraSeleccionada, setFormProyecto]);
+
+  React.useEffect(() => {
+    if (cicloSeleccionado !== undefined) {
+      setFormProyecto(prev => ({ ...prev, ciclo: cicloSeleccionado }));
+    }
+  }, [cicloSeleccionado, setFormProyecto]);
+
+  const carreraActual = carreras.find(c => c.id === carreraSeleccionada);
+  const duracionCiclos = carreraActual ? carreraActual.duracion_ciclos : 0;
+
+  const generarOpcionesCiclos = (total) => {
+    const romanos = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+    return Array.from({ length: total }, (_, i) => ({
+      value: i + 1,
+      label: romanos[i] || (i + 1).toString()
+    }));
+  };
+
+  const opcionesCiclos = generarOpcionesCiclos(duracionCiclos);
 
   React.useEffect(() => {
     if (open) {
@@ -129,7 +187,6 @@ export default function ProyectoFormModal({
 
   return (
     <Box sx={{ width: "100%", pb: 6 }}>
-      {/* 1. BARRA SUPERIOR DE NAVEGACIÓN */}
       <Box
         sx={{
           display: "flex",
@@ -174,7 +231,6 @@ export default function ProyectoFormModal({
         </Alert>
       )}
 
-      {/* 2. LAYOUT A DOS COLUMNAS: FORMULARIO + VISTA PREVIA */}
       <Box
         sx={{
           display: "flex",
@@ -183,7 +239,6 @@ export default function ProyectoFormModal({
           alignItems: "flex-start"
         }}
       >
-        {/* COLUMNA IZQUIERDA: FORMULARIO */}
         <Paper
           elevation={0}
           component="form"
@@ -209,7 +264,6 @@ export default function ProyectoFormModal({
           <Divider sx={{ mb: 3 }} />
 
           <Stack spacing={3.5}>
-            {/* ROW 1: Título + Estado */}
             <Stack direction={{ xs: "column", md: "row" }} spacing={2.5}>
               <Box sx={{ flex: 2 }}>
                 <Typography variant="body2" sx={labelSx}>
@@ -241,7 +295,6 @@ export default function ProyectoFormModal({
               </Box>
             </Stack>
 
-            {/* ROW 2: Descripción */}
             <Box>
               <Typography variant="body2" sx={labelSx}>
                 Descripción del Proyecto
@@ -257,7 +310,6 @@ export default function ProyectoFormModal({
               />
             </Box>
 
-            {/* ROW 3: Autor, Carrera, Ciclo */}
             <Stack direction={{ xs: "column", md: "row" }} spacing={2.5}>
               <Box sx={{ flex: 2 }}>
                 <Typography variant="body2" sx={labelSx}>
@@ -276,30 +328,53 @@ export default function ProyectoFormModal({
                 <Typography variant="body2" sx={labelSx}>
                   Carrera Profesional
                 </Typography>
-                <TextField
-                  fullWidth
-                  required
-                  placeholder="Ej. Ingeniería de Software"
-                  value={formProyecto.carrera}
-                  onChange={(e) => setFormProyecto({ ...formProyecto, carrera: e.target.value })}
-                  sx={fieldSx}
-                />
+                <FormControl fullWidth>
+                  <Select
+                    value={carreraSeleccionada || ""}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setCarreraSeleccionada(val);
+                      setCicloSeleccionado(null);
+                    }}
+                    displayEmpty
+                    sx={selectSx}
+                  >
+                    <MenuItem value="">
+                      <em>Seleccionar...</em>
+                    </MenuItem>
+                    {carreras.map((c) => (
+                      <MenuItem key={c.id} value={c.id}>
+                        {c.nombre}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               </Box>
               <Box sx={{ flex: 1 }}>
                 <Typography variant="body2" sx={labelSx}>
                   Ciclo
                 </Typography>
-                <TextField
-                  fullWidth
-                  placeholder="Ej. VI"
-                  value={formProyecto.ciclo}
-                  onChange={(e) => setFormProyecto({ ...formProyecto, ciclo: e.target.value })}
-                  sx={fieldSx}
-                />
+                <FormControl fullWidth>
+                  <Select
+                    value={cicloSeleccionado || ""}
+                    onChange={(e) => setCicloSeleccionado(e.target.value)}
+                    disabled={!carreraSeleccionada}
+                    displayEmpty
+                    sx={selectSx}
+                  >
+                    <MenuItem value="">
+                      <em>{carreraSeleccionada ? "Seleccionar..." : "Primero selecciona carrera"}</em>
+                    </MenuItem>
+                    {opcionesCiclos.map((op) => (
+                      <MenuItem key={op.value} value={op.value}>
+                        {op.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               </Box>
             </Stack>
 
-            {/* ROW 4: Categoría + ODS */}
             <Stack direction={{ xs: "column", md: "row" }} spacing={2.5}>
               <Box sx={{ flex: 1 }}>
                 <Typography variant="body2" sx={labelSx}>
@@ -329,14 +404,26 @@ export default function ProyectoFormModal({
                 </Typography>
                 <FormControl fullWidth>
                   <Select
-                    value={formProyecto.ods}
-                    onChange={(e) => setFormProyecto({ ...formProyecto, ods: e.target.value })}
-                    displayEmpty
+                    multiple
+                    value={formProyecto.ods_ids || []}
+                    onChange={(e) => setFormProyecto({ ...formProyecto, ods_ids: e.target.value })}
+                    renderValue={(selected) => (
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                        {selected.map((id) => {
+                          const ods = ODS_LIST.find(o => o.id === id);
+                          return (
+                            <Chip
+                              key={id}
+                              label={ods ? `ODS ${id}` : id}
+                              size="small"
+                              sx={{ bgcolor: ods?.color || '#6b7280', color: '#fff', fontWeight: 600 }}
+                            />
+                          );
+                        })}
+                      </Box>
+                    )}
                     sx={selectSx}
                   >
-                    <MenuItem value="">
-                      <em>No especificado</em>
-                    </MenuItem>
                     {ODS_LIST.map((o) => (
                       <MenuItem key={o.id} value={o.id}>
                         {o.label}
@@ -347,7 +434,6 @@ export default function ProyectoFormModal({
               </Box>
             </Stack>
 
-            {/* ROW 5: URLs de Repositorio y Demo */}
             <Stack direction={{ xs: "column", md: "row" }} spacing={2.5}>
               <Box sx={{ flex: 1 }}>
                 <Typography variant="body2" sx={labelSx}>
@@ -375,7 +461,6 @@ export default function ProyectoFormModal({
               </Box>
             </Stack>
 
-            {/* ROW 6: Tecnologías 100% ancho */}
             <Box>
               <Typography variant="body2" sx={labelSx}>
                 Tecnologías Utilizadas
@@ -404,7 +489,6 @@ export default function ProyectoFormModal({
               </FormControl>
             </Box>
 
-            {/* ROW 7: Botones Subida Portada y Video */}
             <Stack direction={{ xs: "column", sm: "row" }} spacing={2.5}>
               <Button
                 variant="outlined"
@@ -478,7 +562,6 @@ export default function ProyectoFormModal({
           </Stack>
         </Paper>
 
-        {/* COLUMNA DERECHA: DEMO */}
         <Box sx={{ flex: { xs: "1 1 100%", lg: "0 0 400px" }, width: { xs: "100%", lg: 400 } }}>
           <ProyectoLivePreview
             formProyecto={formProyecto}
@@ -490,7 +573,6 @@ export default function ProyectoFormModal({
         </Box>
       </Box>
 
-      {/* DIÁLOGO DE CONFIRMACIÓN AL CANCELAR */}
       <ConfirmDialog
         open={showCancelDialog}
         onClose={() => setShowCancelDialog(false)}

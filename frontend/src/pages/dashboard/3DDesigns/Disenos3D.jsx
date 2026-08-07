@@ -50,10 +50,8 @@ export default function Disenos3D() {
   const [categorias, setCategorias] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Pestañas (Filtro por estado de publicación)
   const [tabValue, setTabValue] = useState("todos");
 
-  // Filtros de búsqueda y selectores
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategoria, setSelectedCategoria] = useState("");
   const [selectedOds, setSelectedOds] = useState("");
@@ -66,28 +64,24 @@ export default function Disenos3D() {
 
   const [selectedDiseno, setSelectedDiseno] = useState(null);
 
-  // Elemento en edición
   const [editingDiseno, setEditingDiseno] = useState(null);
 
-  // Formulario y archivos
   const [formDiseno, setFormDiseno] = useState({
     titulo: "",
     estado_publicacion: "BORRADOR",
     autor_nombre: "",
-    carrera: "",
-    ciclo: "",
+    carrera: null,
+    ciclo: null,
     categoria: "",
-    ods: "",
+    ods_ids: [],   // <-- Ahora es un array de números
     descripcion: ""
   });
   const [archivoFBX, setArchivoFBX] = useState(null);
   const [imagenMiniatura, setImagenMiniatura] = useState(null);
   const [formError, setFormError] = useState("");
 
-  // Notificaciones
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
 
-  // Modal de eliminación
   const [deleteModal, setDeleteModal] = useState({ open: false, item: null, submitting: false });
 
   const loadData = async () => {
@@ -122,7 +116,6 @@ export default function Disenos3D() {
     loadData();
   }, [selectedCategoria, selectedOds]);
 
-  // FILTRADO 
   const filteredDisenos = useMemo(() => {
     let list = disenos;
     if (tabValue !== "todos") {
@@ -134,7 +127,7 @@ export default function Disenos3D() {
       const titulo = (item.titulo || "").toLowerCase();
       const autor = (item.autor_nombre || "").toLowerCase();
       const desc = (item.descripcion || "").toLowerCase();
-      const carrera = (item.carrera || "").toLowerCase();
+      const carrera = (item.carrera_nombre || "").toLowerCase();
       return (
         titulo.includes(query) ||
         autor.includes(query) ||
@@ -144,7 +137,6 @@ export default function Disenos3D() {
     });
   }, [disenos, tabValue, searchTerm]);
 
-  // Manejar ENTER en búsqueda
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -158,17 +150,16 @@ export default function Disenos3D() {
     setTabValue("todos");
   };
 
-  // ACCIONES CRUD
   const handleOpenCreate = () => {
     setEditingDiseno(null);
     setFormDiseno({
       titulo: "",
       estado_publicacion: "BORRADOR",
       autor_nombre: "",
-      carrera: "",
-      ciclo: "",
+      carrera: null,
+      ciclo: null,
       categoria: "",
-      ods: "",
+      ods_ids: [],
       descripcion: "",
       creado_por: 1
     });
@@ -185,10 +176,10 @@ export default function Disenos3D() {
       titulo: item.titulo || "",
       estado_publicacion: item.estado_publicacion || "BORRADOR",
       autor_nombre: item.autor_nombre || "",
-      carrera: item.carrera || "",
-      ciclo: item.ciclo || "",
+      carrera: item.carrera || null,
+      ciclo: item.ciclo || null,
       categoria: typeof item.categoria === "object" ? item.categoria?.id || "" : item.categoria || "",
-      ods: item.ods || "",
+      ods_ids: item.ods_detalle?.map(o => o.id) || [],  // <-- Cargar IDs existentes
       descripcion: item.descripcion || "",
       creado_por: item.creado_por || 1
     });
@@ -217,8 +208,8 @@ export default function Disenos3D() {
       formData.append("titulo", formDiseno.titulo);
       formData.append("estado_publicacion", formDiseno.estado_publicacion);
       formData.append("autor_nombre", formDiseno.autor_nombre);
-      formData.append("carrera", formDiseno.carrera);
-      formData.append("ciclo", formDiseno.ciclo);
+      if (formDiseno.carrera) formData.append("carrera", formDiseno.carrera);
+      if (formDiseno.ciclo) formData.append("ciclo", formDiseno.ciclo);
       formData.append("descripcion", formDiseno.descripcion);
       formData.append("creado_por", formDiseno.creado_por || 1);
 
@@ -227,9 +218,12 @@ export default function Disenos3D() {
       } else if (categorias.length > 0) {
         formData.append("categoria", categorias[0].id);
       }
-      if (formDiseno.ods) {
-        formData.append("ods", formDiseno.ods);
+      
+      // Enviar ods_ids como JSON string
+      if (formDiseno.ods_ids && formDiseno.ods_ids.length > 0) {
+        formData.append("ods_ids", JSON.stringify(formDiseno.ods_ids));
       }
+
       if (archivoFBX) {
         formData.append("archivo_fbx", archivoFBX);
       }
@@ -303,7 +297,6 @@ export default function Disenos3D() {
     }
   };
 
-  // RENDERING: VISTA DETALLE O LISTADO
   if (selectedDiseno) {
     return (
       <Box sx={{ pb: 4, maxWidth: 1360, margin: "0 auto" }}>
@@ -344,14 +337,12 @@ export default function Disenos3D() {
     );
   }
 
-  // KPIs Resumen
   const totalCount = disenos.length;
   const publicadosCount = disenos.filter((d) => d.estado_publicacion === "PUBLICADO").length;
   const borradorCount = disenos.filter((d) => d.estado_publicacion === "BORRADOR").length;
 
   return (
     <Box sx={{ pb: 4, maxWidth: 1360, margin: "0 auto" }}>
-      {/* HEADER PRINCIPAL */}
       <Stack
         direction={{ xs: "column", sm: "row" }}
         justifyContent="space-between"
@@ -395,7 +386,6 @@ export default function Disenos3D() {
         </Button>
       </Stack>
 
-      {/* PESTAÑAS DE FILTRO POR ESTADO (Estilo Minimalista Negro con Contadores e Indicador al Ancho del Texto) */}
       <Box sx={{ borderBottom: "1px solid rgba(0, 0, 0, 0.08)", mb: 3.5 }}>
         <Stack direction="row" spacing={4}>
           {[
@@ -440,7 +430,6 @@ export default function Disenos3D() {
         </Stack>
       </Box>
 
-      {/* BARRA DE BÚSQUEDA Y FILTROS */}
       <Box sx={{ mb: 3 }}>
         <Stack
           direction={{ xs: "column", md: "row" }}
@@ -448,7 +437,6 @@ export default function Disenos3D() {
           alignItems={{ xs: "stretch", md: "center" }}
           justifyContent="space-between"
         >
-          {/* Campo de Búsqueda */}
           <Box sx={{ flexGrow: 1, minWidth: { xs: "100%", md: 320 } }}>
             <TextField
               fullWidth
@@ -478,14 +466,12 @@ export default function Disenos3D() {
             />
           </Box>
 
-          {/* Grupo de Filtros Select y Botones */}
           <Stack
             direction={{ xs: "column", sm: "row" }}
             spacing={2}
             alignItems="center"
             sx={{ flexShrink: 0 }}
           >
-            {/* Filtro por Categoría */}
             <FormControl
               size="small"
               sx={{
@@ -530,7 +516,6 @@ export default function Disenos3D() {
               </Select>
             </FormControl>
 
-            {/* Filtro por ODS */}
             <FormControl
               size="small"
               sx={{
@@ -575,7 +560,6 @@ export default function Disenos3D() {
               </Select>
             </FormControl>
 
-            {/* Acciones de filtro y vista */}
             <Stack direction="row" spacing={1} alignItems="center">
               {(searchTerm || selectedCategoria || selectedOds) && (
                 <Tooltip title="Limpiar Filtros">
@@ -601,7 +585,6 @@ export default function Disenos3D() {
                 </Tooltip>
               )}
 
-              {/* Toggle vista tabla / cuadricula */}
               <Tooltip title={viewMode === "table" ? "Cambiar a Cuadrícula" : "Cambiar a Tabla"}>
                 <IconButton
                   onClick={() => {
@@ -627,7 +610,6 @@ export default function Disenos3D() {
         </Stack>
       </Box>
 
-      {/* TABLA O GRID DE DISEÑOS 3D */}
       <Disenos3DTable
         disenos={filteredDisenos}
         categorias={categorias}
@@ -638,7 +620,6 @@ export default function Disenos3D() {
         onDelete={(item) => handleDeleteDiseno(item)}
       />
 
-      {/* MODAL DE ELIMINACIÓN */}
       <Diseno3DDeleteModal
         open={deleteModal.open}
         onClose={() => setDeleteModal({ open: false, item: null, submitting: false })}
@@ -646,7 +627,6 @@ export default function Disenos3D() {
         submitting={deleteModal.submitting}
       />
 
-      {/* SNACKBAR COMUNICACIONES */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
