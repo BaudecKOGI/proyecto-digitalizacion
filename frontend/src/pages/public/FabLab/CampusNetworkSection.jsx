@@ -5,7 +5,7 @@ import PeruMap from '@/components/landing/PeruMap';
 
 export default function CampusNetworkSection() {
   return (
-    <section className="bg-[#F8F9FB] py-20 px-[8vw]">
+    <section className="bg-white py-20 px-[8vw]">
       <div className="mx-auto max-w-[1400px]">
         {/* Encabezado */}
         <motion.div
@@ -37,7 +37,7 @@ export default function CampusNetworkSection() {
             >
               <div className="relative h-44 overflow-hidden bg-[#07101F]">
                 <img
-                  src="/campus/campus-lima-los-olivos.png"
+                  src="assets/campus/campus-lima-los-olivos.png"
                   alt="Campus Lima Los Olivos"
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 relative z-10"
                   onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
@@ -67,7 +67,7 @@ export default function CampusNetworkSection() {
             >
               <div className="relative h-44 overflow-hidden bg-[#07101F]">
                 <img
-                  src="/campus/campus-arequipa.png"
+                  src="assets/campus/campus-arequipa.png"
                   alt="Campus Arequipa"
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 relative z-10"
                   onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
@@ -113,7 +113,7 @@ export default function CampusNetworkSection() {
             >
               <div className="relative h-44 overflow-hidden bg-[#07101F]">
                 <img
-                  src="/campus/campus-huancayo.png"
+                  src="assets/campus/campus-huancayo.png"
                   alt="Campus Huancayo"
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 relative z-10"
                   onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
@@ -143,7 +143,7 @@ export default function CampusNetworkSection() {
             >
               <div className="relative h-44 overflow-hidden bg-[#07101F]">
                 <img
-                  src="/campus/campus-cusco.png"
+                  src="assets/campus/campus-cusco.png"
                   alt="Campus Cusco"
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 relative z-10"
                   onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}

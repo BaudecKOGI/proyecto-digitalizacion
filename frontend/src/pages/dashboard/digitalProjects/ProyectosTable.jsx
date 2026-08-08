@@ -85,7 +85,7 @@ export default function ProyectosTable({
           No hay proyectos digitales registrados
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-          Comienza publicando el primer proyecto de software o aplicación con repositorios y ODS.
+          Comienza publicando el primer proyecto digital o aplicación con repositorios y ODS.
         </Typography>
       </Card>
     );

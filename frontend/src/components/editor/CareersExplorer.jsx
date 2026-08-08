@@ -2,17 +2,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { GraduationCap, ChevronRight, Eye } from 'lucide-react';
 
-/**
- * Explorador de Carreras -> Ciclos -> Alumnos.
- *
- * No trae datos nuevos: agrupa en memoria los proyectos que ya trae
- * `fetchFn` (la misma función que usa tu lista de "Todos los proyectos"),
- * usando los campos carrera / ciclo / autor_nombre que ya existen en cada
- * proyecto. No requiere cambios en el backend.
- *
- * mode: '3d' | 'software'
- * fetchFn: la función de src/services/api.js que ya usa tu lista de esa categoría
- */
 export function CareersExplorer({ mode, fetchFn }) {
   const { carrera, ciclo } = useParams();
   const navigate = useNavigate();
@@ -34,10 +23,8 @@ export function CareersExplorer({ mode, fetchFn }) {
     return () => {
       cancelado = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Agrupación en memoria: carrera -> ciclo -> autor_nombre -> [proyectos]
   const arbol = useMemo(() => {
     const tree = {};
     for (const p of proyectos) {
@@ -56,9 +43,8 @@ export function CareersExplorer({ mode, fetchFn }) {
     if (mode === '3d') {
       navigate(`/editor/3d/detalle/${proyecto.id}`);
     } else {
-      // Pasamos el proyecto completo para evitar el flash de la tabla
-      navigate('/editor/software/proyectos', { 
-        state: { openProject: proyecto } 
+      navigate('/editor/software/proyectos', {
+        state: { openProject: proyecto }
       });
     }
   }
@@ -109,7 +95,7 @@ export function CareersExplorer({ mode, fetchFn }) {
     </div>
   );
 
-  // ---------- NIVEL 3: alumnos dentro de un ciclo ----------
+  // NIVEL 3: alumnos dentro de un ciclo 
   if (carrera && ciclo) {
     const alumnos = arbol[carrera]?.[ciclo] || {};
     const entradas = Object.entries(alumnos);
@@ -142,7 +128,7 @@ export function CareersExplorer({ mode, fetchFn }) {
     );
   }
 
-  // ---------- NIVEL 2: ciclos dentro de una carrera ----------
+  // NIVEL 2: ciclos dentro de una carrera
   if (carrera) {
     const ciclos = arbol[carrera] || {};
     const entradas = Object.entries(ciclos);
@@ -171,7 +157,7 @@ export function CareersExplorer({ mode, fetchFn }) {
     );
   }
 
-  // ---------- NIVEL 1: todas las carreras ----------
+  // NIVEL 1: todas las carreras
   const entradas = Object.entries(arbol);
   return (
     <div className="flex flex-col gap-6 pb-24">

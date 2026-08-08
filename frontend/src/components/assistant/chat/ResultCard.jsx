@@ -1,6 +1,4 @@
-// src/components/assistant/chat/ResultCard.jsx
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
 const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:8000';
@@ -23,16 +21,15 @@ function resolveImageUrl(item) {
 
 function getRoute(item) {
   if (item._type === '3D') return `/proyecto/3d/${item.id}`;
-  return `/galeria/software`;
+  return `/proyecto/digitales/${item.id}`;
 }
 
 const TYPE_BADGE = {
-  '3D':      { label: 'Diseño 3D', color: '#6366F1', bg: 'rgba(99,102,241,0.15)' },
-  Software:  { label: 'Software',   color: '#0891B2', bg: 'rgba(8,145,178,0.15)'  },
+  '3D': { label: 'Diseño 3D', color: '#6366F1', bg: 'rgba(99,102,241,0.15)' },
+  Software: { label: 'Software', color: '#5A00AA', bg: 'rgba(90,0,170,0.15)' },
 };
 
 export default function ResultCard({ item, index }) {
-  const navigate = useNavigate();
   const imgUrl = resolveImageUrl(item);
   const badge = TYPE_BADGE[item._type] || TYPE_BADGE['Software'];
   const [imgError, setImgError] = useState(false);
@@ -42,7 +39,7 @@ export default function ResultCard({ item, index }) {
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.06 }}
-      onClick={() => navigate(getRoute(item))}
+      onClick={() => window.open(getRoute(item), '_blank')}
       className="group w-full text-left flex gap-3 items-center p-2.5 transition-all duration-200"
       style={{
         background: 'rgba(255,255,255,1)',

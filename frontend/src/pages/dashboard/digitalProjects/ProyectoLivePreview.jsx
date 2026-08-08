@@ -127,7 +127,7 @@ export default function ProyectoLivePreview({
           </Stack>
 
           <Typography variant="h6" fontWeight={800} sx={{ color: "text.primary", mb: 0.5 }}>
-            {formProyecto.titulo || "Título del Proyecto de Software"}
+            {formProyecto.titulo || "Título del Proyecto Digital"}
           </Typography>
 
           <Typography variant="caption" color="text.secondary" fontWeight={700} display="block" sx={{ mb: 1.5 }}>

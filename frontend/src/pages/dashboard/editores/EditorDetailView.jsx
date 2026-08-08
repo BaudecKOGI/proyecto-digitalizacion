@@ -136,6 +136,8 @@ export default function EditorDetailView({ editor, onBack, showSnackbar }) {
     .join("")
     .toUpperCase();
 
+  const avatarUrl = editor.avatar_url || editor.avatar || "/assets/user.png";
+
   // Filtrado por búsqueda local
   const currentList = activeTab === 0 ? proyectos3D : proyectosSoftware;
   const filteredList = currentList.filter((p) => {
@@ -182,16 +184,12 @@ export default function EditorDetailView({ editor, onBack, showSnackbar }) {
           <Grid size={{ xs: 12, md: 7 }}>
             <Stack direction="row" spacing={2.5} alignItems="center">
               <Avatar
+                src={avatarUrl}
                 sx={{
-                  bgcolor: avatarColor,
-                  fontWeight: 700,
                   width: 56,
                   height: 56,
-                  fontSize: "1.25rem"
                 }}
-              >
-                {initials}
-              </Avatar>
+              />
               <Box>
                 <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 0.5 }}>
                   <Typography variant="h5" sx={{ fontWeight: 700, color: "text.primary" }}>
@@ -242,7 +240,7 @@ export default function EditorDetailView({ editor, onBack, showSnackbar }) {
                   }}
                 >
                   <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-                    DISEÑOS 3D SUBIDOS
+                    MODELOS 3D SUBIDOS
                   </Typography>
                   <Typography variant="h5" sx={{ fontWeight: 700, color: "#10B981", mt: 0.5 }}>
                     {proyectos3D.length}
@@ -295,7 +293,7 @@ export default function EditorDetailView({ editor, onBack, showSnackbar }) {
           <Tab
             icon={<CubeIcon size={18} />}
             iconPosition="start"
-            label={`Diseños 3D (${proyectos3D.length})`}
+            label={`Modelos 3D (${proyectos3D.length})`}
           />
           <Tab
             icon={<FolderIcon size={18} />}
@@ -308,7 +306,7 @@ export default function EditorDetailView({ editor, onBack, showSnackbar }) {
       {/* Barra de Filtro de Proyectos */}
       <Box sx={{ mb: 3, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 2 }}>
         <TextField
-          placeholder={`Buscar en ${activeTab === 0 ? "Diseños 3D" : "Proyectos Digitales"} de este editor...`}
+          placeholder={`Buscar en ${activeTab === 0 ? "Modelos 3D" : "Proyectos Digitales"} de este editor...`}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           size="small"
@@ -345,7 +343,7 @@ export default function EditorDetailView({ editor, onBack, showSnackbar }) {
           <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.5, color: "text.primary" }}>
             {searchTerm
               ? "No se encontraron proyectos para esta búsqueda"
-              : `Este editor aún no ha subido ${activeTab === 0 ? "Diseños 3D" : "Proyectos Digitales"}`}
+              : `Este editor aún no ha subido ${activeTab === 0 ? "Modelos 3D" : "Proyectos Digitales"}`}
           </Typography>
           <Typography variant="body2" color="text.secondary">
             Los proyectos publicados por el editor aparecerán listados aquí para su gestión.

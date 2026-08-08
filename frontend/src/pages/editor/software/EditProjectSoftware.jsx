@@ -236,7 +236,7 @@ export default function EditProjectSoftware() {
         {/* FORMULARIO */}
         <div className="bg-[var(--panel)] p-6 md:p-10 rounded-2xl border border-[var(--line)] shadow-sm">
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-[var(--text-main)]">Editar Proyecto de Software</h2>
+            <h2 className="text-2xl font-bold text-[var(--text-main)]">Editar Proyecto Digital</h2>
             <p className="text-sm text-[var(--text-muted)] mt-1">
               Modifica la información técnica, repositorio, demo o archivos multimedia.
             </p>

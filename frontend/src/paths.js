@@ -10,7 +10,7 @@ export const paths = {
         categorias: "/dashboard/categorias",
         visualizaciones: "/dashboard/visualizaciones",
     },
-    // NUEVO BLOQUE:
+    // Bloque del editor:
     editor: {
         proyectos3D: "/editor/3d/proyectos",
         nuevoProyecto3D: "/editor/3d/proyectos/nuevo",

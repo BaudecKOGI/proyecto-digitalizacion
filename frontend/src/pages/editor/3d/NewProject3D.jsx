@@ -264,7 +264,7 @@ export const NewProject3D = () => {
       
       <div className="mb-6">
         <h2 className="text-2xl font-bold mb-1 text-[var(--text-main)]">
-          Subir Nuevo Diseño 3D
+          Subir Nuevo Modelo 3D
         </h2>
         <div className="text-sm text-[var(--text-muted)]">
           Sube tu archivo .fbx, configura sus datos y prueba sus interacciones mecánicas.
@@ -445,7 +445,7 @@ export const NewProject3D = () => {
           </form>
         </div>
 
-        {/* VISOR 3D (Se mantiene oscuro por defecto de diseño 3D) */}
+        {/* VISOR 3D (Se mantiene oscuro por defecto de modelo 3D) */}
         <div className="flex-1 bg-[#1e293b] rounded-xl border border-[#334155] relative overflow-hidden flex items-center justify-center shadow-inner">
           
           {!fbxUrl ? (

@@ -351,10 +351,10 @@ export default function Diseno3DFormView({
               }
             }}
           >
-            Volver a Diseños
+            Volver a Modelos
           </Button>
           <Typography variant="h6" fontWeight={700} sx={{ color: "text.primary" }}>
-            {editingDiseno ? "Editar Diseño 3D" : "Crear Diseño 3D"}
+            {editingDiseno ? "Editar Modelo 3D" : "Crear Modelo 3D"}
           </Typography>
         </Stack>
       </Box>
@@ -391,7 +391,7 @@ export default function Diseno3DFormView({
           }}
         >
           <Typography variant="h5" fontWeight={800} gutterBottom sx={{ color: "text.primary", mb: 0.5 }}>
-            {editingDiseno ? "Editar Diseño 3D" : "Crear Nuevo Diseño 3D"}
+            {editingDiseno ? "Editar Modelo 3D" : "Crear Nuevo Modelo 3D"}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
             Completa la información general, carga el modelo 3D y configura las interacciones mecánicas del proyecto.
@@ -838,7 +838,7 @@ export default function Diseno3DFormView({
                 "&:hover": { bgcolor: "#001e33", boxShadow: "none" }
               }}
             >
-              {editingDiseno ? "Actualizar Proyecto" : "Crear Diseño 3D"}
+              {editingDiseno ? "Actualizar Proyecto" : "Crear Modelo 3D"}
             </Button>
           </Stack>
         </Paper>

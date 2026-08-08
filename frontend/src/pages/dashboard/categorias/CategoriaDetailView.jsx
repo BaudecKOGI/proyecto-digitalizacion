@@ -113,17 +113,18 @@ export default function CategoriaDetailView({ categoria, onBack }) {
           spacing={3}
         >
           <Stack direction="row" spacing={2.5} alignItems="center">
-            <Avatar
+            <Box
+              component="img"
+              src="/assets/tag.png"
+              alt="Categoría"
               sx={{
-                bgcolor: "primary.main",
-                color: "#ffffff",
-                width: 64,
-                height: 64,
-                borderRadius: 3
+                width: 38,
+                height: 38,
+                ml: 1,
+                mr: 0.5,
+                objectFit: "contain"
               }}
-            >
-              <TagIcon size={32} weight="fill" />
-            </Avatar>
+            />
             <Box>
               <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 0.5 }}>
                 <Typography variant="h4" sx={{ fontWeight: 800, color: "text.primary" }}>
@@ -139,12 +140,12 @@ export default function CategoriaDetailView({ categoria, onBack }) {
           <Stack direction="row" spacing={1.5} alignItems="center">
             <Chip
               icon={<CubeIcon size={16} weight="fill" />}
-              label={`${disenos3D.length} Diseños 3D`}
+              label={`${disenos3D.length} Modelos 3D`}
               sx={{ fontWeight: 700, bgcolor: "action.hover", py: 2 }}
             />
             <Chip
               icon={<CodeIcon size={16} weight="fill" />}
-              label={`${proyectosSoftware.length} Proyectos Software`}
+              label={`${proyectosSoftware.length} Proyectos Digitales`}
               sx={{ fontWeight: 700, bgcolor: "action.hover", py: 2 }}
             />
           </Stack>
@@ -163,12 +164,12 @@ export default function CategoriaDetailView({ categoria, onBack }) {
           <Tab
             icon={<CubeIcon size={20} />}
             iconPosition="start"
-            label={`Diseños 3D relacionados (${disenos3D.length})`}
+            label={`Modelos 3D relacionados (${disenos3D.length})`}
           />
           <Tab
             icon={<CodeIcon size={20} />}
             iconPosition="start"
-            label={`Proyectos de Software relacionados (${proyectosSoftware.length})`}
+            label={`Proyectos Digitales relacionados (${proyectosSoftware.length})`}
           />
         </Tabs>
       </Box>
@@ -182,7 +183,7 @@ export default function CategoriaDetailView({ categoria, onBack }) {
           </Typography>
         </Box>
       ) : tabIndex === 0 ? (
-        /* TAB 0: DISEÑOS 3D */
+        /* TAB 0: MODELOS 3D */
         disenos3D.length === 0 ? (
           <Paper
             elevation={0}
@@ -197,7 +198,7 @@ export default function CategoriaDetailView({ categoria, onBack }) {
           >
             <CubeIcon size={56} weight="duotone" style={{ opacity: 0.5, marginBottom: 16 }} />
             <Typography variant="h6" fontWeight={700} color="text.primary" gutterBottom>
-              Sin Diseños 3D vinculados
+              Sin Modelos 3D vinculados
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 420, mx: "auto" }}>
               Actualmente no hay modelos 3D que pertenezcan a la categoría "{categoria.nombre}".
@@ -298,7 +299,7 @@ export default function CategoriaDetailView({ categoria, onBack }) {
           >
             <FolderIcon size={56} weight="duotone" style={{ opacity: 0.5, marginBottom: 16 }} />
             <Typography variant="h6" fontWeight={700} color="text.primary" gutterBottom>
-              Sin Proyectos de Software vinculados
+              Sin Proyectos Digitales vinculados
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 420, mx: "auto" }}>
               Actualmente no hay repositorios o demos digitales que pertenezcan a la categoría "{categoria.nombre}".

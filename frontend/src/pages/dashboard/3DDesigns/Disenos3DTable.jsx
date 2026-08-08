@@ -77,7 +77,7 @@ export default function Disenos3DTable({
   if (loading) {
     return (
       <Box sx={{ p: 6, textAlign: "center", color: "text.secondary" }}>
-        <Typography variant="body1">Cargando catálogo de diseños 3D...</Typography>
+        <Typography variant="body1">Cargando catálogo de modelos 3D...</Typography>
       </Box>
     );
   }
@@ -100,7 +100,7 @@ export default function Disenos3DTable({
           No hay modelos 3D registrados
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Crea un nuevo diseño 3D o ajusta los filtros de búsqueda para encontrar resultados.
+          Crea un nuevo modelo 3D o ajusta los filtros de búsqueda para encontrar resultados.
         </Typography>
       </Paper>
     );

@@ -161,9 +161,9 @@ export default function ProjectsListSoftware() {
       {/* CABECERA */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-[var(--text-main)]">Gestión de Proyectos Software</h2>
+          <h2 className="text-2xl font-bold text-[var(--text-main)]">Gestión de Proyectos Digitales</h2>
           <p className="text-sm text-[var(--text-muted)] mt-1">
-            Administra proyectos de software, repositorios, demos vivas, videos, tecnologías y ODS.
+            Administra proyectos digitales, repositorios, demos vivas, videos, tecnologías y ODS.
           </p>
         </div>
         
@@ -172,7 +172,7 @@ export default function ProjectsListSoftware() {
           className="flex items-center gap-2 bg-[var(--accent)] text-white px-5 py-2.5 rounded-xl font-semibold hover:opacity-90 transition-all cursor-pointer shadow-md shadow-[var(--accent)]/20 shrink-0"
         >
           <Plus size={18} />
-          Nuevo Proyecto Software
+          Nuevo Proyecto Digital
         </button>
       </div>
 

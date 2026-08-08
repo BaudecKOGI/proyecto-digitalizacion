@@ -8,7 +8,9 @@ from usuarios.views import (
     logout_view,
     me_view,
     update_profile_view,
-    change_password_view
+    change_password_view,
+    forgot_password_view,
+    reset_password_view
 )
 
 router = DefaultRouter()
@@ -21,6 +23,8 @@ urlpatterns = [
     path('auth/me/', me_view, name='api-me'),
     path('auth/profile/', update_profile_view, name='api-update-profile'),
     path('auth/change-password/', change_password_view, name='api-change-password'),
+    path('auth/forgot-password/', forgot_password_view, name='api-forgot-password'),
+    path('auth/reset-password/', reset_password_view, name='api-reset-password'),
     path('auth/token/refresh/', TokenRefreshView.as_view(), name='token-refresh'),
     path('', include(router.urls)),
 ]

@@ -72,7 +72,7 @@ export function MainNav() {
 						<Avatar
 							onClick={userPopover.handleOpen}
 							ref={userPopover.anchorRef}
-							src={user?.avatar || "/assets/avatar_jonel.png"}
+							src={user?.avatar || "/assets/user.png"}
 							sx={{ cursor: "pointer" }}
 						>
 							{(user?.name || "A").charAt(0).toUpperCase()}

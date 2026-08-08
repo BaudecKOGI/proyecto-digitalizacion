@@ -29,7 +29,7 @@ export default function ProyectoDeleteModal({ open, onClose, onConfirm, submitti
       <DialogTitle sx={{ fontWeight: 700 }}>¿Eliminar este Proyecto?</DialogTitle>
       <DialogContent>
         <Typography variant="body2" color="text.secondary">
-          Esta acción eliminará de forma permanente el proyecto de software, incluyendo su portada y video. Esta operación no se puede deshacer.
+          Esta acción eliminará de forma permanente el proyecto digital, incluyendo su portada y video. Esta operación no se puede deshacer.
         </Typography>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2 }}>

@@ -310,7 +310,7 @@ export const EditProject3D = () => {
       {/* HEADER */}
       <div className="mb-6">
         <h2 className="text-2xl font-bold mb-1 text-[var(--text-main)]">
-          Editar Diseño 3D
+          Editar Modelo 3D
         </h2>
         <div className="text-sm text-[var(--text-muted)]">
           Modifica la información o la configuración mecánica de tu proyecto.

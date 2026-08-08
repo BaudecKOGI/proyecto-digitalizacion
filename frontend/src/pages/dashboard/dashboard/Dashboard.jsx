@@ -145,12 +145,12 @@ export default function Dashboard() {
             value={(total3D || 124) + (totalSoftware || 48)}
             icon={<SparkleIcon />}
             color="#6366F1"
-            subtitle="Proyectos Digitales y Diseños 3D"
+            subtitle="Proyectos Digitales y Modelos 3D"
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
           <SummaryStatCard
-            title="Diseños 3D"
+            title="Modelos 3D"
             value={total3D || 124}
             icon={<CubeIcon />}
             color="#0EA5E9"

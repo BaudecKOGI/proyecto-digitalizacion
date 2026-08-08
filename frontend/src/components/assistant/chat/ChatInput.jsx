@@ -1,4 +1,3 @@
-// src/components/assistant/chat/ChatInput.jsx
 import React, { useState, useRef } from 'react';
 
 const SUGGESTIONS = [

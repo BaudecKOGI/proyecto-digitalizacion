@@ -6,6 +6,11 @@ from django.contrib.auth import authenticate, login, logout, update_session_auth
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.core.mail import send_mail
+from django.conf import settings
 
 class UsuarioViewSet(viewsets.ModelViewSet):
     """
@@ -196,3 +201,64 @@ def change_password_view(request):
     }, status=status.HTTP_200_OK)
 
 
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def forgot_password_view(request):
+    email = request.data.get('email', '').strip().lower()
+    if not email:
+        return Response({"error": "El correo es obligatorio."}, status=status.HTTP_400_BAD_REQUEST)
+
+    user = Usuario.objects.filter(email=email).first()
+    if user:
+        # Generate token and uid
+        token_generator = PasswordResetTokenGenerator()
+        token = token_generator.make_token(user)
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        
+        # Build reset link
+        reset_link = f"{settings.FRONTEND_URL}/auth/update-password?uid={uid}&token={token}"
+        
+        # Send email
+        subject = "Recuperación de Contraseña - FabLab"
+        message = f"Hola {user.nombre},\n\nHaz clic en el siguiente enlace para restablecer tu contraseña:\n{reset_link}\n\nSi no solicitaste esto, ignora este correo."
+        try:
+            send_mail(
+                subject,
+                message,
+                settings.EMAIL_HOST_USER or 'noreply@fablab.pe',
+                [user.email],
+                fail_silently=False,
+            )
+        except Exception as e:
+            # Fallback for development if SMTP fails
+            print(f"Error sending email: {e}\nReset Link: {reset_link}")
+
+    # Always return success to prevent email enumeration
+    return Response({"success": True, "message": "Si el correo está registrado, recibirás un enlace de recuperación."}, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def reset_password_view(request):
+    uidb64 = request.data.get('uid')
+    token = request.data.get('token')
+    new_password = request.data.get('password')
+
+    if not uidb64 or not token or not new_password:
+        return Response({"error": "Faltan datos para restablecer la contraseña."}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = Usuario.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, Usuario.DoesNotExist):
+        user = None
+
+    if user is not None and PasswordResetTokenGenerator().check_token(user, token):
+        if len(new_password) < 6:
+            return Response({"error": "La nueva contraseña debe tener al menos 6 caracteres."}, status=status.HTTP_400_BAD_REQUEST)
+            
+        user.set_password(new_password)
+        user.save()
+        return Response({"success": True, "message": "Tu contraseña ha sido actualizada correctamente."}, status=status.HTTP_200_OK)
+    else:
+        return Response({"error": "El enlace de recuperación es inválido o ha expirado."}, status=status.HTTP_400_BAD_REQUEST)

@@ -100,7 +100,7 @@ export const ProjectsList3D = () => {
       
       {/* TÍTULO PRINCIPAL */}
       <div>
-        <h2 className="text-2xl font-bold text-[var(--text-main)]">Gestión de Proyectos 3D</h2>
+        <h2 className="text-2xl font-bold text-[var(--text-main)]">Gestión de Modelos 3D</h2>
         <p className="text-sm text-[var(--text-muted)] mt-1">
           Administra modelos 3D, tecnologías y ODS.
         </p>
@@ -238,7 +238,7 @@ export const ProjectsList3D = () => {
 
       {/* --- GRID DE TARJETAS --- */}
       {loading ? (
-        <div className="p-10 text-center text-[var(--text-muted)] animate-pulse">Cargando espectaculares proyectos 3D...</div>
+        <div className="p-10 text-center text-[var(--text-muted)] animate-pulse">Cargando espectaculares modelos 3D...</div>
       ) : filteredProjects.length === 0 ? (
         <div className="py-16 px-5 text-center bg-[var(--panel)] border border-[var(--line)] rounded-2xl text-[var(--text-muted)]">
           No hay proyectos que coincidan con tu búsqueda.

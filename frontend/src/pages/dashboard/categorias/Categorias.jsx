@@ -207,7 +207,7 @@ export default function CategoriasPage() {
             Gestión de Categorías
           </Typography>
           <Typography variant="body1" color="text.secondary" fontWeight={500}>
-            Organiza y estructura las clasificaciones para proyectos 3D y de desarrollo de software del FAB LAB.
+            Organiza y estructura las clasificaciones para modelos 3D y proyectos de desarrollo de software del FAB LAB.
           </Typography>
         </Box>
       </Box>
@@ -290,17 +290,18 @@ export default function CategoriasPage() {
             borderColor: "divider"
           }}
         >
-          <Avatar
+          <Box
+            component="img"
+            src="/assets/tag.png"
+            alt="Categoría vacía"
             sx={{
-              width: 64,
-              height: 64,
+              width: 48,
+              height: 48,
               margin: "0 auto 16px",
-              backgroundColor: "rgba(99, 102, 241, 0.1)",
-              color: "#9CA3AF"
+              opacity: 0.5,
+              objectFit: "contain"
             }}
-          >
-            <TagIcon size={32} />
-          </Avatar>
+          />
           <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
             {searchTerm ? "No se encontraron categorías coincidiendo con la búsqueda" : "No hay categorías registradas"}
           </Typography>

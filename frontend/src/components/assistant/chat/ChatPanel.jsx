@@ -1,4 +1,3 @@
-// src/components/assistant/chat/ChatPanel.jsx
 import React, { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ChatMessage from './ChatMessage';

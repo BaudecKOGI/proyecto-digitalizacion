@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   User, Mail, ShieldCheck, Activity, 
-  Lock, Eye, EyeOff, Camera,
+  Lock, Eye, EyeOff, Camera, Trash2,
   CheckCircle2, X, AlertTriangle
 } from 'lucide-react';
 import { useUser } from '@/hooks/use-user'; 
@@ -178,6 +178,46 @@ export const Profile = () => {
     }
   };
 
+  const handleRemoveAvatar = () => {
+    openConfirm(
+      'Eliminar foto de perfil',
+      '¿Estás seguro de que deseas eliminar tu foto de perfil actual?',
+      'remove_avatar'
+    );
+  };
+
+  const doRemoveAvatar = async () => {
+    const nombre = (accountData.nombre || getUserNombre(user) || '').trim();
+    const email = (accountData.correo || getUserEmail(user) || '').trim().toLowerCase();
+
+    setIsSavingAvatar(true);
+    try {
+      const { error } = await authClient.updateProfile({
+        nombre,
+        email,
+        remove_avatar: true,
+      });
+
+      if (error) {
+        showToast('error', error);
+        return;
+      }
+
+      setAvatarPreview(null);
+      pendingAvatarRef.current = null;
+      avatarLoadedRef.current = true;
+      if (fileInputRef.current) fileInputRef.current.value = '';
+
+      await checkSession?.();
+      showToast('success', '¡Foto de perfil eliminada correctamente!');
+      closeConfirm();
+    } catch (err) {
+      showToast('error', 'Error al eliminar la foto de perfil.');
+    } finally {
+      setIsSavingAvatar(false);
+    }
+  };
+
   const doSaveAccount = async () => {
     setIsSavingAccount(true);
     
@@ -219,6 +259,8 @@ export const Profile = () => {
   const handleConfirmAction = async () => {
     if (confirmModal.action === 'avatar') {
       await doSaveAvatar();
+    } else if (confirmModal.action === 'remove_avatar') {
+      await doRemoveAvatar();
     } else if (confirmModal.action === 'account') {
       await doSaveAccount();
     } else if (confirmModal.action === 'password') {
@@ -304,6 +346,18 @@ export const Profile = () => {
               >
                 <Camera size={14} />
               </button>
+
+              {avatarPreview && !avatarPreview.includes("/assets/user.png") && (
+                <button
+                  type="button"
+                  onClick={handleRemoveAvatar}
+                  disabled={isSavingAvatar}
+                  className="absolute bottom-1 left-1 w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center shadow-md hover:opacity-90 transition-opacity cursor-pointer border-2 border-[var(--panel)] disabled:opacity-50"
+                  title="Eliminar foto de perfil"
+                >
+                  <Trash2 size={14} />
+                </button>
+              )}
 
               <input
                 ref={fileInputRef}

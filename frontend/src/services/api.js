@@ -75,10 +75,9 @@ export const createProyecto3D = async (formData) => {
   return handleResponse(res);
 };
 
-export const fetchProyecto3DById = async (id) => {
-  const res = await fetch(`${API_BASE_URL}/proyectos-3d/${id}/`, {
-    headers: getAuthHeaders(false)
-  });
+export const fetchProyecto3DById = async (id, isPublic = false) => {
+  const headers = isPublic ? { "Content-Type": "application/json" } : getAuthHeaders(false);
+  const res = await fetch(`${API_BASE_URL}/proyectos-3d/${id}/`, { headers });
   return handleResponse(res);
 };
 
@@ -265,10 +264,9 @@ export const createProyectoSoftware = async (formData) => {
   return handleResponse(res);
 };
 
-export const fetchProyectoSoftwareById = async (id) => {
-  const res = await fetch(`${API_BASE_URL}/proyectos-software/${id}/`, {
-    headers: getAuthHeaders(false)
-  });
+export const fetchProyectoSoftwareById = async (id, isPublic = false) => {
+  const headers = isPublic ? { "Content-Type": "application/json" } : getAuthHeaders(false);
+  const res = await fetch(`${API_BASE_URL}/proyectos-software/${id}/`, { headers });
   return handleResponse(res);
 };
 

@@ -16,7 +16,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { paths } from "@/paths";
 
-// TABLA RESUMEN DE ÚLTIMOS DISEÑOS 3D REGISTRADOS
+// TABLA RESUMEN DE ÚLTIMOS MODELOS 3D REGISTRADOS
 export default function Recent3DTable({ disenos = [], categorias = [] }) {
   const navigate = useNavigate();
   const recentItems = disenos.slice(0, 4);
@@ -49,14 +49,14 @@ export default function Recent3DTable({ disenos = [], categorias = [] }) {
         }}
       >
         <Typography sx={{ fontWeight: 700, color: "text.primary", fontSize: "1.15rem" }}>
-          Últimos Diseños 3D
+          Últimos Modelos 3D
         </Typography>
       </Box>
 
       {recentItems.length === 0 ? (
         <Box sx={{ p: 4, textAlign: "center", color: "text.secondary", flexGrow: 1 }}>
           <Typography variant="body2" fontWeight={500}>
-            No hay diseños 3D registrados aún.
+            No hay modelos 3D registrados aún.
           </Typography>
         </Box>
       ) : (
@@ -139,7 +139,7 @@ export default function Recent3DTable({ disenos = [], categorias = [] }) {
             "&:hover": { bgcolor: "transparent", textDecoration: "underline" }
           }}
         >
-          Ver todos los Diseños 3D
+          Ver todos los Modelos 3D
         </Button>
       </Box>
     </Paper>

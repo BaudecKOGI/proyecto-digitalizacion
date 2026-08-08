@@ -1,10 +1,9 @@
-// src/components/assistant/chat/ChatMessage.jsx
 import React from 'react';
 import { motion } from 'framer-motion';
 import ResultCard from './ResultCard';
 import { MiniRobotAvatar } from '../avatar/RobotHead3D';
 
-/* ─── Markdown básico ─── */
+/* Markdown básico */
 function parseText(text) {
   return text
     .split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g)
@@ -22,9 +21,12 @@ function parseText(text) {
     });
 }
 
-/* ─── Efecto Máquina de Escribir ─── */
-function TypewriterText({ text, speed = 15 }) {
-  const [count, setCount] = React.useState(0);
+/* Efecto Máquina de Escribir */
+const typedMessages = new Set();
+
+function TypewriterText({ text, messageId, isOld, speed = 15 }) {
+  const isAlreadyTyped = isOld || typedMessages.has(messageId);
+  const [count, setCount] = React.useState(isAlreadyTyped ? text.length : 0);
 
   React.useEffect(() => {
     if (count < text.length) {
@@ -32,13 +34,15 @@ function TypewriterText({ text, speed = 15 }) {
         setCount((prev) => prev + 1);
       }, speed);
       return () => clearTimeout(timeout);
+    } else {
+      typedMessages.add(messageId);
     }
-  }, [count, text, speed]);
+  }, [count, text, speed, messageId]);
 
   return <>{parseText(text.slice(0, count))}</>;
 }
 
-/* ─── Indicador "escribiendo..." ─── */
+/* Indicador "escribiendo..." */
 function TypingIndicator() {
   return (
     <div className="flex items-center gap-1 px-3 py-2.5">
@@ -54,7 +58,7 @@ function TypingIndicator() {
   );
 }
 
-/* ─── Mensaje individual ─── */
+/* Mensaje individual */
 export default function ChatMessage({ message }) {
   const isBot = message.role === 'bot';
 
@@ -111,19 +115,13 @@ export default function ChatMessage({ message }) {
         className="max-w-[80%] px-3 py-2 text-[13px] leading-relaxed"
         style={{
           fontFamily: 'Roboto, sans-serif',
-          /*
-           * items-end = el avatar está alineado al FONDO del mensaje.
-           * La cola (esquina plana) debe apuntar hacia abajo donde está el avatar.
-           * Bot  -> esquina inferior-izquierda plana : 18 18 18 2
-           * User -> esquina inferior-derecha plana   : 18 18 2 18
-           */
           borderRadius: isBot ? '18px 18px 18px 2px' : '18px 18px 2px 18px',
-          background: isBot ? '#FFFFFF' : 'linear-gradient(135deg, #4F46E5, #6366F1)',
+          background: isBot ? '#FFFFFF' : '#5A00AA',
           color: isBot ? '#111827' : 'rgba(255,255,255,0.95)',
           boxShadow: isBot ? '0 1px 4px rgba(0,0,0,0.18)' : 'none',
         }}
       >
-        {isBot ? <TypewriterText text={message.text} /> : parseText(message.text)}
+        {isBot ? <TypewriterText text={message.text} messageId={message.id} isOld={message.isOld} /> : parseText(message.text)}
       </div>
     </motion.div>
   );

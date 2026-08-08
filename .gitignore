@@ -9,6 +9,9 @@ backend/**/migrations/
 !backend/**/migrations/__init__.py
 **/__pycache__/
 *.pyc
+backend/media/
+backend/staticfiles/
+backend/.env
 
 # React / Node.js
 frontend/node_modules/

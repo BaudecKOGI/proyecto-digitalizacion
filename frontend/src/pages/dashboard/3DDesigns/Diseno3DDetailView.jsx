@@ -74,7 +74,7 @@ export default function Diseno3DDetailView({
             Volver al listado
           </Button>
           <Typography variant="body2" color="text.secondary">
-            / Diseños 3D / Detalle de Modelo
+            / Modelos 3D / Detalle de Modelo
           </Typography>
         </Stack>
 

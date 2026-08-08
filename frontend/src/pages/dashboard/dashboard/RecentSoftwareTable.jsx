@@ -51,7 +51,7 @@ export default function RecentSoftwareTable({ proyectos = [] }) {
       {recentItems.length === 0 ? (
         <Box sx={{ p: 4, textAlign: "center", color: "text.secondary", flexGrow: 1 }}>
           <Typography variant="body2" fontWeight={500}>
-            No hay proyectos de software registrados aún.
+            No hay proyectos digitales registrados aún.
           </Typography>
         </Box>
       ) : (

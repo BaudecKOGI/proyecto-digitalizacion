@@ -60,7 +60,7 @@ export default function ProjectDetailView({
             Volver al listado
           </Button>
           <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-            / Proyectos Software / <strong style={{ color: "inherit" }}>{proyecto.titulo}</strong>
+            / Proyectos Digitales / <strong style={{ color: "inherit" }}>{proyecto.titulo}</strong>
           </Typography>
         </Stack>
 
