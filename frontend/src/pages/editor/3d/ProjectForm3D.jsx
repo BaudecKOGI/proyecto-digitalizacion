@@ -1,11 +1,12 @@
 import React, { useState, useEffect, Suspense, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { 
   Upload, Save, X, Box as BoxIcon, Plus, Trash2, 
   Eye, FileEdit, Info 
 } from 'lucide-react';
+import { Select, MenuItem, Checkbox, ListItemText, FormControl } from "@mui/material";
 import { useUser } from '@/hooks/use-user';
-import { fetchCategorias, fetchCarreras, createProyecto3D } from '@/services/api';
+import { fetchCategorias, fetchCarreras, fetchProyecto3DById, updateProyecto3D, createProyecto3D, fetchProyectoSoftwareById, updateProyectoSoftware } from '@/services/api';
 import { ODS_LIST } from "@/pages/dashboard/digitalProjects/odsData";
 
 // --- IMPORTACIONES 3D ---
@@ -131,56 +132,96 @@ const FBXModel = ({ url, piezasMoviles, setHabilitarCamara }) => {
   );
 };
 
-export const NewProject3D = () => {
+export const ProjectForm3D = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  
   const { user } = useUser();
+  
   const [categorias, setCategorias] = useState([]);
   const [carreras, setCarreras] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState('');
 
   const [formData, setFormData] = useState({
     titulo: '', 
     descripcion: '', 
-    autor_nombre: '',
+    autor_nombre: '', 
     carrera: '',   // ID de carrera
-    ciclo: '',     // número de ciclo (1-12)
+    ciclo: '',     // número de ciclo
     estado_publicacion: 'BORRADOR', 
-    categoria: '', 
-    ods: '',
+    categoria: '',
+    ods_ids: [],
   });
 
   const [archivoFbx, setArchivoFbx] = useState(null);
-  const [fbxUrl, setFbxUrl] = useState(null); 
+  const [fbxUrl, setFbxUrl] = useState(null);
   const [imagenMiniatura, setImagenMiniatura] = useState(null);
 
   const [piezasMoviles, setPiezasMoviles] = useState([]);
+  const [camaraConfig, setCamaraConfig] = useState(null); 
   const [habilitarCamara, setHabilitarCamara] = useState(true);
 
   // Cargar categorías y carreras
   useEffect(() => {
-    const loadData = async () => {
+    const fetchData = async () => {
       try {
+        setInitialLoading(true);
         const [catsData, carrerasData] = await Promise.all([
           fetchCategorias(),
           fetchCarreras('activo=true')
         ]);
         setCategorias(Array.isArray(catsData) ? catsData : catsData?.results || []);
         setCarreras(Array.isArray(carrerasData) ? carrerasData : carrerasData?.results || []);
+
+        if (id) {
+          const proyecto = await fetchProyecto3DById(id);
+          
+          setFormData({
+            titulo: proyecto.titulo || '',
+            descripcion: proyecto.descripcion || '',
+            autor_nombre: proyecto.autor_nombre || '',
+            carrera: proyecto.carrera || '',
+            ciclo: proyecto.ciclo || '',
+            estado_publicacion: proyecto.estado_publicacion || 'BORRADOR',
+            categoria: proyecto.categoria || '',
+            ods_ids: proyecto.ods_ids || (proyecto.ods ? [proyecto.ods] : []),
+          });
+
+          if (proyecto.archivo_fbx) {
+            setFbxUrl(proyecto.archivo_fbx); 
+          }
+
+          if (proyecto.configuracion_interactiva) {
+            const config = typeof proyecto.configuracion_interactiva === 'string'
+              ? JSON.parse(proyecto.configuracion_interactiva)
+              : proyecto.configuracion_interactiva;
+              
+            if (Array.isArray(config)) {
+              setPiezasMoviles(config);
+            } else {
+              setPiezasMoviles(config.piezas_moviles || []);
+              if (config.camara) setCamaraConfig(config.camara); 
+            }
+          }
+        }
       } catch (err) {
         console.error("Error cargando datos:", err);
+        setError("No se pudo cargar la información del proyecto.");
+      } finally {
+        setInitialLoading(false);
       }
     };
-    loadData();
-  }, []);
+    fetchData();
+  }, [id]);
 
   useEffect(() => {
     if (archivoFbx) {
       const url = URL.createObjectURL(archivoFbx);
       setFbxUrl(url);
       return () => URL.revokeObjectURL(url);
-    } else {
-      setFbxUrl(null);
     }
   }, [archivoFbx]);
 
@@ -209,14 +250,13 @@ export const NewProject3D = () => {
   };
 
   const actualizarPieza = (index, campo, valor) => {
-    const nuevasPiezas = [...piezasMoviles];
-    nuevasPiezas[index][campo] = valor;
-    setPiezasMoviles(nuevasPiezas);
+    const nuevas = [...piezasMoviles];
+    nuevas[index][campo] = valor;
+    setPiezasMoviles(nuevas);
   };
 
   const eliminarPieza = (index) => {
-    const nuevasPiezas = piezasMoviles.filter((_, i) => i !== index);
-    setPiezasMoviles(nuevasPiezas);
+    setPiezasMoviles(piezasMoviles.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e) => {
@@ -227,31 +267,31 @@ export const NewProject3D = () => {
     try {
       const data = new FormData();
       Object.keys(formData).forEach(key => {
-        if (key === 'categoria') {
-          if (formData.categoria) data.append('categoria', formData.categoria);
-        } else if (key === 'ods') {
-          if (formData.ods) data.append('ods', formData.ods);
-        } else if (key === 'carrera' || key === 'ciclo') {
-          if (formData[key]) data.append(key, formData[key]);
-        } else {
+        if (key === 'ods_ids') {
+          data.append('ods_ids', JSON.stringify(formData.ods_ids));
+        } else if (formData[key] !== '') {
           data.append(key, formData[key]);
         }
       });
 
-      if (user?.id) data.append('creado_por', user.id);
-      
       if (archivoFbx) data.append('archivo_fbx', archivoFbx);
-      else throw new Error("El archivo FBX es obligatorio.");
-      
       if (imagenMiniatura) data.append('imagen_miniatura', imagenMiniatura);
 
-      const configuracionJSON = JSON.stringify({ piezas_moviles: piezasMoviles });
+      const configA_guardar = { piezas_moviles: piezasMoviles };
+      if (camaraConfig) {
+        configA_guardar.camara = camaraConfig;
+      }
+      const configuracionJSON = JSON.stringify(configA_guardar);
       data.append('configuracion_interactiva', configuracionJSON);
 
-      await createProyecto3D(data);
+      if (id) {
+        await updateProyecto3D(id, data);
+      } else {
+        await createProyecto3D(data);
+      }
       navigate('/editor/3d/proyectos');
     } catch (err) {
-      setError(err.message || "Error al crear el proyecto. Verifica los datos.");
+      setError(err.message || "Error al actualizar el proyecto. Verifica los datos.");
     } finally {
       setLoading(false);
     }
@@ -263,7 +303,6 @@ export const NewProject3D = () => {
     return romanos[num - 1] || num;
   };
 
-  // Carrera seleccionada actual
   const carreraSeleccionada = carreras.find(c => String(c.id) === String(formData.carrera));
   const duracionCiclos = carreraSeleccionada ? carreraSeleccionada.duracion_ciclos : 0;
 
@@ -272,15 +311,24 @@ export const NewProject3D = () => {
   const labelClassName = "block text-xs font-semibold text-[var(--text-muted)] mb-1.5 uppercase tracking-wide";
   const sectionTitleClassName = "text-base font-bold text-[var(--text-main)] border-b-2 border-[var(--line)] pb-2 mb-5 flex items-center gap-2";
 
+  if (initialLoading) {
+    return (
+      <div className="flex items-center justify-center h-full min-h-[400px] text-[var(--text-muted)] text-base">
+        Cargando datos del proyecto...
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-full">
       
+      {/* HEADER */}
       <div className="mb-6">
         <h2 className="text-2xl font-bold mb-1 text-[var(--text-main)]">
-          Subir Nuevo Modelo 3D
+          {id ? 'Editar Modelo 3D' : 'Nuevo Modelo 3D'}
         </h2>
         <div className="text-sm text-[var(--text-muted)]">
-          Sube tu archivo .fbx, configura sus datos y prueba sus interacciones mecánicas.
+          Modifica la información o la configuración mecánica de tu proyecto.
         </div>
       </div>
 
@@ -292,7 +340,7 @@ export const NewProject3D = () => {
 
       <div className="flex flex-col lg:flex-row gap-6 flex-1 min-h-[600px]">
         
-        {/* PANEL DEL FORMULARIO */}
+        {/* LADO IZQUIERDO: FORMULARIO */}
         <div className="flex-[0_0_45%] bg-[var(--panel)] p-6 rounded-xl border border-[var(--line)] overflow-y-auto max-h-[calc(100vh-180px)] shadow-sm">
           <form onSubmit={handleSubmit} id="project-form">
             
@@ -324,7 +372,7 @@ export const NewProject3D = () => {
 
             <h3 className={sectionTitleClassName}>2. Información General</h3>
             <label className={labelClassName}>Título del Proyecto</label>
-            <input className={inputClassName} type="text" name="titulo" value={formData.titulo} onChange={handleChange} placeholder="Ej. Motor V8" required />
+            <input className={inputClassName} type="text" name="titulo" value={formData.titulo} onChange={handleChange} required />
 
             <div className="flex gap-4">
               <div className="flex-[2]">
@@ -378,31 +426,58 @@ export const NewProject3D = () => {
               </div>
               <div className="flex-1">
                 <label className={labelClassName}>ODS de Impacto (ONU)</label>
-                <select className={inputClassName} name="ods" value={formData.ods || ""} onChange={handleChange}>
-                  <option value="">Ninguno / No especificado</option>
-                  {ODS_LIST.map(o => (
-                    <option key={o.id} value={o.id}>{o.label}</option>
-                  ))}
-                </select>
+                <FormControl fullWidth>
+                  <Select
+                    multiple
+                    value={formData.ods_ids || []}
+                    onChange={(e) => setFormData({ ...formData, ods_ids: e.target.value })}
+                    renderValue={(selected) => selected.map(id => `ODS ${id}`).join(", ")}
+                    sx={{
+                      bgcolor: 'var(--bg-general)',
+                      color: 'var(--text-main)',
+                      borderRadius: '0.5rem',
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        borderColor: 'var(--line)',
+                      },
+                      '&:hover .MuiOutlinedInput-notchedOutline': {
+                        borderColor: 'var(--accent)',
+                      },
+                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                        borderColor: 'var(--accent)',
+                      },
+                      '.MuiSelect-select': {
+                        padding: '10px 14px',
+                        fontSize: '0.875rem'
+                      }
+                    }}
+                  >
+                    {ODS_LIST.map((o) => (
+                      <MenuItem key={o.id} value={o.id}>
+                        <Checkbox checked={(formData.ods_ids || []).indexOf(o.id) > -1} />
+                        <ListItemText primary={o.label} />
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               </div>
             </div>
 
             <label className={labelClassName}>Descripción</label>
             <textarea className={`${inputClassName} min-h-[80px] resize-y`} name="descripcion" value={formData.descripcion} onChange={handleChange} required />
 
-            <h3 className={sectionTitleClassName}>3. Archivos y Recursos</h3>
+            <h3 className={sectionTitleClassName}>3. Archivos (Opcional)</h3>
             <div className="flex gap-4 mb-7">
-              <div className={`flex-1 p-4 border-2 border-dashed rounded-lg text-center cursor-pointer relative transition-colors ${archivoFbx ? 'border-[var(--accent)] bg-[var(--accent-dim)]' : 'border-[var(--accent)] bg-[var(--accent-dim)]'}`}>
-                <input type="file" name="archivo_fbx" accept=".fbx" onChange={handleFileChange} required className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
-                <Upload size={24} className="text-[var(--accent)] mx-auto mb-2" />
-                <span className="text-[13px] font-bold text-[var(--text-main)] block">Subir .FBX *</span>
-                <span className="text-[11px] text-[var(--accent)]">{archivoFbx ? archivoFbx.name : 'Obligatorio'}</span>
+              <div className="flex-1 p-4 border-2 border-dashed border-[var(--line)] bg-[var(--bg-general)] rounded-lg text-center cursor-pointer relative hover:border-[var(--accent)] transition-colors">
+                <input type="file" name="archivo_fbx" accept=".fbx" onChange={handleFileChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                <Upload size={24} className="text-[var(--text-muted)] mx-auto mb-2" />
+                <span className="text-[13px] font-bold text-[var(--text-main)] block">Actualizar .FBX</span>
+                <span className="text-[11px] text-[var(--text-muted)]">{archivoFbx ? archivoFbx.name : 'Se conservará el actual'}</span>
               </div>
-              <div className="flex-1 p-4 border-2 border-dashed border-[var(--line)] bg-[var(--bg-general)] rounded-lg text-center cursor-pointer relative hover:border-[var(--text-muted)] transition-colors">
+              <div className="flex-1 p-4 border-2 border-dashed border-[var(--line)] bg-[var(--bg-general)] rounded-lg text-center cursor-pointer relative hover:border-[var(--accent)] transition-colors">
                 <input type="file" name="imagen_miniatura" accept="image/png, image/jpeg" onChange={handleFileChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
                 <Upload size={24} className="text-[var(--text-muted)] mx-auto mb-2" />
-                <span className="text-[13px] font-bold text-[var(--text-main)] block">Miniatura</span>
-                <span className="text-[11px] text-[var(--text-muted)]">{imagenMiniatura ? imagenMiniatura.name : 'Opcional (JPG/PNG)'}</span>
+                <span className="text-[13px] font-bold text-[var(--text-main)] block">Actualizar Miniatura</span>
+                <span className="text-[11px] text-[var(--text-muted)]">{imagenMiniatura ? imagenMiniatura.name : 'Se conservará la actual'}</span>
               </div>
             </div>
 
@@ -483,13 +558,13 @@ export const NewProject3D = () => {
           </form>
         </div>
 
-        {/* VISOR 3D (Se mantiene oscuro por defecto de modelo 3D) */}
+        {/* LADO DERECHO: VISOR 3D */}
         <div className="flex-1 bg-[#1e293b] rounded-xl border border-[#334155] relative overflow-hidden flex items-center justify-center shadow-inner">
           
           {!fbxUrl ? (
             <div className="text-center text-slate-400">
               <BoxIcon size={64} className="mx-auto mb-4 opacity-30" />
-              <p className="text-[15px] font-medium">Sube tu archivo .FBX a la izquierda<br/>para previsualizarlo aquí</p>
+              <p className="text-[15px] font-medium">Sin archivo 3D cargado</p>
             </div>
           ) : (
             <Canvas shadows camera={{ position: [0, 2, 5], fov: 50 }}>
@@ -499,7 +574,7 @@ export const NewProject3D = () => {
                   <FBXModel 
                     url={fbxUrl} 
                     piezasMoviles={piezasMoviles} 
-                    setHabilitarCamara={setHabilitarCamara}
+                    setHabilitarCamara={setHabilitarCamara} 
                   />
                 </Stage>
               </Suspense>
@@ -510,6 +585,7 @@ export const NewProject3D = () => {
         </div>
       </div>
 
+      {/* FOOTER */}
       <div className="flex justify-end gap-4 mt-6 pt-4 border-t border-[var(--line)]">
         <button 
           type="button" 
@@ -524,7 +600,7 @@ export const NewProject3D = () => {
           disabled={loading} 
           className="px-6 py-2.5 rounded-lg border-none bg-[var(--accent)] text-white font-bold flex items-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
         >
-          <Save size={16} /> {loading ? 'Guardando...' : 'Guardar Proyecto'}
+          <Save size={16} /> {loading ? 'Guardando...' : (id ? 'Actualizar Proyecto' : 'Crear Proyecto')}
         </button>
       </div>
     </div>

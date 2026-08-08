@@ -9,6 +9,7 @@ class MetricaProyectoSerializer(serializers.ModelSerializer):
     proyecto_categoria = serializers.SerializerMethodField()
     proyecto_ods = serializers.SerializerMethodField()
     proyecto_tipo = serializers.SerializerMethodField()
+    proyecto_miniatura = serializers.SerializerMethodField()
     tasa_engagement = serializers.SerializerMethodField()
 
     class Meta:
@@ -21,6 +22,7 @@ class MetricaProyectoSerializer(serializers.ModelSerializer):
             'proyecto_categoria',
             'proyecto_ods',
             'proyecto_tipo',
+            'proyecto_miniatura',
             'vistas_totales',
             'likes_totales',
             'compartidos_totales',
@@ -33,6 +35,7 @@ class MetricaProyectoSerializer(serializers.ModelSerializer):
             'proyecto_categoria',
             'proyecto_ods',
             'proyecto_tipo',
+            'proyecto_miniatura',
             'tasa_engagement',
             'ultima_visita',
         ]
@@ -58,8 +61,26 @@ class MetricaProyectoSerializer(serializers.ModelSerializer):
 
     def get_proyecto_tipo(self, obj):
         if obj.proyecto and hasattr(obj.proyecto, 'proyecto3d'):
-            return "Diseño 3D"
-        return "Proyecto Digital"
+            return "Modelo 3D"
+        return "Digital"
+
+    def get_proyecto_miniatura(self, obj):
+        if not obj.proyecto: return None
+        try:
+            url = None
+            if hasattr(obj.proyecto, 'proyecto3d') and obj.proyecto.proyecto3d.imagen_miniatura:
+                url = obj.proyecto.proyecto3d.imagen_miniatura.url
+            elif hasattr(obj.proyecto, 'proyectosoftware') and obj.proyecto.proyectosoftware.imagen_portada:
+                url = obj.proyecto.proyectosoftware.imagen_portada.url
+            
+            if url:
+                request = self.context.get('request')
+                if request:
+                    return request.build_absolute_uri(url)
+                return url
+        except Exception:
+            pass
+        return None
 
     def get_tasa_engagement(self, obj):
         if obj.vistas_totales and obj.vistas_totales > 0:

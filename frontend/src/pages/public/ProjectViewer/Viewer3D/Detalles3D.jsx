@@ -14,7 +14,13 @@ export default function Detalles3D({
   const [anchorEl, setAnchorEl] = useState(null);
   const shareOpen = Boolean(anchorEl);
   const [liked, setLiked] = useState(false);
-  const [likesCount, setLikesCount] = useState(diseno?.likes || 124);
+  const [likesCount, setLikesCount] = useState(0);
+
+  React.useEffect(() => {
+    if (diseno) {
+      setLikesCount(diseno.likes_totales || 0);
+    }
+  }, [diseno]);
 
   const handleLike = () => {
     if (!liked) {
@@ -106,9 +112,13 @@ export default function Detalles3D({
           {diseno.titulo}
         </Typography>
 
-        {diseno.ods && (
+        {diseno.ods_detalle && diseno.ods_detalle.length > 0 && (
           <Box sx={{ mb: 2.5 }}>
-            <OdsBadge odsNum={diseno.ods} />
+            <Stack direction="row" flexWrap="wrap" gap={1}>
+              {diseno.ods_detalle.map((ods) => (
+                <OdsBadge key={ods.id} odsNum={ods.id} />
+              ))}
+            </Stack>
           </Box>
         )}
 
@@ -266,7 +276,7 @@ export default function Detalles3D({
               CARRERA Y CICLO
             </Typography>
             <Typography variant="body1" sx={{ color: "#111827", fontWeight: 600, mt: 0.3 }}>
-              {diseno.carrera || "N/A"} - {diseno.ciclo || "N/A"}
+              {diseno.carrera_nombre || "N/A"} - {diseno.ciclo_romano ? `Ciclo ${diseno.ciclo_romano}` : "N/A"}
             </Typography>
           </Box>
 

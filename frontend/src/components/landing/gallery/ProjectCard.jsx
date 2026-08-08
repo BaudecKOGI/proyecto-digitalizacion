@@ -16,7 +16,7 @@ export default function ProjectCard({ proyecto: p, type, colorClass, onClick }) 
       className="bg-[#F4F4F4] overflow-hidden transition-all duration-300 hover:bg-[#E9D5FF] hover:shadow-lg hover:-translate-y-1 rounded-lg"
       style={{ fontFamily: 'Roboto, sans-serif' }}
     >
-      <div 
+      <div
         className="group relative aspect-[4/3] w-full overflow-hidden bg-panel mb-5 cursor-pointer"
         onClick={onClick}
       >
@@ -47,23 +47,24 @@ export default function ProjectCard({ proyecto: p, type, colorClass, onClick }) 
       </div>
       <div className="px-5 pb-5">
         <div className="mb-2.5 flex items-center justify-between gap-2 flex-wrap">
-          {p.ods && (() => {
-            const odsObj = ODS_LIST.find((o) => o.id === Number(p.ods));
-            const textColor = odsObj ? odsObj.color : '#475569';
-            const bgColor = odsObj ? `${odsObj.color}20` : '#f1f5f9';
-            
-            return (
-              <div className="flex items-center gap-2">
-                <span 
-                  className="px-2.5 py-0.5 rounded-md text-[13.5px] font-bold tracking-wide"
-                  style={{ backgroundColor: bgColor, color: textColor }}
-                >
-                  {odsObj ? `ODS ${odsObj.id}` : `ODS ${p.ods}`}
-                </span>
-              </div>
-            );
-          })()}
-
+          {p.ods_detalle && p.ods_detalle.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-1">
+              {p.ods_detalle.map((ods) => {
+                const odsObj = ODS_LIST.find((o) => o.id === ods.id);
+                const textColor = odsObj ? odsObj.color : '#475569';
+                const bgColor = odsObj ? `${odsObj.color}20` : '#f1f5f9';
+                return (
+                  <span
+                    key={ods.id}
+                    className="px-2.5 py-0.5 rounded-md text-[13px] font-bold tracking-wide"
+                    style={{ backgroundColor: bgColor, color: textColor }}
+                  >
+                    ODS {ods.id}
+                  </span>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         <h3 className="text-[24px] leading-[29px] text-[#111928] font-bold" style={{ fontFamily: 'Roboto, sans-serif' }}>
@@ -108,8 +109,8 @@ export default function ProjectCard({ proyecto: p, type, colorClass, onClick }) 
 
 function ProjectCardActions({ proyecto, type }) {
   const fechaProyecto = proyecto.fecha_creacion || proyecto.created_at || proyecto.fecha;
-  const fechaFormateada = fechaProyecto 
-    ? new Date(fechaProyecto).toLocaleDateString('es-PE', { year: 'numeric', month: 'short', day: 'numeric' }) 
+  const fechaFormateada = fechaProyecto
+    ? new Date(fechaProyecto).toLocaleDateString('es-PE', { year: 'numeric', month: 'short', day: 'numeric' })
     : '';
 
   return (

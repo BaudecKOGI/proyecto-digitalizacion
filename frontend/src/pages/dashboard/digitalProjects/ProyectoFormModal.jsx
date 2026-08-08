@@ -416,7 +416,7 @@ export default function ProyectoFormModal({
                               key={id}
                               label={ods ? `ODS ${id}` : id}
                               size="small"
-                              sx={{ bgcolor: ods?.color || '#6b7280', color: '#fff', fontWeight: 600 }}
+                              sx={{ bgcolor: '#E2E8F0', color: '#475569', fontWeight: 600 }}
                             />
                           );
                         })}

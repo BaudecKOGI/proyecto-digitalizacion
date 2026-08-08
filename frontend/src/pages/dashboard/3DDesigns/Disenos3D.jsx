@@ -150,6 +150,19 @@ export default function Disenos3D() {
     setTabValue("todos");
   };
 
+  const handleUpdateEstado = async (id, nuevoEstado) => {
+    try {
+      const formData = new FormData();
+      formData.append("estado_publicacion", nuevoEstado);
+      const res = await updateProyecto3D(id, formData);
+      setDisenos(prev => prev.map(p => p.id === id ? { ...p, estado_publicacion: nuevoEstado } : p));
+      setSnackbar({ open: true, message: "Estado actualizado exitosamente.", severity: "success" });
+    } catch (err) {
+      console.error(err);
+      setSnackbar({ open: true, message: err.message || "Error al actualizar estado.", severity: "error" });
+    }
+  };
+
   const handleOpenCreate = () => {
     setEditingDiseno(null);
     setFormDiseno({
@@ -619,6 +632,7 @@ export default function Disenos3D() {
         onView={(item) => setSelectedDiseno(item)}
         onEdit={(item) => handleOpenEdit(item)}
         onDelete={(item) => handleDeleteDiseno(item)}
+        onUpdateEstado={handleUpdateEstado}
       />
 
       <Diseno3DDeleteModal

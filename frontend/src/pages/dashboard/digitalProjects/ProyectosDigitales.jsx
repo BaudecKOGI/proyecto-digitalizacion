@@ -133,6 +133,19 @@ export default function ProyectosDigitalesPage() {
 
   const hasActiveFilters = Boolean(searchTerm || filterOds || filterCategoria || filterEstado);
 
+  const handleUpdateEstado = async (id, nuevoEstado) => {
+    try {
+      const formData = new FormData();
+      formData.append("estado_publicacion", nuevoEstado);
+      const res = await updateProyectoSoftware(id, formData);
+      setProyectos(prev => prev.map(p => p.id === id ? { ...p, estado_publicacion: nuevoEstado } : p));
+      showSnackbar("Estado actualizado exitosamente.", "success");
+    } catch (err) {
+      console.error(err);
+      showSnackbar(err.message || "Error al actualizar estado.", "error");
+    }
+  };
+
   const handleOpenCreateProyecto = () => {
     setEditingProyecto(null);
     setFormProyecto({
@@ -611,7 +624,6 @@ export default function ProyectosDigitalesPage() {
                     <MenuItem value=""><em>Todos</em></MenuItem>
                     <MenuItem value="PUBLICADO">Publicado</MenuItem>
                     <MenuItem value="BORRADOR">Borrador</MenuItem>
-                    <MenuItem value="ARCHIVADO">Archivado</MenuItem>
                   </Select>
                 </FormControl>
 
@@ -650,6 +662,7 @@ export default function ProyectosDigitalesPage() {
                   onEdit={handleOpenEditProyecto}
                   onDelete={handleDeleteProyecto}
                   onPlayVideo={handleOpenVideo}
+                  onUpdateEstado={handleUpdateEstado}
                 />
               )}
             </Box>

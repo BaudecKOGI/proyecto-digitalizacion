@@ -251,23 +251,6 @@ export default function CarrerasPage() {
           <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 420, margin: "0 auto 24px" }}>
             Crea la primera carrera para empezar a clasificar los proyectos por área académica.
           </Typography>
-          <Button
-            variant="contained"
-            startIcon={<PlusIcon />}
-            onClick={handleOpenCreate}
-            sx={{
-              bgcolor: "#002B49",
-              color: "#FFFFFF",
-              fontWeight: 600,
-              textTransform: "none",
-              borderRadius: "2px",
-              px: 3.5,
-              py: 1,
-              "&:hover": { bgcolor: "#001e33" }
-            }}
-          >
-            Nueva Carrera
-          </Button>
         </Card>
 
         <CarreraFormModal

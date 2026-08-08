@@ -37,16 +37,14 @@ import { AssistantWidget } from "./components/assistant";
 // RUTAS DE 3D
 import { Overview as EditorOverview } from "./pages/editor/3d/Dashboard3D";
 import { ProjectsList3D as EditorProjectsList } from "./pages/editor/3d/ProjectsList3D";
-import { NewProject3D as EditorNewProject } from "./pages/editor/3d/NewProject3D";
-import { EditProject3D as EditorEditProject } from "./pages/editor/3d/EditProject3D";
+import { ProjectForm3D } from "./pages/editor/3d/ProjectForm3D";
 import { ProjectDetailView3D } from "./pages/editor/3d/ProjectDetailView3D";
 import { Careers3D } from "./pages/editor/3d/Careers3D";
 
 // RUTAS DE SOFTWARE 
 import { DashboardSoftware } from "./pages/editor/software/DashboardSoftware";
 import ProjectsListSoftware from "./pages/editor/software/ProjectsListSoftware";
-import NewProjectSoftware from "./pages/editor/software/NewProjectSoftware";
-import EditProjectSoftware from "./pages/editor/software/EditProjectSoftware";
+import ProjectFormSoftware from "./pages/editor/software/ProjectFormSoftware";
 import CareersSoftware from "./pages/editor/software/CareersSoftware";
 
 // Perfil
@@ -120,8 +118,8 @@ export default function App() {
                 element={<EditorProjectsList mode="3d" projects={[]} />}
               />
 
-              <Route path="nuevo" element={<EditorNewProject />} />
-              <Route path="editar/:id" element={<EditorEditProject />} />
+              <Route path="nuevo" element={<ProjectForm3D />} />
+              <Route path="editar/:id" element={<ProjectForm3D />} />
               <Route path="detalle/:id" element={<ProjectDetailView3D />} />
 
               <Route path="carreras" element={<Careers3D />} />
@@ -148,8 +146,8 @@ export default function App() {
                 element={<ProjectsListSoftware />}
               />
 
-              <Route path="nuevo" element={<NewProjectSoftware />} />
-              <Route path="editar/:id" element={<EditProjectSoftware />} />
+              <Route path="nuevo" element={<ProjectFormSoftware />} />
+              <Route path="editar/:id" element={<ProjectFormSoftware />} />
 
               <Route path="carreras" element={<CareersSoftware />} />
               <Route

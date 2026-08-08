@@ -79,6 +79,11 @@ export default function Dashboard() {
   const totalEditores = editores.length;
   const totalGeneral = total3D + totalSoftware;
 
+  // Sumamos vistas_totales de ambos arreglos de proyectos (suponiendo que la API los incluya, por defecto 0)
+  const totalVisualizaciones = 
+    disenos3D.reduce((acc, p) => acc + (p.vistas_totales || 0), 0) +
+    proyectosSoftware.reduce((acc, p) => acc + (p.vistas_totales || 0), 0);
+
   if (loading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: 400 }}>
@@ -164,7 +169,7 @@ export default function Dashboard() {
         <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
           <SummaryStatCard
             title="Visualizaciones"
-            value="4.2k"
+            value={totalVisualizaciones}
             icon={<EyeIcon size={18} />}
             bgIcon={<EyeIcon size={130} />}
             color="#10B981"

@@ -249,7 +249,7 @@ export default function Diseno3DFormView({
     if (currentPiezasState !== basePiezas) return true;
     if (archivoFBX) return true;
     if (imagenMiniatura) return true;
-    
+
     return false;
   };
 
@@ -630,7 +630,7 @@ export default function Diseno3DFormView({
                               key={id}
                               label={ods ? `ODS ${id}` : id}
                               size="small"
-                              sx={{ bgcolor: ods?.color || '#6b7280', color: '#fff', fontWeight: 600 }}
+                              sx={{ bgcolor: '#E2E8F0', color: '#475569', fontWeight: 600 }}
                             />
                           );
                         })}
@@ -668,7 +668,7 @@ export default function Diseno3DFormView({
             {/* ARCHIVOS */}
             <Box>
               <Typography variant="body2" sx={{ ...labelSx, mb: 1.5 }}>
-                Archivos (Opcional)
+                Archivos
               </Typography>
               <Stack direction={{ xs: "column", sm: "row" }} spacing={2.5}>
                 <Button
@@ -690,8 +690,8 @@ export default function Diseno3DFormView({
                   {archivoFBX
                     ? archivoFBX.name
                     : editingDiseno
-                    ? "Actualizar .FBX"
-                    : "Subir Modelo .FBX"}
+                      ? "Actualizar .FBX"
+                      : "Subir Modelo .FBX"}
                   <input
                     type="file"
                     hidden
@@ -719,8 +719,8 @@ export default function Diseno3DFormView({
                   {imagenMiniatura
                     ? imagenMiniatura.name
                     : editingDiseno
-                    ? "Actualizar Miniatura"
-                    : "Subir Portada"}
+                      ? "Actualizar Miniatura"
+                      : "Subir Portada"}
                   <input
                     type="file"
                     hidden

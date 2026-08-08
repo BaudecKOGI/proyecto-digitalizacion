@@ -5,7 +5,7 @@ import { Monitor } from "lucide-react";
 import { ODS_LIST } from "@/pages/dashboard/digitalProjects/odsData";
 
 export default function DetallesDigital({ proyecto, sidebarOpen }) {
-  const odsObj = proyecto.ods ? ODS_LIST.find((o) => o.id === Number(proyecto.ods)) : null;
+  const odsList = proyecto.ods_detalle || [];
   const techs = proyecto.tecnologias_detalle || proyecto.tecnologias || [];
 
   return (
@@ -93,18 +93,31 @@ export default function DetallesDigital({ proyecto, sidebarOpen }) {
               CARRERA Y CICLO
             </Typography>
             <Typography variant="body1" sx={{ color: "#111827", fontWeight: 600, mt: 0.3 }}>
-              {proyecto.carrera || "N/A"} - {proyecto.ciclo ? `Ciclo ${proyecto.ciclo}` : "N/A"}
+              {proyecto.carrera_nombre || "N/A"} - {proyecto.ciclo_romano ? `Ciclo ${proyecto.ciclo_romano}` : "N/A"}
             </Typography>
           </Box>
 
-          {odsObj && (
+          {odsList.length > 0 && (
             <Box>
               <Typography variant="caption" sx={{ color: "#64748B", fontWeight: 700, display: "block", mb: 1 }}>
-                ODS RELACIONADO
+                ODS RELACIONADOS
               </Typography>
-              <Typography variant="body2" sx={{ color: "#111827", fontWeight: 600 }}>
-                {odsObj.label}
-              </Typography>
+              <Stack direction="row" flexWrap="wrap" gap={1}>
+                {odsList.map((ods) => (
+                  <Chip
+                    key={ods.id}
+                    label={ods.label}
+                    size="small"
+                    sx={{
+                      borderRadius: 1,
+                      fontWeight: 600,
+                      bgcolor: "rgba(0,0,0,0.04)",
+                      color: "#111827",
+                      border: "1px solid rgba(0,0,0,0.08)",
+                    }}
+                  />
+                ))}
+              </Stack>
             </Box>
           )}
 

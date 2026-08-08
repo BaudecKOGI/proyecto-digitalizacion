@@ -20,7 +20,7 @@ import {
 } from '@/services/api';
 import { ODS_LIST } from "@/pages/dashboard/digitalProjects/odsData";
 
-export default function EditProjectSoftware() {
+export default function ProjectFormSoftware() {
   const navigate = useNavigate();
   const { id } = useParams();
   const { user } = useUser();
@@ -565,7 +565,7 @@ export default function EditProjectSoftware() {
           className="flex items-center gap-2 bg-[var(--accent)] text-white px-8 py-3 rounded-xl font-bold hover:opacity-90 transition-all shadow-lg shadow-[var(--accent)]/20 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
         >
           <Save size={20} />
-          {loadingSubmit ? 'Actualizando...' : 'Actualizar Proyecto'}
+          {loadingSubmit ? 'Guardando...' : (id ? 'Actualizar Proyecto' : 'Crear Proyecto')}
         </button>
       </div>
 

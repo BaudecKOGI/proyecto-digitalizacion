@@ -190,7 +190,7 @@ export default function ProjectDetailView({ proyecto: propProyecto, onBack, onEd
                     key={ods.id}
                     label={ods.label}
                     size="small"
-                    sx={{ bgcolor: odsColor, color: '#fff', fontWeight: 600 }}
+                    sx={{ bgcolor: '#E2E8F0', color: '#475569', fontWeight: 600 }}
                   />
                 );
               })}

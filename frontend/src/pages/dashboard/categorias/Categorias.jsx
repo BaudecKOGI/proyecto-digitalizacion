@@ -310,23 +310,6 @@ export default function CategoriasPage() {
               ? "Intenta buscar con otro término o palabra clave en la descripción."
               : "Crea tu primera categoría para poder clasificar los proyectos de fabricación digital y software."}
           </Typography>
-          {!searchTerm && (
-            <Button
-              variant="outlined"
-              startIcon={<PlusIcon />}
-              onClick={handleOpenCreate}
-              sx={{
-                borderRadius: 2,
-                textTransform: "none",
-                fontWeight: 700,
-                borderColor: "#F79009",
-                color: "#F79009",
-                "&:hover": { borderColor: "#E07B00", backgroundColor: "rgba(247,144,9,0.05)" }
-              }}
-            >
-              Crear primera categoría
-            </Button>
-          )}
         </Card>
       ) : (
         <CategoriasTable

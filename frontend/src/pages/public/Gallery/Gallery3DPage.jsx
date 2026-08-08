@@ -99,16 +99,30 @@ export default function Gallery3DPage() {
       .catch(() => setStatus('error'));
   }, []);
 
-  // Aplicar filtros combinados
   const filteredProyectos = proyectos.filter((p) => {
     // 1. Filtro ODS
-    if (selectedOds.length > 0 && !selectedOds.includes(Number(p.ods))) return false;
+    if (selectedOds.length > 0) {
+      const projectOdsIds = p.ods_detalle?.map(o => Number(o.id)) || (Array.isArray(p.ods) ? p.ods.map(Number) : [Number(p.ods)]);
+      const hasMatch = projectOdsIds.some(id => selectedOds.includes(id));
+      if (!hasMatch) return false;
+    }
 
     // 2. Filtro Categoría
     if (selectedCategory.length > 0 && !selectedCategory.includes(p.categoria_nombre)) return false;
 
-    // 3. Filtro Búsqueda (título)
-    if (searchQuery && !p.titulo?.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    // 3. Filtro Búsqueda (título, categoría y ODS)
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      const matchesTitle = p.titulo?.toLowerCase().includes(query);
+      const matchesCategory = p.categoria_nombre?.toLowerCase().includes(query);
+      const projectOdsItems = p.ods_detalle || [];
+      const matchesOds = projectOdsItems.some(o => {
+        const matchesOdsNumber = `ods ${o.id}`.includes(query) || String(o.id) === query;
+        const matchesOdsLabel = o.label?.toLowerCase().includes(query);
+        return matchesOdsNumber || matchesOdsLabel;
+      });
+      if (!matchesTitle && !matchesCategory && !matchesOds) return false;
+    }
 
     return true;
   });
@@ -185,24 +199,29 @@ export default function Gallery3DPage() {
 
             {showEmptyState && status !== 'loading' && (
               <>
-                {[0, 1, 2].map((i) => (
-                  <motion.div variants={itemVariants} key={i} className="flex aspect-[4/3] w-full items-center justify-center bg-panel rounded-2xl">
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ repeat: Infinity, duration: 10, ease: "linear" }}
-                    >
-                      <svg className="opacity-10" width="34" height="34" viewBox="0 0 24 24" fill="none">
-                        <rect x="3" y="3" width="18" height="18" stroke="currentColor" strokeWidth="1.4" />
-                      </svg>
+                {/* Contenedor para centrar los 3 cuadros en pantallas grandes */}
+                <div className="col-span-full grid grid-cols-1 sm:grid-cols-3 gap-6 w-full max-w-4xl mx-auto">
+                  {[0, 1, 2].map((i) => (
+                    <motion.div variants={itemVariants} key={i} className="flex aspect-[4/3] w-full items-center justify-center bg-panel rounded-2xl">
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ repeat: Infinity, duration: 10, ease: "linear" }}
+                      >
+                        <svg className="opacity-10" width="34" height="34" viewBox="0 0 24 24" fill="none">
+                          <rect x="3" y="3" width="18" height="18" stroke="currentColor" strokeWidth="1.4" />
+                        </svg>
+                      </motion.div>
                     </motion.div>
-                  </motion.div>
-                ))}
+                  ))}
+                </div>
+
+                {/* Contenedor del texto centrado */}
                 <div className="col-span-full py-12 text-center font-sans text-[13px] font-semibold text-muted">
                   {status === 'error'
                     ? 'Error de conexión con el repositorio principal.'
                     : (selectedOds.length > 0 || selectedCategory.length > 0)
                       ? 'No hay proyectos catalogados que coincidan con estos filtros de ODS y Categoría.'
-                      : 'Aún no hay proyectos publicados en esta categoría.'}
+                      : 'Aún no hay proyectos publicados.'}
                 </div>
               </>
             )}

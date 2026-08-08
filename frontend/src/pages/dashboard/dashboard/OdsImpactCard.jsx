@@ -59,7 +59,12 @@ export default function OdsImpactCard({ disenos = [], proyectos = [], categorias
   const slices = React.useMemo(() => {
     const conteoOds = {};
     todosLosProyectos.forEach((item) => {
-      if (item.ods) {
+      if (item.ods_detalle && Array.isArray(item.ods_detalle)) {
+        item.ods_detalle.forEach((odsObj) => {
+          const num = Number(odsObj.id);
+          conteoOds[num] = (conteoOds[num] || 0) + 1;
+        });
+      } else if (item.ods) {
         const num = Number(item.ods);
         conteoOds[num] = (conteoOds[num] || 0) + 1;
       }

@@ -84,8 +84,7 @@ export function OdsBadges({ odsIds, size = "small", maxDisplay = 3 }) {
             display: 'inline-block',
             padding: '2px 8px',
             borderRadius: '12px',
-            backgroundColor: ods.color || '#ccc',
-            color: '#fff',
+            color: '#475569',
             fontSize: size === 'small' ? '0.65rem' : '0.75rem',
             fontWeight: 700,
             whiteSpace: 'nowrap'

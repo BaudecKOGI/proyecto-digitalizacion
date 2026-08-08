@@ -17,9 +17,12 @@ import {
   Stack,
   Card,
   Grid,
-  useMediaQuery,
   useTheme,
-  TablePagination
+  TablePagination,
+  Select,
+  MenuItem,
+  FormControl,
+  useMediaQuery
 } from "@mui/material";
 import { Plus as PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
 import { PencilSimple as EditIcon } from "@phosphor-icons/react/dist/ssr/PencilSimple";
@@ -37,7 +40,8 @@ export default function ProyectosTable({
   onView,
   onEdit,
   onDelete,
-  onPlayVideo
+  onPlayVideo,
+  onUpdateEstado
 }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -161,18 +165,25 @@ export default function ProyectosTable({
                   variant="outlined"
                   sx={{ fontSize: "0.72rem", fontWeight: 600 }}
                 />
-                <Chip
-                  label={p.estado_publicacion}
-                  size="small"
-                  color={
-                    p.estado_publicacion === "PUBLICADO"
-                      ? "success"
-                      : p.estado_publicacion === "BORRADOR"
-                        ? "warning"
-                        : "default"
-                  }
-                  sx={{ fontWeight: 700, fontSize: "0.72rem" }}
-                />
+                <FormControl size="small">
+                  <Select
+                    value={p.estado_publicacion || "BORRADOR"}
+                    onChange={(e) => onUpdateEstado && onUpdateEstado(p.id, e.target.value)}
+                    sx={{
+                      fontSize: "0.72rem",
+                      fontWeight: 700,
+                      height: 24,
+                      borderRadius: "12px",
+                      bgcolor: p.estado_publicacion === "PUBLICADO" ? "#E8F5E9" : "#FFF8E1",
+                      color: p.estado_publicacion === "PUBLICADO" ? "#2E7D32" : "#F57F17",
+                      "& .MuiOutlinedInput-notchedOutline": { border: "none" },
+                      "& .MuiSelect-icon": { color: "inherit" }
+                    }}
+                  >
+                    <MenuItem value="PUBLICADO" sx={{ fontSize: "0.75rem", fontWeight: 700, color: "#2E7D32" }}>PUBLICADO</MenuItem>
+                    <MenuItem value="BORRADOR" sx={{ fontSize: "0.75rem", fontWeight: 700, color: "#F57F17" }}>BORRADOR</MenuItem>
+                  </Select>
+                </FormControl>
               </Stack>
 
               <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap sx={{ mb: 2 }}>
@@ -388,18 +399,25 @@ export default function ProyectosTable({
               </TableCell>
 
               <TableCell>
-                <Chip
-                  label={p.estado_publicacion}
-                  size="small"
-                  color={
-                    p.estado_publicacion === "PUBLICADO"
-                      ? "success"
-                      : p.estado_publicacion === "BORRADOR"
-                        ? "warning"
-                        : "default"
-                  }
-                  sx={{ fontWeight: 700, fontSize: "0.75rem" }}
-                />
+                <FormControl size="small">
+                  <Select
+                    value={p.estado_publicacion || "BORRADOR"}
+                    onChange={(e) => onUpdateEstado && onUpdateEstado(p.id, e.target.value)}
+                    sx={{
+                      fontSize: "0.75rem",
+                      fontWeight: 700,
+                      height: 28,
+                      borderRadius: "16px",
+                      bgcolor: p.estado_publicacion === "PUBLICADO" ? "#E8F5E9" : "#FFF8E1",
+                      color: p.estado_publicacion === "PUBLICADO" ? "#2E7D32" : "#F57F17",
+                      "& .MuiOutlinedInput-notchedOutline": { border: "none" },
+                      "& .MuiSelect-icon": { color: "inherit" }
+                    }}
+                  >
+                    <MenuItem value="PUBLICADO" sx={{ fontSize: "0.75rem", fontWeight: 700, color: "#2E7D32" }}>PUBLICADO</MenuItem>
+                    <MenuItem value="BORRADOR" sx={{ fontSize: "0.75rem", fontWeight: 700, color: "#F57F17" }}>BORRADOR</MenuItem>
+                  </Select>
+                </FormControl>
               </TableCell>
 
               <TableCell align="right">
