@@ -286,3 +286,41 @@ export const deleteProyectoSoftware = async (id) => {
   });
   return handleResponse(res);
 };
+
+// ============================================================
+// CARRERAS
+// ============================================================
+
+export const fetchCarreras = async (params = "") => {
+  const url = `${API_BASE_URL}/carreras/carreras/${params ? "?" + params : ""}`;
+  const res = await fetch(url, {
+    headers: getAuthHeaders(false)
+  });
+  return handleResponse(res);
+};
+
+export const createCarrera = async (data) => {
+  const res = await fetch(`${API_BASE_URL}/carreras/carreras/`, {
+    method: "POST",
+    headers: getAuthHeaders(false),
+    body: JSON.stringify(data),
+  });
+  return handleResponse(res);
+};
+
+export const updateCarrera = async (id, data) => {
+  const res = await fetch(`${API_BASE_URL}/carreras/carreras/${id}/`, {
+    method: "PATCH",
+    headers: getAuthHeaders(false),
+    body: JSON.stringify(data),
+  });
+  return handleResponse(res);
+};
+
+export const deleteCarrera = async (id) => {
+  const res = await fetch(`${API_BASE_URL}/carreras/carreras/${id}/`, {
+    method: "DELETE",
+    headers: getAuthHeaders(false)
+  });
+  return handleResponse(res);
+};

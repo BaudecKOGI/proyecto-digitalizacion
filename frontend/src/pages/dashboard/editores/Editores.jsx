@@ -1,11 +1,8 @@
 import * as React from "react";
 import {
   Box,
-  Card,
-  CardContent,
   Typography,
   Button,
-  Grid,
   TextField,
   InputAdornment,
   Snackbar,
@@ -22,6 +19,14 @@ import { Link as RouterLink } from "react-router-dom";
 
 import { MagnifyingGlass as SearchIcon } from "@phosphor-icons/react/dist/ssr/MagnifyingGlass";
 import { Plus as PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
+import { FileArrowDown as ExportIcon } from "@phosphor-icons/react/dist/ssr/FileArrowDown";
+import { FilePdf as FilePdfIcon } from "@phosphor-icons/react/dist/ssr/FilePdf";
+import { FileXls as FileXlsIcon } from "@phosphor-icons/react/dist/ssr/FileXls";
+
+// Librerías para exportación
+import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 import {
   fetchEditores,
@@ -35,27 +40,45 @@ import EditorFormModal from "./EditorFormModal";
 import EditorDeleteModal from "./EditorDeleteModal";
 import EditorDetailView from "./EditorDetailView";
 
+// Helper para formatear fecha
+function formatDate(dateString) {
+  if (!dateString) return "—";
+  try {
+    const d = new Date(dateString);
+    if (isNaN(d.getTime())) return "—";
+    return d.toLocaleDateString("es-ES", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric"
+    });
+  } catch {
+    return "—";
+  }
+}
+
+// Helper para formatear lista de proyectos
+function formatProyectosList(proyectos) {
+  if (!proyectos || proyectos.length === 0) return "—";
+  return proyectos
+    .map((p) => `${p.titulo} (${formatDate(p.fecha)})`)
+    .join("; ");
+}
+
 export default function EditoresPage() {
   const [editores, setEditores] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [searchTerm, setSearchTerm] = React.useState("");
 
-  // Filtros desplegables (Estado y Más Filtros)
-  const [statusFilter, setStatusFilter] = React.useState("ALL"); // "ALL" | "ACTIVE" | "INACTIVE"
-  const [moreFilter, setMoreFilter] = React.useState("ALL"); // "ALL" | "WITH_PROJECTS" | "WITHOUT_PROJECTS"
-  const [anchorElStatus, setAnchorElStatus] = React.useState(null);
-  const [anchorElMore, setAnchorElMore] = React.useState(null);
+  const [statusFilter, setStatusFilter] = React.useState("ALL");
+  const [moreFilter, setMoreFilter] = React.useState("ALL");
 
-  // Vista Detalle Integrada (Ver Proyectos Subidos por un Editor)
   const [viewingEditor, setViewingEditor] = React.useState(null);
 
-  // Modales de Crear / Editar / Eliminar
   const [openDialog, setOpenDialog] = React.useState(false);
   const [editingEditor, setEditingEditor] = React.useState(null);
   const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
   const [deletingId, setDeletingId] = React.useState(null);
 
-  // Formulario de editor
   const [formData, setFormData] = React.useState({
     nombre: "",
     email: "",
@@ -65,12 +88,14 @@ export default function EditoresPage() {
   const [formError, setFormError] = React.useState("");
   const [submitting, setSubmitting] = React.useState(false);
 
-  // Alerta flotante (Snackbar)
   const [snackbar, setSnackbar] = React.useState({
     open: false,
     message: "",
     severity: "success"
   });
+
+  const [exportAnchorEl, setExportAnchorEl] = React.useState(null);
+  const openExportMenu = Boolean(exportAnchorEl);
 
   const showSnackbar = React.useCallback((message, severity = "success") => {
     setSnackbar({ open: true, message, severity });
@@ -96,7 +121,6 @@ export default function EditoresPage() {
     loadEditores();
   }, [loadEditores]);
 
-  // Manejador de Búsqueda
   const handleSearchChange = (e) => {
     const val = e.target.value;
     setSearchTerm(val);
@@ -106,7 +130,6 @@ export default function EditoresPage() {
     return () => clearTimeout(timer);
   };
 
-  // Abrir modal Nuevo Editor
   const handleOpenCreate = () => {
     setEditingEditor(null);
     setFormData({
@@ -119,7 +142,6 @@ export default function EditoresPage() {
     setOpenDialog(true);
   };
 
-  // Abrir modal Editar Editor
   const handleOpenEdit = (editor) => {
     setEditingEditor(editor);
     setFormData({
@@ -132,7 +154,6 @@ export default function EditoresPage() {
     setOpenDialog(true);
   };
 
-  // Enviar formulario (Crear o Actualizar)
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.nombre.trim() || !formData.email.trim()) {
@@ -178,7 +199,6 @@ export default function EditoresPage() {
     }
   };
 
-  // Eliminar Editor
   const handleConfirmDelete = async () => {
     if (!deletingId) return;
     setSubmitting(true);
@@ -195,6 +215,108 @@ export default function EditoresPage() {
     }
   };
 
+  // ------------------------------------------------------------
+  // EXPORTACIONES
+  // ------------------------------------------------------------
+  const handleExportExcel = () => {
+    if (editores.length === 0) {
+      showSnackbar("No hay editores para exportar", "warning");
+      return;
+    }
+
+    const data = editores.map((e) => {
+      // Unir todos los proyectos (3D + Software) en una sola columna
+      const allProjects = [
+        ...(e.proyectos_3d_list || []).map(p => ({ ...p, tipo: "3D" })),
+        ...(e.proyectos_software_list || []).map(p => ({ ...p, tipo: "SW" }))
+      ];
+      // Ordenar por fecha descendente
+      allProjects.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+      const proyectosStr = allProjects.length > 0
+        ? allProjects.map(p => `${p.titulo} (${formatDate(p.fecha)})`).join("; ")
+        : "—";
+
+      return {
+        Nombre: e.nombre || "",
+        Email: e.email || "",
+        Rol: "Editor",
+        "Fecha creación": formatDate(e.date_joined || e.created_at),
+        "Diseños 3D": e.proyectos_3d_count || 0,
+        "Proyectos Software": e.proyectos_software_count || 0,
+        "Proyectos (todos)": proyectosStr,
+        Estado: e.is_active ? "Activo" : "Inactivo"
+      };
+    });
+
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Editores");
+    XLSX.writeFile(wb, `editores_${new Date().toISOString().slice(0,10)}.xlsx`);
+
+    showSnackbar("Exportación a Excel completada", "success");
+    setExportAnchorEl(null);
+  };
+
+  const handleExportPDF = () => {
+    if (editores.length === 0) {
+      showSnackbar("No hay editores para exportar", "warning");
+      return;
+    }
+
+    const doc = new jsPDF("landscape", "mm", "a4");
+    const pageWidth = doc.internal.pageSize.getWidth();
+
+    doc.setFontSize(16);
+    doc.text("Lista de Editores", pageWidth / 2, 15, { align: "center" });
+    doc.setFontSize(10);
+    doc.text(`Generado: ${new Date().toLocaleString()}`, pageWidth / 2, 22, { align: "center" });
+
+    const rows = editores.map((e) => {
+      const allProjects = [
+        ...(e.proyectos_3d_list || []).map(p => ({ ...p, tipo: "3D" })),
+        ...(e.proyectos_software_list || []).map(p => ({ ...p, tipo: "SW" }))
+      ];
+      allProjects.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+      const proyectosStr = allProjects.length > 0
+        ? allProjects.map(p => `${p.titulo} (${formatDate(p.fecha)})`).join("; ")
+        : "—";
+
+      return [
+        e.nombre || "",
+        e.email || "",
+        "Editor",
+        formatDate(e.date_joined || e.created_at),
+        String(e.proyectos_3d_count || 0),
+        String(e.proyectos_software_count || 0),
+        proyectosStr,
+        e.is_active ? "Activo" : "Inactivo"
+      ];
+    });
+
+    autoTable(doc, {
+      startY: 28,
+      head: [["Nombre", "Email", "Rol", "Fecha creación", "Diseños 3D", "Proyectos Software", "Proyectos (todos)", "Estado"]],
+      body: rows,
+      theme: "striped",
+      styles: { fontSize: 7, cellPadding: 1.5 },
+      headStyles: { fillColor: [0, 43, 73], textColor: 255, fontSize: 8, fontStyle: "bold" },
+      columnStyles: {
+        6: { cellWidth: 'auto' } // columna de proyectos más ancha
+      },
+      didDrawPage: (data) => {
+        doc.setFontSize(8);
+        doc.text(`Página ${data.pageNumber}`, pageWidth - 20, doc.internal.pageSize.getHeight() - 5);
+      }
+    });
+
+    doc.save(`editores_${new Date().toISOString().slice(0,10)}.pdf`);
+    showSnackbar("Exportación a PDF completada", "success");
+    setExportAnchorEl(null);
+  };
+
+  // ------------------------------------------------------------
+  // FILTRADO
+  // ------------------------------------------------------------
   const filteredEditores = React.useMemo(() => {
     return editores.filter((e) => {
       if (statusFilter === "ACTIVE" && !e.is_active) return false;
@@ -206,9 +328,11 @@ export default function EditoresPage() {
     });
   }, [editores, statusFilter, moreFilter]);
 
+  // ------------------------------------------------------------
+  // RENDER
+  // ------------------------------------------------------------
   return (
     <Box sx={{ pb: 4, maxWidth: 1360, margin: "0 auto" }}>
-      {/* Si estamos viendo la producción/proyectos de un editor en particular */}
       {viewingEditor ? (
         <EditorDetailView
           editor={viewingEditor}
@@ -220,7 +344,7 @@ export default function EditoresPage() {
         />
       ) : (
         <>
-          {/* Encabezado Principal*/}
+          {/* Encabezado */}
           <Box
             sx={{
               display: "flex",
@@ -240,28 +364,60 @@ export default function EditoresPage() {
               </Typography>
             </Box>
 
-            <Button
-              variant="contained"
-              elevation={0}
-              sx={{
-                bgcolor: "#F1F5F9",
-                color: "#1E293B",
-                fontWeight: 600,
-                textTransform: "none",
-                borderRadius: "6px",
-                boxShadow: "none",
-                px: 2.2,
-                py: 0.8,
-                "&:hover": { bgcolor: "#E2E8F0", boxShadow: "none" }
-              }}
-            >
-              Exportar
-            </Button>
+            {/* Botón Exportar con menú */}
+            <div>
+              <Button
+                variant="contained"
+                elevation={0}
+                startIcon={<ExportIcon size={18} />}
+                onClick={(e) => setExportAnchorEl(e.currentTarget)}
+                sx={{
+                  bgcolor: "#F1F5F9",
+                  color: "#1E293B",
+                  fontWeight: 600,
+                  textTransform: "none",
+                  borderRadius: "6px",
+                  boxShadow: "none",
+                  px: 2.2,
+                  py: 0.8,
+                  "&:hover": { bgcolor: "#E2E8F0", boxShadow: "none" }
+                }}
+              >
+                Exportar
+              </Button>
+              <Menu
+                anchorEl={exportAnchorEl}
+                open={openExportMenu}
+                onClose={() => setExportAnchorEl(null)}
+                PaperProps={{
+                  elevation: 0,
+                  sx: {
+                    borderRadius: "6px",
+                    border: "1px solid rgba(0, 0, 0, 0.06)",
+                    boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+                    minWidth: 200,
+                    py: 0.5,
+                    mt: 0.5
+                  }
+                }}
+                transformOrigin={{ horizontal: "right", vertical: "top" }}
+                anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+              >
+                <MenuItem onClick={handleExportExcel} sx={{ fontSize: "0.85rem", fontWeight: 500 }}>
+                  <FileXlsIcon size={18} style={{ marginRight: 8 }} />
+                  Exportar a Excel
+                </MenuItem>
+                <MenuItem onClick={handleExportPDF} sx={{ fontSize: "0.85rem", fontWeight: 500 }}>
+                  <FilePdfIcon size={18} style={{ marginRight: 8 }} />
+                  Exportar a PDF
+                </MenuItem>
+              </Menu>
+            </div>
           </Box>
 
           <Box sx={{ borderBottom: "1px solid rgba(0, 0, 0, 0.06)", mb: 3 }} />
 
-          {/* Barra de Acciones y Filtros (Posición original en escritorio, 100% responsive en móvil) */}
+          {/* Barra de Acciones y Filtros */}
           <Box
             sx={{
               display: "flex",
@@ -272,7 +428,6 @@ export default function EditoresPage() {
               mb: 3
             }}
           >
-            {/* Izquierda: Botón Nuevo Editor + Buscador */}
             <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} alignItems="center">
               <Button
                 variant="contained"
@@ -320,62 +475,28 @@ export default function EditoresPage() {
               />
             </Stack>
 
-            {/* Derecha: Filtros estilo Select con etiqueta flotante */}
-            <Stack
-              direction="row"
-              spacing={2}
-              alignItems="center"
-              flexWrap="wrap"
-              useFlexGap
-              sx={{ pt: { xs: 1, md: 0 } }}
-            >
-              <FormControl
-                size="small"
-                sx={{
-                  minWidth: 160,
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: "2px",
-                    bgcolor: "#FFFFFF",
-                    "& fieldset": { borderColor: "rgba(0, 0, 0, 0.23)" },
-                    "&:hover fieldset": { borderColor: "rgba(0, 0, 0, 0.4)" },
-                    "&.Mui-focused fieldset": { borderColor: "#002B49" }
-                  },
-                  "& .MuiInputLabel-root.Mui-focused": { color: "#002B49" }
-                }}
-              >
+            <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap" useFlexGap>
+              <FormControl size="small" sx={{ minWidth: 160 }}>
                 <InputLabel>Estado</InputLabel>
                 <Select
                   value={statusFilter}
                   label="Estado"
                   onChange={(e) => setStatusFilter(e.target.value)}
                 >
-                  <MenuItem value="ALL"><em>Todos los estados</em></MenuItem>
+                  <MenuItem value="ALL">Todos los estados</MenuItem>
                   <MenuItem value="ACTIVE">Activo</MenuItem>
                   <MenuItem value="INACTIVE">Inactivo</MenuItem>
                 </Select>
               </FormControl>
 
-              <FormControl
-                size="small"
-                sx={{
-                  minWidth: 200,
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: "2px",
-                    bgcolor: "#FFFFFF",
-                    "& fieldset": { borderColor: "rgba(0, 0, 0, 0.23)" },
-                    "&:hover fieldset": { borderColor: "rgba(0, 0, 0, 0.4)" },
-                    "&.Mui-focused fieldset": { borderColor: "#002B49" }
-                  },
-                  "& .MuiInputLabel-root.Mui-focused": { color: "#002B49" }
-                }}
-              >
+              <FormControl size="small" sx={{ minWidth: 200 }}>
                 <InputLabel>Filtro Proyectos</InputLabel>
                 <Select
                   value={moreFilter}
                   label="Filtro Proyectos"
                   onChange={(e) => setMoreFilter(e.target.value)}
                 >
-                  <MenuItem value="ALL"><em>Todos los editores</em></MenuItem>
+                  <MenuItem value="ALL">Todos los editores</MenuItem>
                   <MenuItem value="WITH_PROJECTS">Con proyectos subidos</MenuItem>
                   <MenuItem value="WITHOUT_PROJECTS">Sin proyectos subidos</MenuItem>
                 </Select>
@@ -408,7 +529,7 @@ export default function EditoresPage() {
             </Stack>
           </Box>
 
-          {/* Tabla Senior con Subcolumnas y Botón de Ver Proyectos */}
+          {/* Tabla */}
           <EditoresTable
             editores={filteredEditores}
             loading={loading}
@@ -424,7 +545,7 @@ export default function EditoresPage() {
         </>
       )}
 
-      {/* Modal Crear / Editar */}
+      {/* Modales */}
       <EditorFormModal
         open={openDialog}
         onClose={() => setOpenDialog(false)}
@@ -436,7 +557,6 @@ export default function EditoresPage() {
         submitting={submitting}
       />
 
-      {/* Modal Eliminar */}
       <EditorDeleteModal
         open={openDeleteDialog}
         onClose={() => setOpenDeleteDialog(false)}
@@ -444,7 +564,6 @@ export default function EditoresPage() {
         submitting={submitting}
       />
 
-      {/* Notificación Flotante */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}

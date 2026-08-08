@@ -5,6 +5,7 @@ import { FolderIcon } from "@phosphor-icons/react/dist/ssr/Folder";
 import { UserIcon } from "@phosphor-icons/react/dist/ssr/User";
 import { UsersIcon } from "@phosphor-icons/react/dist/ssr/Users";
 import { TagIcon } from "@phosphor-icons/react/dist/ssr/Tag";
+import { GraduationCapIcon } from "@phosphor-icons/react/dist/ssr/GraduationCap";
 
 export const navIcons = {
 	"chart-pie": ChartPieIcon,
@@ -14,4 +15,5 @@ export const navIcons = {
 	user: UserIcon,
 	users: UsersIcon,
 	tag: TagIcon,
+	"graduation-cap": GraduationCapIcon,
 };

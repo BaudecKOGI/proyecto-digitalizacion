@@ -48,6 +48,10 @@ INSTALLED_APPS = [
     'usuarios',
     'proyectos',
     'analitica',
+
+    'invitaciones',
+
+    'carreras',
 ]
 
 MIDDLEWARE = [

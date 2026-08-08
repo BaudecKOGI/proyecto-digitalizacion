@@ -217,7 +217,6 @@ export const Profile = () => {
       setIsSavingAvatar(false);
     }
   };
-
   const doSaveAccount = async () => {
     setIsSavingAccount(true);
     
@@ -358,7 +357,6 @@ export const Profile = () => {
                   <Trash2 size={14} />
                 </button>
               )}
-
               <input
                 ref={fileInputRef}
                 type="file"

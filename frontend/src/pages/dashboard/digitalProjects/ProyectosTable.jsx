@@ -29,7 +29,7 @@ import { Code as CodeIcon } from "@phosphor-icons/react/dist/ssr/Code";
 import { Globe as GlobeIcon } from "@phosphor-icons/react/dist/ssr/Globe";
 import { GitBranch as GitIcon } from "@phosphor-icons/react/dist/ssr/GitBranch";
 import { PlayCircle as PlayIcon } from "@phosphor-icons/react/dist/ssr/PlayCircle";
-import { OdsBadge } from "./odsData";
+import { OdsBadges } from "./odsData";
 
 export default function ProyectosTable({
   proyectos,
@@ -148,13 +148,13 @@ export default function ProyectosTable({
                     {p.titulo}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    Por: {p.autor_nombre} • {p.carrera} (Ciclo {p.ciclo})
+                    Por: {p.autor_nombre} • {p.carrera_nombre || p.carrera} (Ciclo {p.ciclo})
                   </Typography>
                 </Box>
               </Stack>
 
               <Stack direction="row" spacing={1} sx={{ mb: 2 }} flexWrap="wrap" useFlexGap>
-                <OdsBadge odsNum={p.ods} />
+                <OdsBadges odsIds={p.ods_detalle?.map(o => o.id) || []} />
                 <Chip
                   label={p.categoria_nombre || "Sin Categoría"}
                   size="small"
@@ -362,7 +362,7 @@ export default function ProyectosTable({
 
               <TableCell>
                 <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  {p.carrera}
+                  {p.carrera_nombre || p.carrera}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
                   {p.categoria_nombre || "Sin Categoría"}
@@ -370,11 +370,7 @@ export default function ProyectosTable({
               </TableCell>
 
               <TableCell>
-                {p.ods ? <OdsBadge odsNum={p.ods} /> : (
-                  <Typography variant="caption" color="text.disabled">
-                    No asignado
-                  </Typography>
-                )}
+                <OdsBadges odsIds={p.ods_detalle?.map(o => o.id) || []} />
               </TableCell>
 
               <TableCell>
@@ -408,7 +404,7 @@ export default function ProyectosTable({
 
               <TableCell align="right">
                 <Stack direction="row" spacing={0.5} justifyContent="flex-end" alignItems="center">
-                  <Tooltip title="Vista detallada (Otro fondo)">
+                  <Tooltip title="Vista detallada">
                     <IconButton
                       size="small"
                       onClick={() => onView(p)}

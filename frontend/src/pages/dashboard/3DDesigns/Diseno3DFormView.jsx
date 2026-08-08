@@ -14,12 +14,16 @@ import {
   Divider,
   Checkbox,
   FormControlLabel,
-  IconButton
+  IconButton,
+  Chip
 } from "@mui/material";
 import { ArrowLeft as BackIcon } from "@phosphor-icons/react/dist/ssr/ArrowLeft";
 import { Plus, Trash2, Upload, Eye, FileEdit, Box as BoxIcon } from "lucide-react";
 import { ODS_LIST } from "@/pages/dashboard/digitalProjects/odsData";
 import ConfirmDialog from "@/components/core/ConfirmDialog";
+
+// IMPORTAR SERVICIO DE CARRERAS
+import { fetchCarreras } from "@/services/api";
 
 // IMPORTACIONES 3D
 import { Canvas } from "@react-three/fiber";
@@ -156,10 +160,70 @@ export default function Diseno3DFormView({
   const [piezasMoviles, setPiezasMoviles] = useState([]);
   const [habilitarCamara, setHabilitarCamara] = useState(true);
 
+  // ESTADOS PARA CARRERAS
+  const [carreras, setCarreras] = useState([]);
+  const [carreraSeleccionada, setCarreraSeleccionada] = useState(null);
+  const [cicloSeleccionado, setCicloSeleccionado] = useState(null);
+
   // ESTADO PARA CONFIRMAR CANCELACIÓN
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [initialFormState, setInitialFormState] = useState(null);
   const [initialPiezasState, setInitialPiezasState] = useState(null);
+
+  // Cargar carreras al montar
+  useEffect(() => {
+    const loadCarreras = async () => {
+      try {
+        const data = await fetchCarreras("activo=true");
+        setCarreras(Array.isArray(data) ? data : data.results || []);
+      } catch (error) {
+        console.error("Error cargando carreras:", error);
+        setCarreras([]);
+      }
+    };
+    loadCarreras();
+  }, []);
+
+  // Preseleccionar carrera y ciclo si estamos editando
+  useEffect(() => {
+    if (editingDiseno) {
+      if (editingDiseno.carrera) {
+        const found = carreras.find(c => c.id === editingDiseno.carrera);
+        if (found) {
+          setCarreraSeleccionada(found.id);
+          if (editingDiseno.ciclo) {
+            setCicloSeleccionado(editingDiseno.ciclo);
+          }
+        }
+      }
+    }
+  }, [editingDiseno, carreras]);
+
+  // Sincronizar formDiseno cuando cambian carrera o ciclo
+  useEffect(() => {
+    if (carreraSeleccionada !== undefined) {
+      setFormDiseno(prev => ({ ...prev, carrera: carreraSeleccionada }));
+    }
+  }, [carreraSeleccionada, setFormDiseno]);
+
+  useEffect(() => {
+    if (cicloSeleccionado !== undefined) {
+      setFormDiseno(prev => ({ ...prev, ciclo: cicloSeleccionado }));
+    }
+  }, [cicloSeleccionado, setFormDiseno]);
+
+  const carreraActual = carreras.find(c => c.id === carreraSeleccionada);
+  const duracionCiclos = carreraActual ? carreraActual.duracion_ciclos : 0;
+
+  const generarOpcionesCiclos = (total) => {
+    const romanos = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+    return Array.from({ length: total }, (_, i) => ({
+      value: i + 1,
+      label: romanos[i] || (i + 1).toString()
+    }));
+  };
+
+  const opcionesCiclos = generarOpcionesCiclos(duracionCiclos);
 
   useEffect(() => {
     if (!initialFormState && formDiseno) {
@@ -458,7 +522,7 @@ export default function Diseno3DFormView({
               />
             </Box>
 
-            {/* AUTOR + CARRERA + CICLO */}
+            {/* AUTOR + CARRERA + CICLO (ahora Selects) */}
             <Stack direction={{ xs: "column", md: "row" }} spacing={2.5}>
               <Box sx={{ flex: 2 }}>
                 <Typography variant="body2" sx={labelSx}>
@@ -477,31 +541,54 @@ export default function Diseno3DFormView({
                 <Typography variant="body2" sx={labelSx}>
                   Carrera
                 </Typography>
-                <TextField
-                  fullWidth
-                  required
-                  placeholder="Ej. Arquitectura"
-                  value={formDiseno.carrera || ""}
-                  onChange={(e) => setFormDiseno({ ...formDiseno, carrera: e.target.value })}
-                  sx={fieldSx}
-                />
+                <FormControl fullWidth>
+                  <Select
+                    value={carreraSeleccionada || ""}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setCarreraSeleccionada(val);
+                      setCicloSeleccionado(null);
+                    }}
+                    displayEmpty
+                    sx={selectSx}
+                  >
+                    <MenuItem value="">
+                      <em>Seleccionar...</em>
+                    </MenuItem>
+                    {carreras.map((c) => (
+                      <MenuItem key={c.id} value={c.id}>
+                        {c.nombre}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               </Box>
               <Box sx={{ flex: 1 }}>
                 <Typography variant="body2" sx={labelSx}>
                   Ciclo
                 </Typography>
-                <TextField
-                  fullWidth
-                  required
-                  placeholder="Ej. III"
-                  value={formDiseno.ciclo || ""}
-                  onChange={(e) => setFormDiseno({ ...formDiseno, ciclo: e.target.value })}
-                  sx={fieldSx}
-                />
+                <FormControl fullWidth>
+                  <Select
+                    value={cicloSeleccionado || ""}
+                    onChange={(e) => setCicloSeleccionado(e.target.value)}
+                    disabled={!carreraSeleccionada}
+                    displayEmpty
+                    sx={selectSx}
+                  >
+                    <MenuItem value="">
+                      <em>{carreraSeleccionada ? "Seleccionar..." : "Primero selecciona carrera"}</em>
+                    </MenuItem>
+                    {opcionesCiclos.map((op) => (
+                      <MenuItem key={op.value} value={op.value}>
+                        {op.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               </Box>
             </Stack>
 
-            {/* CATEGORÍA + ODS */}
+            {/* CATEGORÍA + ODS (múltiple) */}
             <Stack direction={{ xs: "column", md: "row" }} spacing={2.5}>
               <Box sx={{ flex: 1 }}>
                 <Typography variant="body2" sx={labelSx}>
@@ -531,14 +618,26 @@ export default function Diseno3DFormView({
                 </Typography>
                 <FormControl fullWidth>
                   <Select
-                    value={formDiseno.ods || ""}
-                    onChange={(e) => setFormDiseno({ ...formDiseno, ods: e.target.value })}
-                    displayEmpty
+                    multiple
+                    value={formDiseno.ods_ids || []}
+                    onChange={(e) => setFormDiseno({ ...formDiseno, ods_ids: e.target.value })}
+                    renderValue={(selected) => (
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                        {selected.map((id) => {
+                          const ods = ODS_LIST.find(o => o.id === id);
+                          return (
+                            <Chip
+                              key={id}
+                              label={ods ? `ODS ${id}` : id}
+                              size="small"
+                              sx={{ bgcolor: ods?.color || '#6b7280', color: '#fff', fontWeight: 600 }}
+                            />
+                          );
+                        })}
+                      </Box>
+                    )}
                     sx={selectSx}
                   >
-                    <MenuItem value="">
-                      <em>No especificado</em>
-                    </MenuItem>
                     {ODS_LIST.map((o) => (
                       <MenuItem key={o.id} value={o.id}>
                         {o.label}
@@ -803,7 +902,6 @@ export default function Diseno3DFormView({
 
           <Divider sx={{ my: 4 }} />
 
-          {/* BOTONES INFERIORES */}
           <Stack direction="row" spacing={2} justifyContent="flex-end">
             <Button
               type="button"

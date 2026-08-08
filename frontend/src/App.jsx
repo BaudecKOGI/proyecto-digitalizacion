@@ -59,9 +59,14 @@ import UpdatePasswordPage from "@/pages/auth/update-password/UpdatePassword";
 import AccountPage from "@/pages/dashboard/account/Account";
 import DashboardOverviewPage from "@/pages/dashboard/dashboard/Dashboard";
 import Disenos3DPage from "@/pages/dashboard/3DDesigns/Disenos3D";
+import Diseno3DDetailView from "@/pages/dashboard/3DDesigns/Diseno3DDetailView"; // NUEVO
 import ProyectosDigitalesPage from "@/pages/dashboard/digitalProjects/ProyectosDigitales";
+import ProjectDetailView from "@/pages/dashboard/digitalProjects/ProjectDetailView"; // NUEVO
 import EditoresPage from "@/pages/dashboard/editores/Editores";
 import CategoriasPage from "@/pages/dashboard/categorias/Categorias";
+import CarrerasPage from "@/pages/dashboard/carreras/CarrerasPage";
+import CarreraDetailView from "@/pages/dashboard/carreras/CarreraDetailView";
+import CarreraCicloDetailView from "@/pages/dashboard/carreras/CarreraCicloDetailView";
 import VisualizacionesPage from "@/pages/dashboard/visualizaciones/Visualizaciones";
 
 // Layouts
@@ -101,7 +106,7 @@ export default function App() {
 
           {/* Con Layout */}
           <Route element={<EditorLayout />}>
-            {/*3D*/}
+            {/* 3D */}
             <Route path="3d">
               <Route index element={<Navigate to="dashboard" replace />} />
 
@@ -129,7 +134,7 @@ export default function App() {
               <Route path="perfil" element={<EditorProfile />} />
             </Route>
 
-            {/*SOFTWARE*/}
+            {/* SOFTWARE */}
             <Route path="software">
               <Route index element={<Navigate to="dashboard" replace />} />
 
@@ -182,12 +187,17 @@ export default function App() {
             <Route index element={<DashboardOverviewPage />} />
             <Route path="cuenta" element={<AccountPage />} />
             <Route path="disenos-3d" element={<Disenos3DPage />} />
+            <Route path="disenos-3d/detalle/:id" element={<Diseno3DDetailView />} /> {/* NUEVO */}
             <Route
               path="proyectos-digitales"
               element={<ProyectosDigitalesPage />}
             />
+            <Route path="proyectos-digitales/detalle/:id" element={<ProjectDetailView />} /> {/* NUEVO */}
             <Route path="editores" element={<EditoresPage />} />
             <Route path="categorias" element={<CategoriasPage />} />
+            <Route path="carreras" element={<CarrerasPage />} />
+            <Route path="carreras/:carrera" element={<CarreraDetailView />} />
+            <Route path="carreras/:carrera/:tipo/:ciclo" element={<CarreraCicloDetailView />} />
             <Route
               path="visualizaciones"
               element={<VisualizacionesPage />}

@@ -11,6 +11,10 @@ class UsuarioSerializer(serializers.ModelSerializer):
     avatar_url = serializers.SerializerMethodField()
     proyectos_3d_count = serializers.SerializerMethodField()
     proyectos_software_count = serializers.SerializerMethodField()
+    
+    # NUEVOS: listas de proyectos con título y fecha
+    proyectos_3d_list = serializers.SerializerMethodField()
+    proyectos_software_list = serializers.SerializerMethodField()
 
     class Meta:
         model = Usuario
@@ -23,12 +27,23 @@ class UsuarioSerializer(serializers.ModelSerializer):
             'avatar_url',
             'proyectos_3d_count',
             'proyectos_software_count',
+            'proyectos_3d_list',        # nuevo
+            'proyectos_software_list',  # nuevo
             'is_active',
             'password',
             'updated_at',
             'date_joined'
         ]
-        read_only_fields = ['id', 'avatar_url', 'proyectos_3d_count', 'proyectos_software_count', 'updated_at', 'date_joined']
+        read_only_fields = [
+            'id',
+            'avatar_url',
+            'proyectos_3d_count',
+            'proyectos_software_count',
+            'proyectos_3d_list',
+            'proyectos_software_list',
+            'updated_at',
+            'date_joined'
+        ]
 
     def get_avatar_url(self, obj):
         if obj.avatar and hasattr(obj.avatar, 'url'):
@@ -45,6 +60,17 @@ class UsuarioSerializer(serializers.ModelSerializer):
     def get_proyectos_software_count(self, obj):
         from proyectos.models import ProyectoSoftware
         return ProyectoSoftware.objects.filter(creado_por=obj).count()
+
+    # NUEVOS: métodos para obtener listas de proyectos
+    def get_proyectos_3d_list(self, obj):
+        from proyectos.models import Proyecto3D
+        proyectos = Proyecto3D.objects.filter(creado_por=obj).order_by('-created_at')
+        return [{"titulo": p.titulo, "fecha": p.created_at.isoformat()} for p in proyectos]
+
+    def get_proyectos_software_list(self, obj):
+        from proyectos.models import ProyectoSoftware
+        proyectos = ProyectoSoftware.objects.filter(creado_por=obj).order_by('-created_at')
+        return [{"titulo": p.titulo, "fecha": p.created_at.isoformat()} for p in proyectos]
 
     def validate_email(self, value):
         email = value.lower().strip()

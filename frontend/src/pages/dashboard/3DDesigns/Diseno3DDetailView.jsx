@@ -1,5 +1,6 @@
 import * as React from "react";
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -18,7 +19,7 @@ import { PencilSimple as EditIcon } from "@phosphor-icons/react/dist/ssr/PencilS
 import { Trash as TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
 import { Cube as CubeIcon } from "@phosphor-icons/react/dist/ssr/Cube";
 import { Maximize2 } from "lucide-react";
-import { OdsBadge } from "@/pages/dashboard/digitalProjects/odsData";
+import { getODSById } from "@/pages/dashboard/digitalProjects/odsData";
 
 // IMPORTACIONES 3D Y COMPONENTES MODULARES
 import { Canvas } from "@react-three/fiber";
@@ -26,17 +27,89 @@ import { OrbitControls, Stage, Html } from "@react-three/drei";
 import FBXInteractiveModel, { FBXErrorBoundary } from "./FBXInteractiveModel";
 import Diseno3DFullscreenModal from "./Diseno3DFullscreenModal";
 
-export default function Diseno3DDetailView({
-  diseno,
-  categorias = [],
-  onBack,
-  onEdit,
-  onDelete
-}) {
+import { fetchProyecto3DById } from "@/services/api";
+
+export default function Diseno3DDetailView({ diseno: propDiseno, onBack, onEdit, onDelete, categorias = [] }) {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  
+  const [diseno, setDiseno] = useState(propDiseno || null);
+  const [loading, setLoading] = useState(!propDiseno);
+  const [error, setError] = useState('');
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [habilitarCamara, setHabilitarCamara] = useState(true);
 
-  if (!diseno) return null;
+  // Cargar proyecto solo si no se pasó como prop
+  useEffect(() => {
+    if (propDiseno) {
+      setDiseno(propDiseno);
+      setLoading(false);
+      return;
+    }
+
+    const loadProject = async () => {
+      if (!id) {
+        setError('ID de proyecto no válido');
+        setLoading(false);
+        return;
+      }
+      try {
+        setLoading(true);
+        const data = await fetchProyecto3DById(id);
+        setDiseno(data);
+      } catch (err) {
+        console.error('Error cargando proyecto 3D:', err);
+        setError('No se pudo cargar el proyecto 3D');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadProject();
+  }, [id, propDiseno]);
+
+  // Manejadores de navegación (priorizan props si existen)
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+    } else {
+      navigate('/dashboard/disenos-3d');
+    }
+  };
+
+  const handleEdit = () => {
+    if (onEdit && diseno) {
+      onEdit(diseno);
+    } else if (diseno) {
+      navigate(`/dashboard/disenos-3d/editar/${diseno.id}`);
+    }
+  };
+
+  const handleDelete = () => {
+    if (onDelete && diseno) {
+      onDelete(diseno);
+    } else {
+      navigate('/dashboard/disenos-3d');
+    }
+  };
+
+  if (loading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: 400 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error || !diseno) {
+    return (
+      <Box sx={{ p: 4, textAlign: "center" }}>
+        <Typography color="error">{error || 'Proyecto no encontrado'}</Typography>
+        <Button variant="contained" sx={{ mt: 2 }} onClick={handleBack}>
+          Volver a la lista
+        </Button>
+      </Box>
+    );
+  }
 
   const fbxUrl = diseno.archivo_fbx;
   const piezasMoviles = diseno.configuracion_interactiva?.piezas_moviles || [];
@@ -62,7 +135,7 @@ export default function Diseno3DDetailView({
             variant="outlined"
             size="small"
             startIcon={<BackIcon />}
-            onClick={onBack}
+            onClick={handleBack}
             sx={{
               textTransform: "none",
               fontWeight: 600,
@@ -83,7 +156,7 @@ export default function Diseno3DDetailView({
             variant="outlined"
             color="primary"
             startIcon={<EditIcon />}
-            onClick={() => onEdit(diseno)}
+            onClick={handleEdit}
             sx={{ textTransform: "none", fontWeight: 700, borderRadius: 1.5 }}
           >
             Editar Diseño
@@ -92,7 +165,7 @@ export default function Diseno3DDetailView({
             variant="outlined"
             color="error"
             startIcon={<TrashIcon />}
-            onClick={() => onDelete(diseno)}
+            onClick={handleDelete}
             sx={{ textTransform: "none", fontWeight: 700, borderRadius: 1.5 }}
           >
             Eliminar
@@ -110,7 +183,7 @@ export default function Diseno3DDetailView({
           alignItems: "stretch"
         }}
       >
-        {/* COLUMNA IZQUIERDA: VISOR 3D EN VIVO  */}
+        {/* COLUMNA IZQUIERDA: VISOR 3D EN VIVO */}
         <Box
           sx={{
             flex: { xs: "1 1 100%", md: "0 0 calc(50% - 12px)" },
@@ -147,7 +220,6 @@ export default function Diseno3DDetailView({
                 overflow: "hidden"
               }}
             >
-              {/* Botón de cuadrito para expandir en toda la pantalla */}
               {fbxUrl && (
                 <Tooltip title="Expandir modelo en pantalla completa">
                   <IconButton
@@ -268,9 +340,20 @@ export default function Diseno3DDetailView({
                 />
               </Stack>
 
-              {diseno.ods && (
-                <Box sx={{ mt: 1, mb: 2 }}>
-                  <OdsBadge odsNum={diseno.ods} />
+              {/* ODS MÚLTIPLES */}
+              {diseno.ods_detalle && diseno.ods_detalle.length > 0 && (
+                <Box sx={{ mt: 1, mb: 2, display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                  {diseno.ods_detalle.map((ods) => {
+                    const odsColor = getODSById(ods.id)?.color || '#6b7280';
+                    return (
+                      <Chip
+                        key={ods.id}
+                        label={ods.label}
+                        size="small"
+                        sx={{ bgcolor: odsColor, color: '#fff', fontWeight: 600 }}
+                      />
+                    );
+                  })}
                 </Box>
               )}
 
@@ -279,8 +362,7 @@ export default function Diseno3DDetailView({
                   label={
                     typeof diseno.categoria === "object"
                       ? diseno.categoria.nombre
-                      : categorias.find((c) => c.id === Number(diseno.categoria))?.nombre
-                        || `Categoría #${diseno.categoria}`
+                      : `Categoría #${diseno.categoria}`
                   }
                   size="small"
                   variant="outlined"
@@ -306,7 +388,7 @@ export default function Diseno3DDetailView({
                     CARRERA Y CICLO
                   </Typography>
                   <Typography variant="body1" fontWeight={600} sx={{ mt: 0.3 }}>
-                    {diseno.carrera || "N/A"} - {diseno.ciclo || "N/A"}
+                    {diseno.carrera_nombre || diseno.carrera || "N/A"} - {diseno.ciclo || "N/A"}
                   </Typography>
                 </Grid>
 
@@ -349,7 +431,6 @@ export default function Diseno3DDetailView({
               </Typography>
             </Box>
 
-            {/* Miniatura adicional o información extra inferior */}
             {diseno.imagen_miniatura && (
               <Box sx={{ mt: 3, pt: 2, borderTop: "1px dashed", borderColor: "divider" }}>
                 <Typography variant="caption" color="text.secondary" fontWeight={700} display="block" sx={{ mb: 1 }}>

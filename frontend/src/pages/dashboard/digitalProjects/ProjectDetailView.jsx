@@ -1,4 +1,6 @@
 import * as React from "react";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -9,7 +11,8 @@ import {
   Paper,
   Divider,
   IconButton,
-  Tooltip
+  Tooltip,
+  CircularProgress
 } from "@mui/material";
 import { ArrowLeft as BackIcon } from "@phosphor-icons/react/dist/ssr/ArrowLeft";
 import { GitBranch as GitIcon } from "@phosphor-icons/react/dist/ssr/GitBranch";
@@ -17,15 +20,89 @@ import { Globe as GlobeIcon } from "@phosphor-icons/react/dist/ssr/Globe";
 import { PencilSimple as EditIcon } from "@phosphor-icons/react/dist/ssr/PencilSimple";
 import { Trash as TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
 import { VideoCameraSlash as NoVideoIcon } from "@phosphor-icons/react/dist/ssr/VideoCameraSlash";
-import { OdsBadge } from "./odsData";
+import { getODSById } from "./odsData";
 
-export default function ProjectDetailView({
-  proyecto,
-  onBack,
-  onEdit,
-  onDelete
-}) {
-  if (!proyecto) return null;
+import { fetchProyectoSoftwareById } from "@/services/api";
+
+export default function ProjectDetailView({ proyecto: propProyecto, onBack, onEdit, onDelete }) {
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  const [proyecto, setProyecto] = useState(propProyecto || null);
+  const [loading, setLoading] = useState(!propProyecto);
+  const [error, setError] = useState('');
+
+  // Cargar proyecto solo si no se pasó como prop
+  useEffect(() => {
+    if (propProyecto) {
+      setProyecto(propProyecto);
+      setLoading(false);
+      return;
+    }
+
+    const loadProject = async () => {
+      if (!id) {
+        setError('ID de proyecto no válido');
+        setLoading(false);
+        return;
+      }
+      try {
+        setLoading(true);
+        const data = await fetchProyectoSoftwareById(id);
+        setProyecto(data);
+      } catch (err) {
+        console.error('Error cargando proyecto de software:', err);
+        setError('No se pudo cargar el proyecto de software');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadProject();
+  }, [id, propProyecto]);
+
+  // Manejadores de navegación (priorizan props si existen)
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+    } else {
+      navigate('/dashboard/proyectos-digitales');
+    }
+  };
+
+  const handleEdit = () => {
+    if (onEdit && proyecto) {
+      onEdit(proyecto);
+    } else if (proyecto) {
+      navigate(`/dashboard/proyectos-digitales/editar/${proyecto.id}`);
+    }
+  };
+
+  const handleDelete = () => {
+    if (onDelete && proyecto) {
+      onDelete(proyecto.id);
+    } else {
+      navigate('/dashboard/proyectos-digitales');
+    }
+  };
+
+  if (loading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: 400 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error || !proyecto) {
+    return (
+      <Box sx={{ p: 4, textAlign: "center" }}>
+        <Typography color="error">{error || 'Proyecto no encontrado'}</Typography>
+        <Button variant="contained" sx={{ mt: 2 }} onClick={handleBack}>
+          Volver a la lista
+        </Button>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ width: "100%", pb: 6 }}>
@@ -48,7 +125,7 @@ export default function ProjectDetailView({
             variant="outlined"
             size="small"
             startIcon={<BackIcon />}
-            onClick={onBack}
+            onClick={handleBack}
             sx={{
               textTransform: "none",
               fontWeight: 600,
@@ -69,7 +146,7 @@ export default function ProjectDetailView({
             variant="outlined"
             size="small"
             startIcon={<EditIcon />}
-            onClick={() => onEdit(proyecto)}
+            onClick={handleEdit}
             sx={{ textTransform: "none", fontWeight: 600, borderRadius: 1.5 }}
           >
             Editar proyecto
@@ -79,7 +156,7 @@ export default function ProjectDetailView({
             color="error"
             size="small"
             startIcon={<TrashIcon />}
-            onClick={() => onDelete(proyecto.id)}
+            onClick={handleDelete}
             sx={{ textTransform: "none", fontWeight: 600, borderRadius: 1.5 }}
           >
             Eliminar
@@ -102,7 +179,24 @@ export default function ProjectDetailView({
             }
             sx={{ fontWeight: 700, borderRadius: 1, fontSize: "0.75rem" }}
           />
-          <OdsBadge odsNum={proyecto.ods} />
+          
+          {/* ODS MÚLTIPLES */}
+          {proyecto.ods_detalle && proyecto.ods_detalle.length > 0 && (
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+              {proyecto.ods_detalle.map((ods) => {
+                const odsColor = getODSById(ods.id)?.color || '#6b7280';
+                return (
+                  <Chip
+                    key={ods.id}
+                    label={ods.label}
+                    size="small"
+                    sx={{ bgcolor: odsColor, color: '#fff', fontWeight: 600 }}
+                  />
+                );
+              })}
+            </Box>
+          )}
+
           {proyecto.categoria_nombre && (
             <Chip
               label={proyecto.categoria_nombre}
@@ -118,7 +212,7 @@ export default function ProjectDetailView({
         </Typography>
 
         <Typography variant="body1" color="text.secondary" sx={{ fontWeight: 400 }}>
-          Desarrollado por <strong>{proyecto.autor_nombre}</strong> • {proyecto.carrera} (Ciclo {proyecto.ciclo})
+          Desarrollado por <strong>{proyecto.autor_nombre}</strong> • {proyecto.carrera_nombre || proyecto.carrera} (Ciclo {proyecto.ciclo})
         </Typography>
       </Box>
 
@@ -248,7 +342,7 @@ export default function ProjectDetailView({
                     Carrera Profesional
                   </Typography>
                   <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                    {proyecto.carrera}
+                    {proyecto.carrera_nombre || proyecto.carrera}
                   </Typography>
                 </Box>
 

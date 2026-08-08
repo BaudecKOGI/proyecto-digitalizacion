@@ -18,13 +18,15 @@ export function getNavItems() {
       icon: "folder",
     },
     { key: "editores", title: "Editores", href: paths.dashboard.editores, icon: "users" },
-    { key: "categorias", title: "Categorias", href: paths.dashboard.categorias, icon: "tag" },
+    { key: "categorias", title: "Categorías", href: paths.dashboard.categorias, icon: "tag" },
+    { key: "carreras", title: "Carreras", href: paths.dashboard.carreras, icon: "graduation-cap" }, // NUEVO
     { key: "visualizaciones", title: "Visualizaciones", href: paths.dashboard.visualizaciones, icon: "eye" },
     { key: "perfil", title: "Perfil", href: paths.dashboard.cuenta, icon: "user" },
   ];
 
   if (isEditor) {
-    return allItems.filter((item) => item.key !== "editores");
+    // Los editores no ven editores ni carreras (solo admin)
+    return allItems.filter((item) => item.key !== "editores" && item.key !== "carreras");
   }
   return allItems;
 }
@@ -39,7 +41,8 @@ export const navItems = [
     icon: "folder",
   },
   { key: "editores", title: "Editores", href: paths.dashboard.editores, icon: "users" },
-  { key: "categorias", title: "Categorias", href: paths.dashboard.categorias, icon: "tag" },
+  { key: "categorias", title: "Categorías", href: paths.dashboard.categorias, icon: "tag" },
+  { key: "carreras", title: "Carreras", href: paths.dashboard.carreras, icon: "graduation-cap" }, // NUEVO
   { key: "visualizaciones", title: "Visualizaciones", href: paths.dashboard.visualizaciones, icon: "eye" },
   { key: "perfil", title: "Perfil", href: paths.dashboard.cuenta, icon: "user" },
 ];

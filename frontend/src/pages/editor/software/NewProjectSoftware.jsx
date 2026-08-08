@@ -12,7 +12,7 @@ import {
   X
 } from 'lucide-react';
 import { useUser } from '@/hooks/use-user';
-import { fetchCategorias, fetchTecnologias, createProyectoSoftware } from '@/services/api';
+import { fetchCategorias, fetchTecnologias, fetchCarreras, createProyectoSoftware } from '@/services/api';
 import { ODS_LIST } from "@/pages/dashboard/digitalProjects/odsData";
 
 export default function NewProjectSoftware() {
@@ -22,6 +22,7 @@ export default function NewProjectSoftware() {
   // Estados para datos dinámicos desde Django
   const [categorias, setCategorias] = useState([]);
   const [tecnologias, setTecnologias] = useState([]);
+  const [carreras, setCarreras] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -31,8 +32,8 @@ export default function NewProjectSoftware() {
     estado_publicacion: 'BORRADOR',
     descripcion: '',
     autor_nombre: '',
-    carrera: '',
-    ciclo: '',
+    carrera: '',   // ID de carrera
+    ciclo: '',     // número de ciclo
     categoria: '',
     ods: '',
     url_repositorio: '',
@@ -45,17 +46,19 @@ export default function NewProjectSoftware() {
   const [archivoVideo, setArchivoVideo] = useState(null);
   const [imagenUrl, setImagenUrl] = useState(null);
 
-  // 1. CARGAR CATEGORÍAS Y TECNOLOGÍAS DESDE DJANGO
+  // 1. CARGAR CATEGORÍAS, TECNOLOGÍAS Y CARRERAS DESDE DJANGO
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [catsData, techsData] = await Promise.all([
+        const [catsData, techsData, carrerasData] = await Promise.all([
           fetchCategorias(),
-          fetchTecnologias()
+          fetchTecnologias(),
+          fetchCarreras('activo=true')
         ]);
         
         setCategorias(Array.isArray(catsData) ? catsData : catsData?.results || []);
         setTecnologias(Array.isArray(techsData) ? techsData : techsData?.results || []);
+        setCarreras(Array.isArray(carrerasData) ? carrerasData : carrerasData?.results || []);
       } catch (err) {
         console.error("Error cargando listas:", err);
       }
@@ -92,6 +95,15 @@ export default function NewProjectSoftware() {
     });
   };
 
+  // Helper para números romanos
+  const toRoman = (num) => {
+    const romanos = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+    return romanos[num - 1] || num;
+  };
+
+  const carreraSeleccionada = carreras.find(c => String(c.id) === String(formData.carrera));
+  const duracionCiclos = carreraSeleccionada ? carreraSeleccionada.duracion_ciclos : 0;
+
   // 2. ENVÍO REAL A DJANGO
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -104,8 +116,9 @@ export default function NewProjectSoftware() {
       // Adjuntamos valores de texto simples
       Object.keys(formData).forEach(key => {
         if (key === 'tecnologias') {
-          // Las tecnologías se envían de a una en FormData para arrays en Django
           formData.tecnologias.forEach(id => data.append('tecnologias', id));
+        } else if (key === 'carrera' || key === 'ciclo') {
+          if (formData[key]) data.append(key, formData[key]);
         } else if (formData[key] !== '' && formData[key] !== null) {
           data.append(key, formData[key]);
         }
@@ -204,7 +217,7 @@ export default function NewProjectSoftware() {
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_100px] gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_150px] gap-6">
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-semibold text-[var(--text-main)]">Nombre del Autor *</label>
                 <input 
@@ -216,20 +229,36 @@ export default function NewProjectSoftware() {
               </div>
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-semibold text-[var(--text-main)]">Carrera Profesional *</label>
-                <input 
-                  type="text" name="carrera" value={formData.carrera} onChange={handleChange}
-                  placeholder="Ej. Ingeniería de Software"
+                <select 
                   className="bg-[var(--bg-general)] border border-[var(--line)] text-[var(--text-main)] rounded-lg px-4 py-2.5 focus:outline-none focus:border-[var(--accent)] transition-colors w-full"
+                  name="carrera"
+                  value={formData.carrera}
+                  onChange={(e) => {
+                    setFormData(prev => ({ ...prev, carrera: e.target.value, ciclo: '' }));
+                  }}
                   required
-                />
+                >
+                  <option value="">Seleccionar carrera...</option>
+                  {carreras.map(c => (
+                    <option key={c.id} value={c.id}>{c.nombre}</option>
+                  ))}
+                </select>
               </div>
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-semibold text-[var(--text-main)]">Ciclo</label>
-                <input 
-                  type="text" name="ciclo" value={formData.ciclo} onChange={handleChange}
-                  placeholder="Ej. VI"
-                  className="bg-[var(--bg-general)] border border-[var(--line)] text-[var(--text-main)] rounded-lg px-4 py-2.5 focus:outline-none focus:border-[var(--accent)] transition-colors w-full uppercase"
-                />
+                <select 
+                  className="bg-[var(--bg-general)] border border-[var(--line)] text-[var(--text-main)] rounded-lg px-4 py-2.5 focus:outline-none focus:border-[var(--accent)] transition-colors w-full"
+                  name="ciclo"
+                  value={formData.ciclo}
+                  onChange={handleChange}
+                  disabled={!formData.carrera}
+                  required
+                >
+                  <option value="">{formData.carrera ? 'Seleccionar ciclo...' : 'Primero selecciona carrera'}</option>
+                  {Array.from({ length: duracionCiclos }, (_, i) => i + 1).map(num => (
+                    <option key={num} value={num}>{toRoman(num)}</option>
+                  ))}
+                </select>
               </div>
             </div>
 
@@ -391,7 +420,7 @@ export default function NewProjectSoftware() {
                 )}
                 {formData.ciclo && (
                   <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border border-[var(--line)] text-[var(--text-muted)] bg-[var(--bg-general)]">
-                    Ciclo {formData.ciclo}
+                    Ciclo {toRoman(Number(formData.ciclo))}
                   </span>
                 )}
               </div>

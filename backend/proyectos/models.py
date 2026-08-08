@@ -1,5 +1,6 @@
 from django.db import models
 from usuarios.models import Usuario
+from carreras.models import Carrera
 
 class Categoria(models.Model):
     nombre = models.CharField(max_length=50, unique=True)
@@ -30,12 +31,30 @@ class Tecnologia(models.Model):
         return self.nombre
 
 
+class ProyectoODS(models.Model):
+    """
+    Modelo intermedio para relacionar muchos ODS con un proyecto.
+    """
+    proyecto = models.ForeignKey('Proyecto', on_delete=models.CASCADE, related_name='ods_relacionados')
+    ods_id = models.PositiveSmallIntegerField()  # 1-17
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('proyecto', 'ods_id')
+        verbose_name = "ODS del Proyecto"
+        verbose_name_plural = "ODS del Proyecto"
+
+    def __str__(self):
+        return f"{self.proyecto.titulo} - ODS {self.ods_id}"
+
+
 class Proyecto(models.Model):
     ESTADOS = (
         ('BORRADOR', 'Borrador'),
         ('PUBLICADO', 'Publicado'),
         ('ARCHIVADO', 'Archivado'),
     )
+    # Mantenemos ODS_CHOICES solo para referencia, pero ya no lo usamos como campo
     ODS_CHOICES = (
         (1, 'ODS 1: Fin de la Pobreza'),
         (2, 'ODS 2: Hambre Cero'),
@@ -59,10 +78,23 @@ class Proyecto(models.Model):
     titulo = models.CharField(max_length=150)
     descripcion = models.TextField()
     autor_nombre = models.CharField(max_length=150)
-    carrera = models.CharField(max_length=100)
-    ciclo = models.CharField(max_length=20)
+
+    carrera = models.ForeignKey(
+        Carrera,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='proyectos',
+        verbose_name="Carrera"
+    )
+    ciclo = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        choices=[(i, i) for i in range(1, 13)],
+        verbose_name="Ciclo"
+    )
+
     estado_publicacion = models.CharField(max_length=20, choices=ESTADOS, default='BORRADOR')
-    ods = models.PositiveSmallIntegerField(choices=ODS_CHOICES, null=True, blank=True, verbose_name="ODS Principal")
     creado_por = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='proyectos')
     categoria = models.ForeignKey(Categoria, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
