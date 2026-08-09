@@ -8,8 +8,6 @@ import {
   InputAdornment,
   Paper,
   Stack,
-  Tabs,
-  Tab,
   MenuItem,
   Select,
   FormControl,
@@ -29,6 +27,7 @@ import { FunnelX as ClearFilterIcon } from "@phosphor-icons/react/dist/ssr/Funne
 import { Cube as CubeIcon } from "@phosphor-icons/react/dist/ssr/Cube";
 import { Table as TableIcon } from "@phosphor-icons/react/dist/ssr/Table";
 import { SquaresFour as GridIcon } from "@phosphor-icons/react/dist/ssr/SquaresFour";
+import { Link2 } from "lucide-react";
 
 import {
   fetchProyectos3DAdmin,
@@ -43,6 +42,7 @@ import Disenos3DTable from "./Disenos3DTable";
 import Diseno3DFormView from "./Diseno3DFormView";
 import Diseno3DDetailView from "./Diseno3DDetailView";
 import Diseno3DDeleteModal from "./Diseno3DDeleteModal";
+import GenerarInvitacionDialog from "@/components/core/GenerarInvitacionDialog";
 
 export default function Disenos3D() {
 
@@ -50,11 +50,14 @@ export default function Disenos3D() {
   const [categorias, setCategorias] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const [tabValue, setTabValue] = useState("todos");
+  // Pestañas: "3d" (todos) o "invitaciones"
+  const [tabValue, setTabValue] = useState("3d");
 
+  // Filtros
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategoria, setSelectedCategoria] = useState("");
   const [selectedOds, setSelectedOds] = useState("");
+  const [filterEstado, setFilterEstado] = useState(""); // "PUBLICADO", "BORRADOR" o ""
 
   const [viewMode, setViewMode] = useState(() => {
     return localStorage.getItem("disenos3d_viewMode") || "table";
@@ -73,7 +76,7 @@ export default function Disenos3D() {
     carrera: null,
     ciclo: null,
     categoria: "",
-    ods_ids: [],   // <-- Ahora es un array de números
+    ods_ids: [],
     descripcion: ""
   });
   const [archivoFBX, setArchivoFBX] = useState(null);
@@ -83,6 +86,8 @@ export default function Disenos3D() {
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
 
   const [deleteModal, setDeleteModal] = useState({ open: false, item: null, submitting: false });
+
+  const [openInvitacionDialog, setOpenInvitacionDialog] = useState(false);
 
   const loadData = async () => {
     setLoading(true);
@@ -116,11 +121,21 @@ export default function Disenos3D() {
     loadData();
   }, [selectedCategoria, selectedOds]);
 
+  // Filtrado combinado
   const filteredDisenos = useMemo(() => {
     let list = disenos;
-    if (tabValue !== "todos") {
-      list = list.filter(item => item.estado_publicacion === tabValue);
+
+    // Filtro por pestaña: si es "invitaciones", solo los que tienen invitación
+    if (tabValue === "invitaciones") {
+      list = list.filter(item => item.invitacion !== null);
     }
+
+    // Filtro por estado (si está seleccionado)
+    if (filterEstado) {
+      list = list.filter(item => item.estado_publicacion === filterEstado);
+    }
+
+    // Filtro de búsqueda
     if (!searchTerm.trim()) return list;
     const query = searchTerm.toLowerCase().trim();
     return list.filter(item => {
@@ -135,7 +150,7 @@ export default function Disenos3D() {
         carrera.includes(query)
       );
     });
-  }, [disenos, tabValue, searchTerm]);
+  }, [disenos, tabValue, filterEstado, searchTerm]);
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
@@ -147,7 +162,8 @@ export default function Disenos3D() {
     setSearchTerm("");
     setSelectedCategoria("");
     setSelectedOds("");
-    setTabValue("todos");
+    setFilterEstado("");
+    setTabValue("3d");
   };
 
   const handleUpdateEstado = async (id, nuevoEstado) => {
@@ -192,7 +208,7 @@ export default function Disenos3D() {
       carrera: item.carrera || null,
       ciclo: item.ciclo || null,
       categoria: typeof item.categoria === "object" ? item.categoria?.id || "" : item.categoria || "",
-      ods_ids: item.ods_detalle?.map(o => o.id) || [],  // <-- Cargar IDs existentes
+      ods_ids: item.ods_detalle?.map(o => o.id) || [],
       descripcion: item.descripcion || "",
       creado_por: item.creado_por || 1
     });
@@ -232,7 +248,6 @@ export default function Disenos3D() {
         formData.append("categoria", categorias[0].id);
       }
       
-      // Enviar ods_ids como JSON string
       if (formDiseno.ods_ids && formDiseno.ods_ids.length > 0) {
         formData.append("ods_ids", JSON.stringify(formDiseno.ods_ids));
       }
@@ -351,8 +366,7 @@ export default function Disenos3D() {
   }
 
   const totalCount = disenos.length;
-  const publicadosCount = disenos.filter((d) => d.estado_publicacion === "PUBLICADO").length;
-  const borradorCount = disenos.filter((d) => d.estado_publicacion === "BORRADOR").length;
+  const invitacionesCount = disenos.filter((d) => d.invitacion !== null).length;
 
   return (
     <Box sx={{ pb: 4, maxWidth: 1360, margin: "0 auto" }}>
@@ -375,36 +389,58 @@ export default function Disenos3D() {
           </Typography>
         </Box>
 
-        <Button
-          variant="contained"
-          size="medium"
-          startIcon={<PlusIcon weight="bold" />}
-          onClick={handleOpenCreate}
-          sx={{
-            fontWeight: 600,
-            borderRadius: "2px",
-            px: 3.5,
-            py: 1,
-            bgcolor: "#002B49",
-            color: "#FFFFFF",
-            textTransform: "none",
-            boxShadow: "none",
-            "&:hover": {
-              bgcolor: "#001e33",
-              boxShadow: "none"
-            }
-          }}
-        >
-          Nuevo Modelo 3D
-        </Button>
+        <Stack spacing={1} direction="column" alignItems="stretch" sx={{ minWidth: { xs: "100%", sm: 180 } }}>
+          <Button
+            variant="contained"
+            size="medium"
+            startIcon={<PlusIcon weight="bold" />}
+            onClick={handleOpenCreate}
+            sx={{
+              fontWeight: 600,
+              borderRadius: "2px",
+              px: 3.5,
+              py: 1,
+              bgcolor: "#002B49",
+              color: "#FFFFFF",
+              textTransform: "none",
+              boxShadow: "none",
+              "&:hover": {
+                bgcolor: "#001e33",
+                boxShadow: "none"
+              }
+            }}
+          >
+            Nuevo Modelo 3D
+          </Button>
+          <Button
+            variant="outlined"
+            size="medium"
+            startIcon={<Link2 size={18} />}
+            onClick={() => setOpenInvitacionDialog(true)}
+            sx={{
+              fontWeight: 600,
+              borderRadius: "2px",
+              px: 3.5,
+              py: 1,
+              borderColor: "#002B49",
+              color: "#002B49",
+              textTransform: "none",
+              "&:hover": {
+                bgcolor: "rgba(0, 43, 73, 0.04)",
+                borderColor: "#002B49"
+              }
+            }}
+          >
+            Generar enlace
+          </Button>
+        </Stack>
       </Stack>
 
       <Box sx={{ borderBottom: "1px solid rgba(0, 0, 0, 0.08)", mb: 3.5 }}>
         <Stack direction="row" spacing={4}>
           {[
-            { label: `Todos los Modelos: ${totalCount}`, value: "todos" },
-            { label: `Publicaciones: ${publicadosCount}`, value: "PUBLICADO" },
-            { label: `Borradores: ${borradorCount}`, value: "BORRADOR" }
+            { label: `Modelos 3D: ${totalCount}`, value: "3d" },
+            { label: `Invitaciones: ${invitacionesCount}`, value: "invitaciones" }
           ].map((tab) => {
             const isSelected = tabValue === tab.value;
             return (
@@ -500,6 +536,45 @@ export default function Disenos3D() {
                 "& .MuiInputLabel-root.Mui-focused": { color: "#002B49" }
               }}
             >
+              <InputLabel>Estado</InputLabel>
+              <Select
+                value={filterEstado}
+                label="Estado"
+                onChange={(e) => setFilterEstado(e.target.value)}
+                MenuProps={{
+                  PaperProps: {
+                    sx: {
+                      borderRadius: "6px",
+                      "& .MuiMenuItem-root.Mui-selected": {
+                        bgcolor: "#002B49",
+                        color: "#FFFFFF",
+                        "&:hover": { bgcolor: "#001e33" }
+                      }
+                    }
+                  }
+                }}
+              >
+                <MenuItem value="">Todos los estados</MenuItem>
+                <MenuItem value="PUBLICADO">Publicado</MenuItem>
+                <MenuItem value="BORRADOR">Borrador</MenuItem>
+              </Select>
+            </FormControl>
+
+            <FormControl
+              size="small"
+              sx={{
+                minWidth: 200,
+                width: { xs: "100%", sm: "auto" },
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "2px",
+                  bgcolor: "#FFFFFF",
+                  "& fieldset": { borderColor: "rgba(0, 0, 0, 0.23)" },
+                  "&:hover fieldset": { borderColor: "rgba(0, 0, 0, 0.4)" },
+                  "&.Mui-focused fieldset": { borderColor: "#002B49" }
+                },
+                "& .MuiInputLabel-root.Mui-focused": { color: "#002B49" }
+              }}
+            >
               <InputLabel>Categorías</InputLabel>
               <Select
                 value={selectedCategoria}
@@ -574,7 +649,7 @@ export default function Disenos3D() {
             </FormControl>
 
             <Stack direction="row" spacing={1} alignItems="center">
-              {(searchTerm || selectedCategoria || selectedOds) && (
+              {(searchTerm || selectedCategoria || selectedOds || filterEstado || tabValue !== "3d") && (
                 <Tooltip title="Limpiar Filtros">
                   <Button
                     size="small"
@@ -623,7 +698,6 @@ export default function Disenos3D() {
         </Stack>
       </Box>
 
-      {/* TABLA O GRID DE MODELOS 3D */}
       <Disenos3DTable
         disenos={filteredDisenos}
         categorias={categorias}
@@ -640,6 +714,13 @@ export default function Disenos3D() {
         onClose={() => setDeleteModal({ open: false, item: null, submitting: false })}
         onConfirm={handleConfirmDelete}
         submitting={deleteModal.submitting}
+      />
+
+      <GenerarInvitacionDialog
+        open={openInvitacionDialog}
+        onClose={() => setOpenInvitacionDialog(false)}
+        tipo="3D"
+        autorNombreInicial=""
       />
 
       <Snackbar

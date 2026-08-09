@@ -1,14 +1,32 @@
 from rest_framework import serializers
 from proyectos.models import Proyecto3D, ProyectoSoftware, ProyectoODS
 from .models import InvitacionProyecto
+from django.utils import timezone
+from datetime import timedelta
 
 
 class InvitacionCrearSerializer(serializers.ModelSerializer):
     """La usa el admin para generar una invitación nueva."""
+    duracion_horas = serializers.IntegerField(
+        write_only=True,
+        required=False,
+        default=24,
+        min_value=1,
+        max_value=720,  # máximo 30 días (720 horas)
+        help_text="Duración del enlace en horas (1-720)"
+    )
+
     class Meta:
         model = InvitacionProyecto
-        fields = ['id', 'tipo', 'autor_nombre', 'token', 'expira_en', 'created_at']
+        fields = ['id', 'tipo', 'autor_nombre', 'token', 'expira_en', 'created_at', 'duracion_horas']
         read_only_fields = ['id', 'token', 'expira_en', 'created_at']
+
+    def create(self, validated_data):
+        # Extraer duracion_horas y calcular expira_en
+        duracion_horas = validated_data.pop('duracion_horas', 24)
+        expira_en = timezone.now() + timedelta(hours=duracion_horas)
+        validated_data['expira_en'] = expira_en
+        return super().create(validated_data)
 
 
 class InvitacionEstadoSerializer(serializers.ModelSerializer):
@@ -49,7 +67,6 @@ class CompletarProyecto3DSerializer(serializers.ModelSerializer):
         
         # Procesar ODS si hay
         if ods_ids_raw:
-            # Parsear el string JSON a lista
             import json
             try:
                 ods_ids = json.loads(ods_ids_raw)
@@ -57,7 +74,7 @@ class CompletarProyecto3DSerializer(serializers.ModelSerializer):
                     for ods_id in ods_ids:
                         ProyectoODS.objects.create(proyecto=proyecto, ods_id=ods_id)
             except (json.JSONDecodeError, TypeError):
-                pass  # Si no es válido, no hacemos nada
+                pass
         
         return proyecto
 
@@ -103,7 +120,6 @@ class CompletarProyectoSoftwareSerializer(serializers.ModelSerializer):
         
         # Procesar tecnologias
         if tecnologias_data:
-            # Si es una lista de objetos o IDs
             ids = []
             for item in tecnologias_data:
                 if hasattr(item, 'id'):

@@ -10,6 +10,11 @@ import {
   Stack,
   IconButton,
   Divider,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  InputAdornment,
 } from "@mui/material";
 import { Link2, Copy, Check, X } from "lucide-react";
 import { createInvitacion } from "@/services/api";
@@ -29,24 +34,50 @@ const fieldSx = {
 
 const labelSx = { fontWeight: 600, color: "#1E293B", mb: 0.6, fontSize: "0.85rem" };
 
-/**
- * Diálogo para generar un enlace temporal de invitación.
- *
- * tipo: '3D' | 'SOFTWARE'  -> el backend usa esto para saber qué formulario
- *       mostrarle al alumno del otro lado del link
- * autorNombreInicial: precarga el campo con lo que ya escribiste en el
- *       formulario grande, para no tener que tipearlo dos veces
- */
+const DURACION_OPCIONES = [
+  { value: 1, label: "1 hora" },
+  { value: 6, label: "6 horas" },
+  { value: 12, label: "12 horas" },
+  { value: 24, label: "24 horas (por defecto)" },
+  { value: 48, label: "48 horas" },
+  { value: 72, label: "72 horas" },
+  { value: 168, label: "7 días" },
+];
+
+// Calcular días y horas a partir de horas totales
+const calcularDiasYHoras = (totalHoras) => {
+  const dias = Math.floor(totalHoras / 24);
+  const horas = totalHoras % 24;
+  return { dias, horas };
+};
+
+// Calcular horas totales a partir de días y horas
+const calcularTotalHoras = (dias, horas) => {
+  return (dias || 0) * 24 + (horas || 0);
+};
+
 export default function GenerarInvitacionDialog({ open, onClose, tipo, autorNombreInicial = "" }) {
   const [autorNombre, setAutorNombre] = React.useState(autorNombreInicial);
-  const [status, setStatus] = React.useState("idle"); // idle | loading | success | error
+  const [dias, setDias] = React.useState(1); // días
+  const [horas, setHoras] = React.useState(0); // horas
+  const [totalHoras, setTotalHoras] = React.useState(24);
+  const [status, setStatus] = React.useState("idle");
   const [resultado, setResultado] = React.useState(null);
   const [errorMsg, setErrorMsg] = React.useState("");
   const [copiado, setCopiado] = React.useState(false);
 
+  // Sincronizar totalHoras con días y horas
+  React.useEffect(() => {
+    const total = calcularTotalHoras(dias, horas);
+    setTotalHoras(total);
+  }, [dias, horas]);
+
   React.useEffect(() => {
     if (open) {
       setAutorNombre(autorNombreInicial || "");
+      // Resetear a 24 horas (1 día)
+      setDias(1);
+      setHoras(0);
       setStatus("idle");
       setResultado(null);
       setErrorMsg("");
@@ -54,14 +85,42 @@ export default function GenerarInvitacionDialog({ open, onClose, tipo, autorNomb
     }
   }, [open, autorNombreInicial]);
 
+  // Determinar si los días/horas coinciden con alguna opción predefinida
+  const opcionSeleccionada = DURACION_OPCIONES.find(op => op.value === totalHoras);
+
+  const handleSelectChange = (e) => {
+    const value = Number(e.target.value);
+    const { dias: d, horas: h } = calcularDiasYHoras(value);
+    setDias(d);
+    setHoras(h);
+  };
+
+  const handleDiasChange = (e) => {
+    const val = Math.max(0, Number(e.target.value) || 0);
+    setDias(val);
+  };
+
+  const handleHorasChange = (e) => {
+    const val = Math.max(0, Math.min(23, Number(e.target.value) || 0));
+    setHoras(val);
+  };
+
   const link = resultado ? `${window.location.origin}/completar/${resultado.token}` : "";
 
   async function handleGenerar() {
     if (!autorNombre.trim()) return;
+    if (totalHoras < 1) {
+      setErrorMsg("La duración debe ser al menos 1 hora.");
+      return;
+    }
     setStatus("loading");
     setErrorMsg("");
     try {
-      const data = await createInvitacion({ tipo, autor_nombre: autorNombre.trim() });
+      const data = await createInvitacion({
+        tipo,
+        autor_nombre: autorNombre.trim(),
+        duracion_horas: totalHoras,
+      });
       setResultado(data);
       setStatus("success");
     } catch (err) {
@@ -115,7 +174,7 @@ export default function GenerarInvitacionDialog({ open, onClose, tipo, autorNomb
 
         <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
           El alumno recibirá un enlace para completar los datos de su proyecto{" "}
-          {tipo === "3D" ? "3D" : "de software"}. El enlace vence en 24 horas o al usarse una vez.
+          {tipo === "3D" ? "3D" : "de software"}. El enlace vence al usarse una vez o al expirar el plazo.
         </Typography>
 
         <Divider sx={{ mb: 3 }} />
@@ -136,6 +195,67 @@ export default function GenerarInvitacionDialog({ open, onClose, tipo, autorNomb
                 sx={fieldSx}
                 disabled={status === "loading"}
               />
+            </Box>
+
+            <Box>
+              <Typography variant="body2" sx={labelSx}>
+                Duración del enlace
+              </Typography>
+              <Stack spacing={1.5}>
+                <FormControl fullWidth>
+                  <Select
+                    value={opcionSeleccionada ? opcionSeleccionada.value : ""}
+                    onChange={handleSelectChange}
+                    displayEmpty
+                    sx={fieldSx}
+                    disabled={status === "loading"}
+                  >
+                    <MenuItem value="" disabled>
+                      <em>Seleccionar duración</em>
+                    </MenuItem>
+                    {DURACION_OPCIONES.map((op) => (
+                      <MenuItem key={op.value} value={op.value}>
+                        {op.label}
+                      </MenuItem>
+                    ))}
+                    {!opcionSeleccionada && totalHoras > 0 && (
+                      <MenuItem value={totalHoras}>
+                        Personalizado ({totalHoras}h)
+                      </MenuItem>
+                    )}
+                  </Select>
+                </FormControl>
+
+                <Stack direction="row" spacing={2}>
+                  <TextField
+                    label="Días"
+                    type="number"
+                    value={dias}
+                    onChange={handleDiasChange}
+                    disabled={status === "loading"}
+                    InputProps={{
+                      inputProps: { min: 0, max: 30 },
+                      endAdornment: <InputAdornment position="end">d</InputAdornment>,
+                    }}
+                    sx={{ ...fieldSx, width: "50%" }}
+                  />
+                  <TextField
+                    label="Horas"
+                    type="number"
+                    value={horas}
+                    onChange={handleHorasChange}
+                    disabled={status === "loading"}
+                    InputProps={{
+                      inputProps: { min: 0, max: 23 },
+                      endAdornment: <InputAdornment position="end">h</InputAdornment>,
+                    }}
+                    sx={{ ...fieldSx, width: "50%" }}
+                  />
+                </Stack>
+                <Typography variant="caption" color="text.secondary">
+                  Total: <strong>{totalHoras} horas</strong>
+                </Typography>
+              </Stack>
             </Box>
 
             {status === "error" && (
@@ -161,7 +281,7 @@ export default function GenerarInvitacionDialog({ open, onClose, tipo, autorNomb
               <Button
                 variant="contained"
                 onClick={handleGenerar}
-                disabled={!autorNombre.trim() || status === "loading"}
+                disabled={!autorNombre.trim() || status === "loading" || totalHoras < 1}
                 sx={{
                   textTransform: "none",
                   fontWeight: 600,
@@ -210,7 +330,10 @@ export default function GenerarInvitacionDialog({ open, onClose, tipo, autorNomb
             <Stack direction="row" spacing={2} justifyContent="flex-end">
               <Button
                 variant="text"
-                onClick={() => setStatus("idle")}
+                onClick={() => {
+                  setStatus("idle");
+                  setResultado(null);
+                }}
                 sx={{ textTransform: "none", fontWeight: 600, color: "#002B49" }}
               >
                 Generar otro

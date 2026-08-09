@@ -22,6 +22,7 @@ import { Link as RouterLink } from "react-router-dom";
 import { MagnifyingGlass as SearchIcon } from "@phosphor-icons/react/dist/ssr/MagnifyingGlass";
 import { Plus as PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
 import { FunnelX as ClearFilterIcon } from "@phosphor-icons/react/dist/ssr/FunnelX";
+import { Link2 } from "lucide-react";
 
 import {
   fetchProyectosSoftwareAdmin,
@@ -44,6 +45,7 @@ import ProjectDetailView from "./ProjectDetailView";
 import VideoPlayerModal from "./VideoPlayerModal";
 import ProyectoDeleteModal from "./ProyectoDeleteModal";
 import TecnologiaDeleteModal from "./TecnologiaDeleteModal";
+import GenerarInvitacionDialog from "@/components/core/GenerarInvitacionDialog";
 
 export default function ProyectosDigitalesPage() {
   const [activeTab, setActiveTab] = useState(0);
@@ -93,6 +95,8 @@ export default function ProyectosDigitalesPage() {
   const [deleteProyectoModal, setDeleteProyectoModal] = useState({ open: false, id: null, submitting: false });
   const [deleteTechModal, setDeleteTechModal] = useState({ open: false, ids: [], submitting: false });
 
+  const [openInvitacionDialog, setOpenInvitacionDialog] = useState(false);
+
   const showSnackbar = (message, severity = "success") => {
     setSnackbar({ open: true, message, severity });
   };
@@ -129,9 +133,15 @@ export default function ProyectosDigitalesPage() {
     setFilterOds("");
     setFilterCategoria("");
     setFilterEstado("");
+    // No reseteamos activeTab para no perder la pestaña
   };
 
   const hasActiveFilters = Boolean(searchTerm || filterOds || filterCategoria || filterEstado);
+
+  // Proyectos que son de invitación
+  const proyectosInvitacion = React.useMemo(() => {
+    return proyectos.filter(p => p.invitacion !== null);
+  }, [proyectos]);
 
   const handleUpdateEstado = async (id, nuevoEstado) => {
     try {
@@ -381,8 +391,8 @@ export default function ProyectosDigitalesPage() {
               </Typography>
             </Box>
 
-            <Stack direction="row" spacing={2}>
-              {activeTab === 0 ? (
+            <Stack spacing={1} direction="column" alignItems="stretch" sx={{ minWidth: { xs: "100%", sm: 180 } }}>
+              {activeTab === 0 || activeTab === 2 ? (
                 <Button
                   variant="contained"
                   startIcon={<PlusIcon />}
@@ -427,6 +437,26 @@ export default function ProyectosDigitalesPage() {
                   Nueva Tecnología
                 </Button>
               )}
+              <Button
+                variant="outlined"
+                startIcon={<Link2 size={18} />}
+                onClick={() => setOpenInvitacionDialog(true)}
+                sx={{
+                  borderRadius: "2px",
+                  textTransform: "none",
+                  fontWeight: 600,
+                  px: 3.5,
+                  py: 1,
+                  borderColor: "#002B49",
+                  color: "#002B49",
+                  "&:hover": {
+                    bgcolor: "rgba(0, 43, 73, 0.04)",
+                    borderColor: "#002B49"
+                  }
+                }}
+              >
+                Generar enlace
+              </Button>
             </Stack>
           </Box>
 
@@ -434,7 +464,8 @@ export default function ProyectosDigitalesPage() {
             <Stack direction="row" spacing={4}>
               {[
                 { label: `Proyectos Digitales: ${proyectos.length}`, value: 0 },
-                { label: `Catálogo de Tecnologías: ${tecnologias.length}`, value: 1 }
+                { label: `Catálogo de Tecnologías: ${tecnologias.length}`, value: 1 },
+                { label: `Invitaciones: ${proyectosInvitacion.length}`, value: 2 }
               ].map((tab) => {
                 const isSelected = activeTab === tab.value;
                 return (
@@ -473,6 +504,7 @@ export default function ProyectosDigitalesPage() {
             </Stack>
           </Box>
 
+          {/* Pestaña de Proyectos Digitales (TODOS los proyectos) */}
           {activeTab === 0 && (
             <Box>
               <Box
@@ -668,6 +700,7 @@ export default function ProyectosDigitalesPage() {
             </Box>
           )}
 
+          {/* Pestaña de Tecnologías */}
           {activeTab === 1 && (
             <TecnologiasGrid
               tecnologias={tecnologias}
@@ -675,6 +708,27 @@ export default function ProyectosDigitalesPage() {
               onDelete={handleDeleteTech}
               onDeleteMultiple={handleDeleteMultipleTech}
             />
+          )}
+
+          {/* Pestaña de Invitaciones */}
+          {activeTab === 2 && (
+            <Box>
+              {loading ? (
+                <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+                  <CircularProgress />
+                </Box>
+              ) : (
+                <ProyectosTable
+                  proyectos={proyectosInvitacion}
+                  onOpenCreate={handleOpenCreateProyecto}
+                  onView={handleOpenViewProyecto}
+                  onEdit={handleOpenEditProyecto}
+                  onDelete={handleDeleteProyecto}
+                  onPlayVideo={handleOpenVideo}
+                  onUpdateEstado={handleUpdateEstado}
+                />
+              )}
+            </Box>
           )}
         </>
       )}
@@ -708,6 +762,13 @@ export default function ProyectosDigitalesPage() {
         open={openVideoModal}
         onClose={() => setOpenVideoModal(false)}
         proyecto={playingProyecto}
+      />
+
+      <GenerarInvitacionDialog
+        open={openInvitacionDialog}
+        onClose={() => setOpenInvitacionDialog(false)}
+        tipo="SOFTWARE"
+        autorNombreInicial=""
       />
 
       <Snackbar

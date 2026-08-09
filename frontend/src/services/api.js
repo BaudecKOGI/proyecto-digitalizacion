@@ -329,18 +329,18 @@ export const deleteCarrera = async (id) => {
 // INVITACIONES (enlace temporal para que un alumno complete un proyecto)
 // ============================================================
 
-export const createInvitacion = async ({ tipo, autor_nombre }) => {
+export const createInvitacion = async ({ tipo, autor_nombre, duracion_horas = 24 }) => {
   const res = await fetch(`${API_BASE_URL}/invitaciones/`, {
     method: "POST",
     headers: getAuthHeaders(false),
-    body: JSON.stringify({ tipo, autor_nombre }),
+    body: JSON.stringify({ tipo, autor_nombre, duracion_horas }),
   });
   return handleResponse(res);
 };
 
 export const fetchInvitacionByToken = async (token) => {
   const res = await fetch(`${API_BASE_URL}/invitaciones/${token}/`, {
-    headers: { "Content-Type": "application/json" }, // pública, no lleva token de auth
+    headers: { "Content-Type": "application/json" },
   });
   return handleResponse(res);
 };
@@ -348,7 +348,7 @@ export const fetchInvitacionByToken = async (token) => {
 export const completarInvitacion = async (token, formData) => {
   const res = await fetch(`${API_BASE_URL}/invitaciones/${token}/completar/`, {
     method: "PATCH",
-    body: formData, // FormData (por los archivos) — no le pongas Content-Type a mano
+    body: formData,
   });
   return handleResponse(res);
 };

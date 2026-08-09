@@ -30,8 +30,8 @@ import PublicODSPage from "./pages/public/ODS/PublicODSPage";
 import FabLabPage from "./pages/public/FabLab/FabLabPage";
 import EditorLayout from "./layouts/EditorLayout";
 import PublicLayout from "./layouts/PublicLayout";
+import CleanLayout from "./layouts/CleanLayout"; // NUEVO
 import { Hub as EditorHub } from "./pages/editor/Hub";
-import { AssistantWidget } from "./components/assistant";
 
 // RUTAS DE 3D
 import { Overview as EditorOverview } from "./pages/editor/3d/Dashboard3D";
@@ -85,13 +85,13 @@ export default function App() {
           <Route path="/galeria/software" element={<GallerySoftwarePage />} />
           <Route path="/ods" element={<PublicODSPage />} />
           <Route path="/fablab" element={<FabLabPage />} />
-          <Route path="/completar/:token" element={<CompletarProyectoPage />} />
         </Route>
 
-        {/* Rutas públicas sin Layout (Visores a pantalla completa) */}
-        <Route element={<Outlet />}>
+        {/* Rutas sin layout (Visores y Completar proyecto) */}
+        <Route element={<CleanLayout />}>
           <Route path="/proyecto/3d/:id" element={<Viewer3DPage />} />
           <Route path="/proyecto/digitales/:id" element={<ViewerDigitalPage />} />
+          <Route path="/completar/:token" element={<CompletarProyectoPage />} />
         </Route>
 
         {/* Editor */}

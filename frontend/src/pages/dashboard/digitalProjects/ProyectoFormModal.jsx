@@ -17,12 +17,9 @@ import {
   Divider
 } from "@mui/material";
 import { ArrowLeft as BackIcon } from "@phosphor-icons/react/dist/ssr/ArrowLeft";
-import { Link2 } from "lucide-react";
 import { ODS_LIST } from "./odsData";
 import ProyectoLivePreview from "./ProyectoLivePreview";
 import ConfirmDialog from "@/components/core/ConfirmDialog";
-// NUEVO: diálogo para generar el enlace de invitación
-import GenerarInvitacionDialog from "@/components/core/GenerarInvitacionDialog";
 
 // IMPORTAR SERVICIO DE CARRERAS
 import { fetchCarreras } from "@/services/api";
@@ -50,9 +47,6 @@ export default function ProyectoFormModal({
   const [carreras, setCarreras] = React.useState([]);
   const [carreraSeleccionada, setCarreraSeleccionada] = React.useState(null);
   const [cicloSeleccionado, setCicloSeleccionado] = React.useState(null);
-
-  // NUEVO: estado del diálogo de invitación
-  const [openInvitacion, setOpenInvitacion] = React.useState(false);
 
   React.useEffect(() => {
     const loadCarreras = async () => {
@@ -229,25 +223,6 @@ export default function ProyectoFormModal({
             {editingProyecto ? "Editar Proyecto Digital" : "Crear Proyecto Digital"}
           </Typography>
         </Stack>
-
-        {/* NUEVO: botón para generar el enlace de invitación (solo al crear) */}
-        {!editingProyecto && (
-          <Button
-            variant="outlined"
-            onClick={() => setOpenInvitacion(true)}
-            startIcon={<Link2 size={16} />}
-            sx={{
-              textTransform: "none",
-              fontWeight: 600,
-              borderRadius: "2px",
-              borderColor: "#002B49",
-              color: "#002B49",
-              "&:hover": { bgcolor: "rgba(0, 43, 73, 0.04)", borderColor: "#002B49" }
-            }}
-          >
-            Generar enlace para alumno
-          </Button>
-        )}
       </Box>
 
       {formError && (
@@ -609,14 +584,6 @@ export default function ProyectoFormModal({
         message="Tienes cambios sin guardar. Si cancelas ahora, perderás todos los datos ingresados. ¿Estás seguro de que deseas cancelar?"
         confirmText="Sí, cancelar"
         cancelText="Continuar editando"
-      />
-
-      {/* NUEVO: DIÁLOGO PARA GENERAR EL ENLACE DE INVITACIÓN */}
-      <GenerarInvitacionDialog
-        open={openInvitacion}
-        onClose={() => setOpenInvitacion(false)}
-        tipo="SOFTWARE"
-        autorNombreInicial={formProyecto.autor_nombre}
       />
     </Box>
   );

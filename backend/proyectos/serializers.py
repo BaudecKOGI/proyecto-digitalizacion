@@ -121,6 +121,9 @@ class ProyectoSerializer(serializers.ModelSerializer):
     )
     ods_detalle = serializers.SerializerMethodField()
 
+    # NUEVO: campo para la invitación (solo lectura)
+    invitacion = serializers.PrimaryKeyRelatedField(read_only=True)
+
     class Meta:
         model = Proyecto
         fields = [
@@ -130,9 +133,13 @@ class ProyectoSerializer(serializers.ModelSerializer):
             'categoria', 'categoria_nombre',
             'vistas_totales', 'likes_totales', 'compartidos_totales',
             'created_at', 'updated_at',
-            'ods_ids', 'ods_detalle'
+            'ods_ids', 'ods_detalle',
+            'invitacion',  # NUEVO
         ]
-        read_only_fields = ['id', 'created_at', 'updated_at', 'carrera_nombre', 'ciclo_romano', 'ods_detalle']
+        read_only_fields = [
+            'id', 'created_at', 'updated_at', 'carrera_nombre',
+            'ciclo_romano', 'ods_detalle', 'invitacion'  # NUEVO
+        ]
 
     def get_vistas_totales(self, obj):
         return getattr(obj, 'metricas', None).vistas_totales if hasattr(obj, 'metricas') and obj.metricas else 0

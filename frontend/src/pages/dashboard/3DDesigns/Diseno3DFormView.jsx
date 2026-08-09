@@ -18,11 +18,9 @@ import {
   Chip
 } from "@mui/material";
 import { ArrowLeft as BackIcon } from "@phosphor-icons/react/dist/ssr/ArrowLeft";
-import { Plus, Trash2, Upload, Eye, FileEdit, Box as BoxIcon, Link2 } from "lucide-react";
+import { Plus, Trash2, Upload, Eye, FileEdit, Box as BoxIcon } from "lucide-react";
 import { ODS_LIST } from "@/pages/dashboard/digitalProjects/odsData";
 import ConfirmDialog from "@/components/core/ConfirmDialog";
-// NUEVO: diálogo para generar el enlace de invitación
-import GenerarInvitacionDialog from "@/components/core/GenerarInvitacionDialog";
 
 // IMPORTAR SERVICIO DE CARRERAS
 import { fetchCarreras } from "@/services/api";
@@ -171,9 +169,6 @@ export default function Diseno3DFormView({
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [initialFormState, setInitialFormState] = useState(null);
   const [initialPiezasState, setInitialPiezasState] = useState(null);
-
-  // NUEVO: estado del diálogo de invitación
-  const [openInvitacion, setOpenInvitacion] = useState(false);
 
   // Cargar carreras al montar
   useEffect(() => {
@@ -426,25 +421,6 @@ export default function Diseno3DFormView({
             {editingDiseno ? "Editar Modelo 3D" : "Crear Modelo 3D"}
           </Typography>
         </Stack>
-
-        {/* NUEVO: botón para generar el enlace de invitación (solo tiene sentido al crear, no al editar) */}
-        {!editingDiseno && (
-          <Button
-            variant="outlined"
-            onClick={() => setOpenInvitacion(true)}
-            startIcon={<Link2 size={16} />}
-            sx={{
-              textTransform: "none",
-              fontWeight: 600,
-              borderRadius: "2px",
-              borderColor: "#002B49",
-              color: "#002B49",
-              "&:hover": { bgcolor: "rgba(0, 43, 73, 0.04)", borderColor: "#002B49" }
-            }}
-          >
-            Generar enlace para alumno
-          </Button>
-        )}
       </Box>
 
       {formError && (
@@ -1030,14 +1006,6 @@ export default function Diseno3DFormView({
         message="Tienes cambios sin guardar. Si cancelas ahora, perderás todos los datos ingresados. ¿Estás seguro de que deseas cancelar?"
         confirmText="Sí, cancelar"
         cancelText="Continuar editando"
-      />
-
-      {/* NUEVO: DIÁLOGO PARA GENERAR EL ENLACE DE INVITACIÓN */}
-      <GenerarInvitacionDialog
-        open={openInvitacion}
-        onClose={() => setOpenInvitacion(false)}
-        tipo="3D"
-        autorNombreInicial={formDiseno.autor_nombre}
       />
     </Box>
   );
