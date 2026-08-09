@@ -226,7 +226,7 @@ export default function ProyectoFormModal({
             Volver a Proyectos
           </Button>
           <Typography variant="h6" fontWeight={700} sx={{ color: "text.primary" }}>
-            {editingProyecto ? "Editar Proyecto de Software" : "Crear Proyecto de Software"}
+            {editingProyecto ? "Editar Proyecto Digital" : "Crear Proyecto Digital"}
           </Typography>
         </Stack>
 
@@ -280,7 +280,7 @@ export default function ProyectoFormModal({
           }}
         >
           <Typography variant="h5" fontWeight={800} gutterBottom sx={{ color: "text.primary", mb: 0.5 }}>
-            {editingProyecto ? "Editar Proyecto de Software" : "Crear Nuevo Proyecto de Software"}
+            {editingProyecto ? "Editar Proyecto Digital" : "Crear Nuevo Proyecto Digital"}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
             Completa la información técnica, repositorio, demo y archivos adjuntos del proyecto.
@@ -441,7 +441,7 @@ export default function ProyectoFormModal({
                               key={id}
                               label={ods ? `ODS ${id}` : id}
                               size="small"
-                              sx={{ bgcolor: ods?.color || '#6b7280', color: '#fff', fontWeight: 600 }}
+                              sx={{ bgcolor: '#E2E8F0', color: '#475569', fontWeight: 600 }}
                             />
                           );
                         })}

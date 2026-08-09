@@ -71,117 +71,103 @@ export default function VisualizacionesChart({ metricas = [], syncButton }) {
 
   const currentTab = tabConfig[activeTab];
 
-  // Configuración de categorías (Eje X) y distribución acumulativa verídica (conserva registros de fechas anteriores como Viernes/Julio y añade en el día/mes actual)
   const chartDataConfig = React.useMemo(() => {
-    const totalCurrent = totals[activeTab] || 0;
     const now = new Date();
+    
+    // Arrays para las categorías y datos
+    let categories = [];
+    let seriesData = [];
 
-    // 1. ESTA SEMANA (week): de Lunes (0) a Domingo (6)
-    const weekCategories = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
-    const currentDayIdx = (now.getDay() + 6) % 7;
-    const weekData = new Array(7).fill(0);
-    if (currentDayIdx > 0) {
-      const prevDaysVal = Math.floor(totalCurrent * 0.85);
-      weekData[currentDayIdx - 1] = prevDaysVal;
-      weekData[currentDayIdx] = totalCurrent - prevDaysVal;
-    } else {
-      weekData[0] = totalCurrent;
-    }
+    if (period === "week") {
+      categories = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+      seriesData = new Array(7).fill(0);
+      
+      const currentDay = now.getDay();
+      const distFromMonday = currentDay === 0 ? 6 : currentDay - 1;
+      const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - distFromMonday);
+      startOfWeek.setHours(0,0,0,0);
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(endOfWeek.getDate() + 7);
 
-    // 2. ESTE MES (month): calendario real en tiempo real de todos los días del mes en curso (ej. 1 Ago a 31 Ago)
-    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-    const monthCategories = Array.from({ length: daysInMonth }, (_, i) => `${i + 1} ${monthNamesEs[now.getMonth()]}`);
-    const currentDayOfMonthIdx = now.getDate() - 1;
-    const monthData = new Array(daysInMonth).fill(0);
-    if (currentDayOfMonthIdx > 0) {
-      const prevDayVal = Math.floor(totalCurrent * 0.85);
-      monthData[currentDayOfMonthIdx - 1] = prevDayVal;
-      monthData[currentDayOfMonthIdx] = totalCurrent - prevDayVal;
-    } else {
-      monthData[0] = totalCurrent;
-    }
+      metricas.forEach(item => {
+        const d = new Date(item.ultima_visita || now);
+        if (d >= startOfWeek && d < endOfWeek) {
+          const idx = (d.getDay() + 6) % 7;
+          seriesData[idx] += item[`${activeTab}_totales`] || 0;
+        }
+      });
+    } else if (period === "month") {
+      const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+      categories = Array.from({ length: daysInMonth }, (_, i) => `${i + 1} ${monthNamesEs[now.getMonth()]}`);
+      seriesData = new Array(daysInMonth).fill(0);
 
-    // 3. ESTE AÑO (year): meses del año (Ene a Dic)
-    const yearCategories = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
-    const currentMonthIdx = now.getMonth();
-    const yearData = new Array(12).fill(0);
-    if (currentMonthIdx > 0) {
-      const prevMonthVal = Math.floor(totalCurrent * 0.85);
-      yearData[currentMonthIdx - 1] = prevMonthVal;
-      yearData[currentMonthIdx] = totalCurrent - prevMonthVal;
-    } else {
-      yearData[0] = totalCurrent;
-    }
+      metricas.forEach(item => {
+        const d = new Date(item.ultima_visita || now);
+        if (d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()) {
+          seriesData[d.getDate() - 1] += item[`${activeTab}_totales`] || 0;
+        }
+      });
+    } else if (period === "year") {
+      categories = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+      seriesData = new Array(12).fill(0);
 
-    // 4. HISTÓRICO (hist): últimos 5 años institucionales hasta el año actual
-    const currentYear = now.getFullYear();
-    const histCategories = [
-      String(currentYear - 4),
-      String(currentYear - 3),
-      String(currentYear - 2),
-      String(currentYear - 1),
-      String(currentYear)
-    ];
-    const histData = [0, 0, 0, 0, totalCurrent];
+      metricas.forEach(item => {
+        const d = new Date(item.ultima_visita || now);
+        if (d.getFullYear() === now.getFullYear()) {
+          seriesData[d.getMonth()] += item[`${activeTab}_totales`] || 0;
+        }
+      });
+    } else if (period === "hist") {
+      const currentYear = now.getFullYear();
+      categories = [
+        String(currentYear - 4),
+        String(currentYear - 3),
+        String(currentYear - 2),
+        String(currentYear - 1),
+        String(currentYear)
+      ];
+      seriesData = new Array(5).fill(0);
 
-    // 5. PERSONALIZADO (custom): rango dinámico seleccionado entre customStartDate y customEndDate
-    const start = new Date(customStartDate);
-    const end = new Date(customEndDate);
-    const diffDays = Math.max(1, Math.round((end - start) / (1000 * 60 * 60 * 24)) + 1);
-    const customCategories = [];
-    for (let i = 0; i < diffDays; i++) {
-      const d = new Date(start);
-      d.setDate(d.getDate() + i);
-      customCategories.push(`${d.getDate()} ${monthNamesEs[d.getMonth()]}`);
-    }
-    const customData = new Array(diffDays).fill(0);
-    const valYesterday = Math.floor(totalCurrent * 0.85);
-    const valToday = totalCurrent - valYesterday;
-    const todayStr = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
-    const yesterdayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
-    const yesterdayStr = `${yesterdayDate.getFullYear()}-${yesterdayDate.getMonth()}-${yesterdayDate.getDate()}`;
+      metricas.forEach(item => {
+        const d = new Date(item.ultima_visita || now);
+        const diff = currentYear - d.getFullYear();
+        if (diff >= 0 && diff <= 4) {
+          seriesData[4 - diff] += item[`${activeTab}_totales`] || 0;
+        }
+      });
+    } else if (period === "custom") {
+      const start = new Date(customStartDate);
+      start.setHours(0,0,0,0);
+      const end = new Date(customEndDate);
+      end.setHours(0,0,0,0);
+      const diffDays = Math.round((end - start) / (1000 * 60 * 60 * 24)) + 1;
+      
+      const realEnd = new Date(customEndDate);
+      realEnd.setHours(23,59,59,999);
 
-    for (let i = 0; i < diffDays; i++) {
-      const d = new Date(start);
-      d.setDate(d.getDate() + i);
-      const dStr = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-      if (dStr === todayStr) {
-        customData[i] += valToday;
-      } else if (dStr === yesterdayStr) {
-        customData[i] += valYesterday;
+      categories = [];
+      for (let i = 0; i < diffDays; i++) {
+        const d = new Date(start);
+        d.setDate(d.getDate() + i);
+        categories.push(`${d.getDate()} ${monthNamesEs[d.getMonth()]}`);
       }
+      seriesData = new Array(diffDays).fill(0);
+
+      metricas.forEach(item => {
+        const d = new Date(item.ultima_visita || now);
+        if (d >= start && d <= realEnd) {
+          const dNoTime = new Date(d);
+          dNoTime.setHours(0,0,0,0);
+          const dayDiff = Math.round((dNoTime - start) / (1000 * 60 * 60 * 24));
+          if (dayDiff >= 0 && dayDiff < diffDays) {
+            seriesData[dayDiff] += item[`${activeTab}_totales`] || 0;
+          }
+        }
+      });
     }
 
-    const configs = {
-      week: {
-        categories: weekCategories,
-        seriesData: weekData
-      },
-      month: {
-        categories: monthCategories,
-        seriesData: monthData
-      },
-      year: {
-        categories: yearCategories,
-        seriesData: yearData
-      },
-      hist: {
-        categories: histCategories,
-        seriesData: histData
-      },
-      custom: {
-        categories: customCategories,
-        seriesData: customData
-      }
-    };
-
-    const currentConfig = configs[period] || configs.week;
-
-    return {
-      categories: currentConfig.categories,
-      seriesData: currentConfig.seriesData
-    };
-  }, [period, activeTab, totals, customStartDate, customEndDate]);
+    return { categories, seriesData };
+  }, [period, activeTab, metricas, customStartDate, customEndDate]);
 
   const series = [
     {

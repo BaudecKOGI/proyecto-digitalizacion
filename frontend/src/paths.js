@@ -11,6 +11,7 @@ export const paths = {
         carreras: "/dashboard/carreras", // NUEVO
         visualizaciones: "/dashboard/visualizaciones",
     },
+    // Bloque del editor:
     editor: {
         proyectos3D: "/editor/3d/proyectos",
         nuevoProyecto3D: "/editor/3d/proyectos/nuevo",

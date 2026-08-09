@@ -266,10 +266,10 @@ export const Hub = () => {
           >
             <div className="half-content">
               <div className="icon-wrap">
-                <img src="/assets/icons/icon-3d.png" alt="Proyectos 3D" className="hub-icon" />
+                <img src="/assets/icons/icon-3d.png" alt="Modelos 3D" className="hub-icon" />
               </div>
               <div className="half-tag">Fabricación digital</div>
-              <div className="half-title">Proyectos 3D</div>
+              <div className="half-title">Modelos 3D</div>
               <div className="half-desc">
                 Piezas impresas, cortadas o modeladas en el taller físico
               </div>

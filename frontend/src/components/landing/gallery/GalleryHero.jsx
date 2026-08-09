@@ -9,7 +9,6 @@ export default function GalleryHero({
   bgImage,
   bgTypeClass,
   status,
-  count,
 }) {
   return (
     <section
@@ -29,10 +28,10 @@ export default function GalleryHero({
       <div className="absolute inset-0 bg-gradient-to-r from-[#090D16]/80 via-transparent to-transparent" />
 
       {/* Contenido del hero */}
-      <div className="relative z-10 px-[8vw] pb-14 pt-32 w-full">
+      <div className="relative z-10 px-[8vw] pb-14 pt-32 w-full flex flex-col items-center text-center">
         <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
           className={`mb-4 font-sans text-[11px] font-extrabold uppercase tracking-[0.25em] ${colorClass}`}
         >
@@ -43,7 +42,8 @@ export default function GalleryHero({
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.1 }}
-          className="font-display text-[clamp(44px,6vw,80px)] font-bold leading-[1.02] tracking-tight text-white max-w-3xl"
+          className="text-[clamp(32px,5vw,56px)] font-bold leading-[1.1] tracking-tight text-white max-w-3xl mx-auto"
+          style={{ fontFamily: 'Roboto, sans-serif' }}
         >
           {title}
         </motion.h1>
@@ -52,25 +52,10 @@ export default function GalleryHero({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.22 }}
-          className="mt-5 max-w-lg text-[15px] leading-relaxed text-white/60"
+          className="mt-5 max-w-lg text-[15px] leading-relaxed text-white/60 mx-auto"
         >
           {description}
         </motion.p>
-
-        {/* Stats pill */}
-        {status === 'success' && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="mt-6 inline-flex items-center gap-2 border border-white/10 bg-white/5 px-4 py-2 backdrop-blur-sm"
-          >
-            <span className={`h-2 w-2 rounded-full ${bgTypeClass}`} />
-            <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-white/70">
-              {count} {count === 1 ? 'proyecto publicado' : 'proyectos publicados'}
-            </span>
-          </motion.div>
-        )}
       </div>
     </section>
   );

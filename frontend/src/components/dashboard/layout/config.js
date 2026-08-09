@@ -10,7 +10,7 @@ export function getNavItems() {
 
   const allItems = [
     { key: "overview", title: "Dashboard", href: paths.dashboard.overview, icon: "chart-pie" },
-    { key: "disenos-3d", title: "Diseños 3D", href: paths.dashboard.disenos3d, icon: "cube" },
+    { key: "disenos-3d", title: "Modelos 3D", href: paths.dashboard.disenos3d, icon: "cube" },
     {
       key: "proyectos-digitales",
       title: "Proyectos Digitales",
@@ -33,7 +33,7 @@ export function getNavItems() {
 
 export const navItems = [
   { key: "overview", title: "Dashboard", href: paths.dashboard.overview, icon: "chart-pie" },
-  { key: "disenos-3d", title: "Diseños 3D", href: paths.dashboard.disenos3d, icon: "cube" },
+  { key: "disenos-3d", title: "Modelos 3D", href: paths.dashboard.disenos3d, icon: "cube" },
   {
     key: "proyectos-digitales",
     title: "Proyectos Digitales",

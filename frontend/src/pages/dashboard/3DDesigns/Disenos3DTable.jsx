@@ -18,7 +18,10 @@ import {
   CardActions,
   Stack,
   Button,
-  TablePagination
+  TablePagination,
+  Select,
+  MenuItem,
+  FormControl
 } from "@mui/material";
 
 import { Eye as ViewIcon } from "@phosphor-icons/react/dist/ssr/Eye";
@@ -49,7 +52,8 @@ export default function Disenos3DTable({
   viewMode,
   onView,
   onEdit,
-  onDelete
+  onDelete,
+  onUpdateEstado
 }) {
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
@@ -71,7 +75,7 @@ export default function Disenos3DTable({
   if (loading) {
     return (
       <Box sx={{ p: 6, textAlign: "center", color: "text.secondary" }}>
-        <Typography variant="body1">Cargando catálogo de diseños 3D...</Typography>
+        <Typography variant="body1">Cargando catálogo de modelos 3D...</Typography>
       </Box>
     );
   }
@@ -94,7 +98,7 @@ export default function Disenos3DTable({
           No hay modelos 3D registrados
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Crea un nuevo diseño 3D o ajusta los filtros de búsqueda para encontrar resultados.
+          Crea un nuevo modelo 3D o ajusta los filtros de búsqueda para encontrar resultados.
         </Typography>
       </Paper>
     );
@@ -205,18 +209,25 @@ export default function Disenos3DTable({
 
                 {/* Estado */}
                 <TableCell>
-                  <Chip
-                    label={item.estado_publicacion || "BORRADOR"}
-                    size="small"
-                    color={
-                      item.estado_publicacion === "PUBLICADO"
-                        ? "success"
-                        : item.estado_publicacion === "ARCHIVADO"
-                          ? "warning"
-                          : "default"
-                    }
-                    sx={{ fontWeight: 700, fontSize: "0.75rem" }}
-                  />
+                  <FormControl size="small">
+                    <Select
+                      value={item.estado_publicacion || "BORRADOR"}
+                      onChange={(e) => onUpdateEstado && onUpdateEstado(item.id, e.target.value)}
+                      sx={{
+                        fontSize: "0.75rem",
+                        fontWeight: 700,
+                        height: 28,
+                        borderRadius: "16px",
+                        bgcolor: item.estado_publicacion === "PUBLICADO" ? "#E8F5E9" : "#F5F5F5",
+                        color: item.estado_publicacion === "PUBLICADO" ? "#2E7D32" : "#616161",
+                        "& .MuiOutlinedInput-notchedOutline": { border: "none" },
+                        "& .MuiSelect-icon": { color: "inherit" }
+                      }}
+                    >
+                      <MenuItem value="PUBLICADO" sx={{ fontSize: "0.75rem", fontWeight: 700, color: "#2E7D32" }}>PUBLICADO</MenuItem>
+                      <MenuItem value="BORRADOR" sx={{ fontSize: "0.75rem", fontWeight: 700, color: "#616161" }}>BORRADOR</MenuItem>
+                    </Select>
+                  </FormControl>
                 </TableCell>
 
                 {/* Acciones */}
@@ -348,18 +359,26 @@ export default function Disenos3DTable({
                 )}
 
                 <Box sx={{ position: "absolute", top: 12, right: 12, display: "flex", gap: 1 }}>
-                  <Chip
-                    label={item.estado_publicacion || "BORRADOR"}
-                    size="small"
-                    color={
-                      item.estado_publicacion === "PUBLICADO"
-                        ? "success"
-                        : item.estado_publicacion === "ARCHIVADO"
-                          ? "warning"
-                          : "default"
-                    }
-                    sx={{ fontWeight: 700, fontSize: "0.7rem", backdropFilter: "blur(6px)" }}
-                  />
+                  <FormControl size="small">
+                    <Select
+                      value={item.estado_publicacion || "BORRADOR"}
+                      onChange={(e) => onUpdateEstado && onUpdateEstado(item.id, e.target.value)}
+                      sx={{
+                        fontSize: "0.7rem",
+                        fontWeight: 700,
+                        height: 26,
+                        borderRadius: "16px",
+                        bgcolor: item.estado_publicacion === "PUBLICADO" ? "rgba(232, 245, 233, 0.9)" : "rgba(245, 245, 245, 0.9)",
+                        color: item.estado_publicacion === "PUBLICADO" ? "#2E7D32" : "#616161",
+                        backdropFilter: "blur(6px)",
+                        "& .MuiOutlinedInput-notchedOutline": { border: "none" },
+                        "& .MuiSelect-icon": { color: "inherit" }
+                      }}
+                    >
+                      <MenuItem value="PUBLICADO" sx={{ fontSize: "0.75rem", fontWeight: 700, color: "#2E7D32" }}>PUBLICADO</MenuItem>
+                      <MenuItem value="BORRADOR" sx={{ fontSize: "0.75rem", fontWeight: 700, color: "#616161" }}>BORRADOR</MenuItem>
+                    </Select>
+                  </FormControl>
                 </Box>
               </Box>
 

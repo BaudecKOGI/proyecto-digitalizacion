@@ -32,7 +32,7 @@ class AuthClient {
       if (data.success && data.user) {
         const formattedUser = {
           id: data.user.id,
-          avatar: data.user.avatar_url || data.user.avatar || "/assets/avatar_jonel.png",
+          avatar: data.user.avatar_url || data.user.avatar || "/assets/user.png",
           firstName: data.user.nombre.split(" ")[0] || data.user.nombre,
           lastName: data.user.nombre.split(" ").slice(1).join(" ") || "",
           name: data.user.nombre,
@@ -54,8 +54,38 @@ class AuthClient {
     }
   }
 
-  async resetPassword(_) {
-    return { error: "Para restablecer tu contraseña comunícate con el Administrador." };
+  async resetPassword({ email }) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/auth/forgot-password/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        return { error: data.error || "No se pudo solicitar el restablecimiento." };
+      }
+      return { data: { success: true } };
+    } catch (err) {
+      return { error: "Error de red al solicitar restablecimiento." };
+    }
+  }
+
+  async confirmPasswordReset({ uid, token, password }) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/auth/reset-password/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ uid, token, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        return { error: data.error || "No se pudo actualizar la contraseña." };
+      }
+      return { data: { success: true } };
+    } catch (err) {
+      return { error: "Error de red al actualizar la contraseña." };
+    }
   }
 
   async updateProfile({ nombre, email, avatar, remove_avatar }) {
@@ -89,7 +119,7 @@ class AuthClient {
       if (data.success && data.user) {
         const formattedUser = {
           id: data.user.id,
-          avatar: data.user.avatar_url || data.user.avatar || "/assets/avatar_jonel.png",
+          avatar: data.user.avatar_url || data.user.avatar || "/assets/user.png",
           firstName: data.user.nombre.split(" ")[0] || data.user.nombre,
           lastName: data.user.nombre.split(" ").slice(1).join(" ") || "",
           name: data.user.nombre,
@@ -135,16 +165,20 @@ class AuthClient {
   }
 
   async getUser() {
-    const token = localStorage.getItem("custom-auth-token");
-    const storedUser = localStorage.getItem("custom-auth-user");
-
-    if (!token || !storedUser) {
-      return { data: null };
-    }
-
     try {
-      const user = JSON.parse(storedUser);
-      return { data: user };
+      const token = localStorage.getItem("custom-auth-token");
+      if (!token) return { data: null };
+      
+      const userStr = localStorage.getItem("custom-auth-user");
+      if (userStr) {
+        const parsed = JSON.parse(userStr);
+        if (parsed.avatar === "/assets/avatar_jonel.png") {
+          parsed.avatar = "/assets/user.png";
+          localStorage.setItem("custom-auth-user", JSON.stringify(parsed));
+        }
+        return { data: parsed };
+      }
+      return { data: null };
     } catch (e) {
       localStorage.removeItem("custom-auth-token");
       localStorage.removeItem("custom-auth-user");

@@ -219,7 +219,7 @@ export default function EditoresTable({
                 Creación
               </TableCell>
               <TableCell align="center" sx={{ fontWeight: 700, color: "#000000", textTransform: "none", py: 1.8, fontSize: "0.85rem", borderBottom: "1px solid rgba(0, 0, 0, 0.08)", bgcolor: "#FFFFFF" }}>
-                Diseños 3D
+                Modelos 3D
               </TableCell>
               <TableCell align="center" sx={{ fontWeight: 700, color: "#000000", textTransform: "none", py: 1.8, fontSize: "0.85rem", borderBottom: "1px solid rgba(0, 0, 0, 0.08)", bgcolor: "#FFFFFF" }}>
                 Software
@@ -245,6 +245,8 @@ export default function EditoresTable({
               const p3dCount = editor.proyectos_3d_count || 0;
               const pSoftwareCount = editor.proyectos_software_count || 0;
 
+              const avatarUrl = editor.avatar_url || editor.avatar || "/assets/user.png";
+
               return (
                 <TableRow
                   key={editor.id}
@@ -255,16 +257,12 @@ export default function EditoresTable({
                   <TableCell sx={{ py: 1.8 }}>
                     <Stack direction="row" spacing={2} alignItems="center">
                       <Avatar
+                        src={avatarUrl}
                         sx={{
-                          bgcolor: avatarColor,
-                          fontWeight: 700,
                           width: 38,
                           height: 38,
-                          fontSize: "0.88rem"
                         }}
-                      >
-                        {initials}
-                      </Avatar>
+                      />
                       <Box>
                         <Typography variant="subtitle2" sx={{ fontWeight: 600, color: "#111827", fontSize: "0.88rem" }}>
                           {editor.nombre}
@@ -294,7 +292,7 @@ export default function EditoresTable({
                     </Typography>
                   </TableCell>
 
-                  {/* Diseños 3D */}
+                  {/* Modelos 3D */}
                   <TableCell align="center">
                     <Typography variant="body2" sx={{ color: p3dCount > 0 ? "#111827" : "#94A3B8", fontWeight: 600 }}>
                       {p3dCount}

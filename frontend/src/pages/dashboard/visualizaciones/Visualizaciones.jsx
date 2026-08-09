@@ -10,6 +10,7 @@ import { Link as RouterLink } from "react-router-dom";
 import { ArrowClockwise as RefreshIcon } from "@phosphor-icons/react/dist/ssr/ArrowClockwise";
 
 import VisualizacionesChart from "./VisualizacionesChart";
+import MetricasRankingTable from "./MetricasRankingTable";
 
 export default function VisualizacionesPage() {
   const [metricas, setMetricas] = React.useState([]);
@@ -69,6 +70,8 @@ export default function VisualizacionesPage() {
         </Typography>
 
         <VisualizacionesChart metricas={metricas} syncButton={syncButton} />
+        
+        <MetricasRankingTable metricas={metricas} />
       </Box>
     </Box>
   );

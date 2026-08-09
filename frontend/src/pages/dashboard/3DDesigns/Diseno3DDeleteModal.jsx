@@ -26,7 +26,7 @@ export default function Diseno3DDeleteModal({ open, onClose, onConfirm, submitti
         }
       }}
     >
-      <DialogTitle sx={{ fontWeight: 700 }}>¿Eliminar este Diseño 3D?</DialogTitle>
+      <DialogTitle sx={{ fontWeight: 700 }}>¿Eliminar este Modelo 3D?</DialogTitle>
       <DialogContent>
         <Typography variant="body2" color="text.secondary">
           Esta acción eliminará de forma permanente el modelo 3D, incluyendo su archivo FBX y miniatura. Esta operación no se puede deshacer.

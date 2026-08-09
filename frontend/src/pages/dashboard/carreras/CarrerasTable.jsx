@@ -51,7 +51,7 @@ export default function CarrerasTable({
   onEdit,
   onDelete,
   onOpenCreate,
-  onNavigate  // <-- Nuevo: función para navegar
+  onNavigate
 }) {
   const handleChangePage = (event, newPage) => {
     onPageChange(newPage);
@@ -84,16 +84,14 @@ export default function CarrerasTable({
         }}
       >
         <Avatar
+          src="/assets/icons/education.png"
           sx={{
             width: 56,
             height: 56,
             margin: "0 auto 16px",
-            backgroundColor: "action.hover",
-            color: "text.secondary"
+            bgcolor: "transparent"
           }}
-        >
-          <CarreraIcon size={28} />
-        </Avatar>
+        />
         <Typography variant="h6" sx={{ fontWeight: 600, mb: 1, color: "text.primary" }}>
           No se encontraron carreras
         </Typography>
@@ -159,20 +157,11 @@ export default function CarrerasTable({
               >
                 <TableCell>
                   <Stack direction="row" spacing={2} alignItems="center">
-                    <Box
-                      sx={{
-                        width: 36,
-                        height: 36,
-                        borderRadius: "6px",
-                        bgcolor: "rgba(0, 43, 73, 0.08)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: "#002B49"
-                      }}
-                    >
-                      <CarreraIcon size={18} />
-                    </Box>
+                    <img 
+                      src="/assets/icons/education.png" 
+                      alt="Carrera" 
+                      style={{ width: 28, height: 28, objectFit: 'contain' }} 
+                    />
                     <Box>
                       <Typography variant="subtitle2" sx={{ fontWeight: 600, color: "#111827" }}>
                         {carrera.nombre}

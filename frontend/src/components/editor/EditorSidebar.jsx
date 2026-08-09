@@ -5,7 +5,7 @@ import { LayoutDashboard, Box, GraduationCap, PlusCircle, User, ArrowLeft, Hexag
 export const EditorSidebar = ({ isCollapsed, setIsCollapsed, isMobileMenuOpen, setIsMobileMenuOpen }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  
+
   const isDig = location.pathname.includes('software');
   const basePath = isDig ? '/editor/software' : '/editor/3d';
 
@@ -29,7 +29,7 @@ export const EditorSidebar = ({ isCollapsed, setIsCollapsed, isMobileMenuOpen, s
   const NavItem = ({ icon: Icon, label, path }) => {
     const active = checkActive(path);
     return (
-      <button 
+      <button
         onClick={() => handleNav(path)}
         className={`group relative flex w-full items-center py-3 mb-2 rounded-xl transition-all duration-200
           ${isCollapsed ? 'sm:justify-center justify-start px-4' : 'justify-start px-4'} 
@@ -38,7 +38,6 @@ export const EditorSidebar = ({ isCollapsed, setIsCollapsed, isMobileMenuOpen, s
             : 'text-[var(--text-muted)] hover:bg-[var(--bg-general)] hover:text-[var(--text-main)]'}`}
       >
         <Icon size={20} className={`shrink-0 transition-colors ${active ? 'text-[var(--accent)]' : 'text-[var(--text-muted)] group-hover:text-[var(--text-main)]'}`} />
-        
         <div className={`overflow-hidden transition-all duration-300 whitespace-nowrap ml-3 
           ${isCollapsed ? 'sm:w-0 sm:opacity-0 w-auto opacity-100' : 'w-auto opacity-100'}`}>
           <span className="text-sm">{label}</span>
@@ -66,14 +65,13 @@ export const EditorSidebar = ({ isCollapsed, setIsCollapsed, isMobileMenuOpen, s
           w-72`}
       >
         <div className="flex h-16 items-center justify-between border-b border-[var(--line)] mb-4 px-4 overflow-hidden whitespace-nowrap">
-          
           <div className={`flex items-center gap-3 animate-in fade-in duration-300 ${isCollapsed ? 'sm:hidden' : 'flex'}`}>
-             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--accent-dim)] text-[var(--accent)]">
-               <Hexagon size={20} />
-             </div>
-             <span className="truncate font-display text-lg font-bold tracking-tight text-[var(--text-main)]">
-               FAB LAB <span className="text-[var(--accent)]">REPO</span>
-             </span>
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--accent-dim)] text-[var(--accent)]">
+              <Hexagon size={20} />
+            </div>
+            <span className="truncate font-display text-lg font-bold tracking-tight text-[var(--text-main)]">
+              FAB LAB <span className="text-[var(--accent)]">REPO</span>
+            </span>
           </div>
 
           <div className={`hidden h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--accent-dim)] text-[var(--accent)] transition-all duration-300 mx-auto ${isCollapsed ? 'sm:flex' : 'sm:hidden'}`}>

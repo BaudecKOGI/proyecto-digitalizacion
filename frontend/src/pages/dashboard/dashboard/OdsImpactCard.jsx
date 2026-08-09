@@ -59,7 +59,12 @@ export default function OdsImpactCard({ disenos = [], proyectos = [], categorias
   const slices = React.useMemo(() => {
     const conteoOds = {};
     todosLosProyectos.forEach((item) => {
-      if (item.ods) {
+      if (item.ods_detalle && Array.isArray(item.ods_detalle)) {
+        item.ods_detalle.forEach((odsObj) => {
+          const num = Number(odsObj.id);
+          conteoOds[num] = (conteoOds[num] || 0) + 1;
+        });
+      } else if (item.ods) {
         const num = Number(item.ods);
         conteoOds[num] = (conteoOds[num] || 0) + 1;
       }
@@ -90,12 +95,16 @@ export default function OdsImpactCard({ disenos = [], proyectos = [], categorias
       return sorted;
     }
 
-    // Datos de demostración
+    // Si no hay ODS, retornar un círculo gris (100%)
     return [
-      { label: "ODS 4", fullName: "Educación de Calidad", color: "#2563EB", hoverColor: "#1D4ED8", percentage: 43.8, count: 35 },
-      { label: "ODS 9", fullName: "Industria e Innovación", color: "#F59E0B", hoverColor: "#D97706", percentage: 31.3, count: 25 },
-      { label: "ODS 11", fullName: "Ciudades Sostenibles", color: "#0D9488", hoverColor: "#0F766E", percentage: 18.8, count: 15 },
-      { label: "ODS 3", fullName: "Salud y Bienestar", color: "#EF4444", hoverColor: "#DC2626", percentage: 6.3, count: 5 },
+      { 
+        label: "Sin datos", 
+        fullName: "Aún no hay proyectos vinculados", 
+        color: "#E2E8F0", 
+        hoverColor: "#CBD5E1", 
+        percentage: 100, 
+        count: 0 
+      },
     ];
   }, [todosLosProyectos]);
 
@@ -130,16 +139,7 @@ export default function OdsImpactCard({ disenos = [], proyectos = [], categorias
     const maxReal = Math.max(...data.map((d) => Math.max(d.valA, d.valB)), 0);
 
     if (maxReal === 0 || data.length === 0) {
-      data = [
-        { label: "Salud", fullName: "Salud y Medicina", valA: 42, valB: 50 },
-        { label: "Educación", fullName: "Educación Digital", valA: 32, valB: 68 },
-        { label: "Robótica", fullName: "Robótica", valA: 21, valB: 46 },
-        { label: "IA", fullName: "Inteligencia Artificial", valA: 66, valB: 39 },
-        { label: "3D", fullName: "Diseño 3D", valA: 67, valB: 36 },
-        { label: "Ingeniería", fullName: "Ingeniería", valA: 36, valB: 23 },
-        { label: "Ciencia", fullName: "Ciencias Exactas", valA: 23, valB: 69 },
-        { label: "Diseño", fullName: "Diseño e Industrial", valA: 54, valB: 23 },
-      ];
+      data = [];
     }
     const max = Math.max(...data.map((d) => Math.max(d.valA, d.valB)), 10);
     return { barData: data, maxVal: max };
@@ -224,13 +224,15 @@ export default function OdsImpactCard({ disenos = [], proyectos = [], categorias
                   return (
                     <g key={i} onMouseEnter={() => setHoveredSlice(slice)} style={{ cursor: "pointer" }}>
                       <circle cx={slice.cx} cy={slice.cy} r={slice.radius} fill={slice.color} />
-                      <text
-                        x={slice.cx} y={slice.cy}
-                        textAnchor="middle" dominantBaseline="middle"
-                        fill="#FFFFFF" fontWeight="700" fontSize="14px" fontFamily="Inter, sans-serif"
-                      >
-                        100%
-                      </text>
+                      {slice.count > 0 && (
+                        <text
+                          x={slice.cx} y={slice.cy}
+                          textAnchor="middle" dominantBaseline="middle"
+                          fill="#FFFFFF" fontWeight="700" fontSize="14px" fontFamily="Inter, sans-serif"
+                        >
+                          100%
+                        </text>
+                      )}
                     </g>
                   );
                 }
@@ -244,7 +246,7 @@ export default function OdsImpactCard({ disenos = [], proyectos = [], categorias
                       strokeWidth="1.8"
                       style={{ transition: "fill 0.2s ease" }}
                     />
-                    {slice.percentage >= 6 && (
+                    {slice.percentage >= 6 && slice.count > 0 && (
                       <text
                         x={slice.tx} y={slice.ty}
                         textAnchor="middle" dominantBaseline="middle"
@@ -305,7 +307,7 @@ export default function OdsImpactCard({ disenos = [], proyectos = [], categorias
               <Stack direction="row" spacing={0.8} alignItems="center">
                 <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: "#F59E0B" }} />
                 <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary", fontSize: "0.82rem" }}>
-                  Diseños 3D
+                  Modelos 3D
                 </Typography>
               </Stack>
             </Stack>
@@ -423,7 +425,7 @@ export default function OdsImpactCard({ disenos = [], proyectos = [], categorias
                         style={{ transition: "fill 0.2s ease", cursor: "pointer" }}
                       />
                     )}
-                    {/* Barra Diseños 3D */}
+                    {/* Barra Modelos 3D */}
                     {hB > 0 && (
                       <rect
                         x={xB} y={yB} width={barWidth} height={hB} rx="3"

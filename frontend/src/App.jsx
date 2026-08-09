@@ -1,30 +1,49 @@
-import * as React from "react";
-import { Navigate, Route, Routes, Outlet } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Navigate, Route, Routes, Outlet, useLocation } from "react-router-dom";
+
+function ScrollToTop() {
+  const { pathname, hash } = useLocation();
+
+  useEffect(() => {
+    if (hash) {
+      setTimeout(() => {
+        const element = document.getElementById(hash.replace('#', ''));
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }, [pathname, hash]);
+
+  return null;
+}
 
 // Importación de las rutas del editor y la landing page
 import PublicHome from "./pages/PublicHome";
-import PublicViewer3DPage from "./pages/public/Viewer3D/PublicViewer3DPage";
+import Viewer3DPage from "./pages/public/ProjectViewer/Viewer3D";
+import ViewerDigitalPage from "./pages/public/ProjectViewer/ViewerDigital";
 import Gallery3DPage from "./pages/public/Gallery/Gallery3DPage";
 import GallerySoftwarePage from "./pages/public/Gallery/GallerySoftwarePage";
 import PublicODSPage from "./pages/public/ODS/PublicODSPage";
-import PublicFabLabPage from "./pages/public/FabLab/PublicFabLabPage";
+import FabLabPage from "./pages/public/FabLab/FabLabPage";
 import EditorLayout from "./layouts/EditorLayout";
+import PublicLayout from "./layouts/PublicLayout";
 import { Hub as EditorHub } from "./pages/editor/Hub";
 import { AssistantWidget } from "./components/assistant";
 
 // RUTAS DE 3D
 import { Overview as EditorOverview } from "./pages/editor/3d/Dashboard3D";
 import { ProjectsList3D as EditorProjectsList } from "./pages/editor/3d/ProjectsList3D";
-import { NewProject3D as EditorNewProject } from "./pages/editor/3d/NewProject3D";
-import { EditProject3D as EditorEditProject } from "./pages/editor/3d/EditProject3D";
+import { ProjectForm3D } from "./pages/editor/3d/ProjectForm3D";
 import { ProjectDetailView3D } from "./pages/editor/3d/ProjectDetailView3D";
 import { Careers3D } from "./pages/editor/3d/Careers3D";
 
 // RUTAS DE SOFTWARE 
 import { DashboardSoftware } from "./pages/editor/software/DashboardSoftware";
 import ProjectsListSoftware from "./pages/editor/software/ProjectsListSoftware";
-import NewProjectSoftware from "./pages/editor/software/NewProjectSoftware";
-import EditProjectSoftware from "./pages/editor/software/EditProjectSoftware";
+import ProjectFormSoftware from "./pages/editor/software/ProjectFormSoftware";
 import CareersSoftware from "./pages/editor/software/CareersSoftware";
 
 // Perfil
@@ -33,6 +52,7 @@ import { Profile as EditorProfile } from "./pages/editor/Profile";
 // Dashboard Admin
 import SignInPage from "@/pages/auth/sign-in/SignIn";
 import ResetPasswordPage from "@/pages/auth/reset-password/ResetPassword";
+import UpdatePasswordPage from "@/pages/auth/update-password/UpdatePassword";
 import AccountPage from "@/pages/dashboard/account/Account";
 import DashboardOverviewPage from "@/pages/dashboard/dashboard/Dashboard";
 import Disenos3DPage from "@/pages/dashboard/3DDesigns/Disenos3D";
@@ -56,24 +76,22 @@ import { Layout as DashboardLayout } from "@/layouts/DashboardLayout";
 export default function App() {
   return (
     <>
+      <ScrollToTop />
       <Routes>
-        {/* Rutas públicas */}
-        <Route
-          element={
-            <>
-              <Outlet />
-              <AssistantWidget />
-            </>
-          }
-        >
+        {/* Rutas públicas con Layout (Navbar y Footer persistentes) */}
+        <Route element={<PublicLayout />}>
           <Route path="/" element={<PublicHome />} />
-          <Route path="/proyecto/3d/:id" element={<PublicViewer3DPage />} />
           <Route path="/galeria/3d" element={<Gallery3DPage />} />
           <Route path="/galeria/software" element={<GallerySoftwarePage />} />
           <Route path="/ods" element={<PublicODSPage />} />
-          <Route path="/fablab" element={<PublicFabLabPage />} />
-          {/* Ruta para completar proyecto con token de invitación */}
+          <Route path="/fablab" element={<FabLabPage />} />
           <Route path="/completar/:token" element={<CompletarProyectoPage />} />
+        </Route>
+
+        {/* Rutas públicas sin Layout (Visores a pantalla completa) */}
+        <Route element={<Outlet />}>
+          <Route path="/proyecto/3d/:id" element={<Viewer3DPage />} />
+          <Route path="/proyecto/digitales/:id" element={<ViewerDigitalPage />} />
         </Route>
 
         {/* Editor */}
@@ -85,7 +103,7 @@ export default function App() {
 
           {/* Con Layout */}
           <Route element={<EditorLayout />}>
-            {/* ==================== 3D ==================== */}
+            {/* 3D */}
             <Route path="3d">
               <Route index element={<Navigate to="dashboard" replace />} />
 
@@ -99,8 +117,8 @@ export default function App() {
                 element={<EditorProjectsList mode="3d" projects={[]} />}
               />
 
-              <Route path="nuevo" element={<EditorNewProject />} />
-              <Route path="editar/:id" element={<EditorEditProject />} />
+              <Route path="nuevo" element={<ProjectForm3D />} />
+              <Route path="editar/:id" element={<ProjectForm3D />} />
               <Route path="detalle/:id" element={<ProjectDetailView3D />} />
 
               <Route path="carreras" element={<Careers3D />} />
@@ -113,7 +131,7 @@ export default function App() {
               <Route path="perfil" element={<EditorProfile />} />
             </Route>
 
-            {/* ==================== SOFTWARE ==================== */}
+            {/* SOFTWARE */}
             <Route path="software">
               <Route index element={<Navigate to="dashboard" replace />} />
 
@@ -127,8 +145,8 @@ export default function App() {
                 element={<ProjectsListSoftware />}
               />
 
-              <Route path="nuevo" element={<NewProjectSoftware />} />
-              <Route path="editar/:id" element={<EditProjectSoftware />} />
+              <Route path="nuevo" element={<ProjectFormSoftware />} />
+              <Route path="editar/:id" element={<ProjectFormSoftware />} />
 
               <Route path="carreras" element={<CareersSoftware />} />
               <Route
@@ -152,6 +170,10 @@ export default function App() {
             <Route
               path="reset-password"
               element={<ResetPasswordPage />}
+            />
+            <Route
+              path="update-password"
+              element={<UpdatePasswordPage />}
             />
           </Route>
         </Route>

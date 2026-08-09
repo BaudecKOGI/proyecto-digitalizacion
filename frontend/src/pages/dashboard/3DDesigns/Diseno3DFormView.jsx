@@ -254,7 +254,7 @@ export default function Diseno3DFormView({
     if (currentPiezasState !== basePiezas) return true;
     if (archivoFBX) return true;
     if (imagenMiniatura) return true;
-    
+
     return false;
   };
 
@@ -420,10 +420,10 @@ export default function Diseno3DFormView({
               }
             }}
           >
-            Volver a Diseños
+            Volver a Modelos
           </Button>
           <Typography variant="h6" fontWeight={700} sx={{ color: "text.primary" }}>
-            {editingDiseno ? "Editar Diseño 3D" : "Crear Diseño 3D"}
+            {editingDiseno ? "Editar Modelo 3D" : "Crear Modelo 3D"}
           </Typography>
         </Stack>
 
@@ -479,7 +479,7 @@ export default function Diseno3DFormView({
           }}
         >
           <Typography variant="h5" fontWeight={800} gutterBottom sx={{ color: "text.primary", mb: 0.5 }}>
-            {editingDiseno ? "Editar Diseño 3D" : "Crear Nuevo Diseño 3D"}
+            {editingDiseno ? "Editar Modelo 3D" : "Crear Nuevo Modelo 3D"}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
             Completa la información general, carga el modelo 3D y configura las interacciones mecánicas del proyecto.
@@ -654,7 +654,7 @@ export default function Diseno3DFormView({
                               key={id}
                               label={ods ? `ODS ${id}` : id}
                               size="small"
-                              sx={{ bgcolor: ods?.color || '#6b7280', color: '#fff', fontWeight: 600 }}
+                              sx={{ bgcolor: '#E2E8F0', color: '#475569', fontWeight: 600 }}
                             />
                           );
                         })}
@@ -692,7 +692,7 @@ export default function Diseno3DFormView({
             {/* ARCHIVOS */}
             <Box>
               <Typography variant="body2" sx={{ ...labelSx, mb: 1.5 }}>
-                Archivos (Opcional)
+                Archivos
               </Typography>
               <Stack direction={{ xs: "column", sm: "row" }} spacing={2.5}>
                 <Button
@@ -714,8 +714,8 @@ export default function Diseno3DFormView({
                   {archivoFBX
                     ? archivoFBX.name
                     : editingDiseno
-                    ? "Actualizar .FBX"
-                    : "Subir Modelo .FBX"}
+                      ? "Actualizar .FBX"
+                      : "Subir Modelo .FBX"}
                   <input
                     type="file"
                     hidden
@@ -743,8 +743,8 @@ export default function Diseno3DFormView({
                   {imagenMiniatura
                     ? imagenMiniatura.name
                     : editingDiseno
-                    ? "Actualizar Miniatura"
-                    : "Subir Portada"}
+                      ? "Actualizar Miniatura"
+                      : "Subir Portada"}
                   <input
                     type="file"
                     hidden
@@ -960,7 +960,7 @@ export default function Diseno3DFormView({
                 "&:hover": { bgcolor: "#001e33", boxShadow: "none" }
               }}
             >
-              {editingDiseno ? "Actualizar Proyecto" : "Crear Diseño 3D"}
+              {editingDiseno ? "Actualizar Proyecto" : "Crear Modelo 3D"}
             </Button>
           </Stack>
         </Paper>

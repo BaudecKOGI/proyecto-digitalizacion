@@ -48,6 +48,7 @@ import TecnologiaDeleteModal from "./TecnologiaDeleteModal";
 export default function ProyectosDigitalesPage() {
   const [activeTab, setActiveTab] = useState(0);
 
+  // Estados Proyectos Digitales
   const [proyectos, setProyectos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -131,6 +132,19 @@ export default function ProyectosDigitalesPage() {
   };
 
   const hasActiveFilters = Boolean(searchTerm || filterOds || filterCategoria || filterEstado);
+
+  const handleUpdateEstado = async (id, nuevoEstado) => {
+    try {
+      const formData = new FormData();
+      formData.append("estado_publicacion", nuevoEstado);
+      const res = await updateProyectoSoftware(id, formData);
+      setProyectos(prev => prev.map(p => p.id === id ? { ...p, estado_publicacion: nuevoEstado } : p));
+      showSnackbar("Estado actualizado exitosamente.", "success");
+    } catch (err) {
+      console.error(err);
+      showSnackbar(err.message || "Error al actualizar estado.", "error");
+    }
+  };
 
   const handleOpenCreateProyecto = () => {
     setEditingProyecto(null);
@@ -228,12 +242,12 @@ export default function ProyectosDigitalesPage() {
         }
       } else {
         await createProyectoSoftware(formData);
-        showSnackbar("Proyecto de software creado con éxito", "success");
+        showSnackbar("Proyecto digital creado con éxito", "success");
       }
       setOpenModalProyecto(false);
       loadAllData();
     } catch (err) {
-      setFormError(err.message || "Error al guardar el proyecto de software.");
+      setFormError(err.message || "Error al guardar el proyecto digital.");
     }
   };
 
@@ -363,7 +377,7 @@ export default function ProyectosDigitalesPage() {
                 Gestión de Proyectos Digitales
               </Typography>
               <Typography variant="body1" color="text.secondary">
-                Administra proyectos de software, repositorios, videos, tecnologías y ODS.
+                Administra proyectos digitales, repositorios, videos, tecnologías y ODS.
               </Typography>
             </Box>
 
@@ -388,7 +402,7 @@ export default function ProyectosDigitalesPage() {
                     }
                   }}
                 >
-                  Nuevo Proyecto Software
+                  Nuevo Proyecto Digital
                 </Button>
               ) : (
                 <Button
@@ -419,7 +433,7 @@ export default function ProyectosDigitalesPage() {
           <Box sx={{ borderBottom: "1px solid rgba(0, 0, 0, 0.08)", mb: 3.5 }}>
             <Stack direction="row" spacing={4}>
               {[
-                { label: `Proyectos Software: ${proyectos.length}`, value: 0 },
+                { label: `Proyectos Digitales: ${proyectos.length}`, value: 0 },
                 { label: `Catálogo de Tecnologías: ${tecnologias.length}`, value: 1 }
               ].map((tab) => {
                 const isSelected = activeTab === tab.value;
@@ -610,7 +624,6 @@ export default function ProyectosDigitalesPage() {
                     <MenuItem value=""><em>Todos</em></MenuItem>
                     <MenuItem value="PUBLICADO">Publicado</MenuItem>
                     <MenuItem value="BORRADOR">Borrador</MenuItem>
-                    <MenuItem value="ARCHIVADO">Archivado</MenuItem>
                   </Select>
                 </FormControl>
 
@@ -649,6 +662,7 @@ export default function ProyectosDigitalesPage() {
                   onEdit={handleOpenEditProyecto}
                   onDelete={handleDeleteProyecto}
                   onPlayVideo={handleOpenVideo}
+                  onUpdateEstado={handleUpdateEstado}
                 />
               )}
             </Box>

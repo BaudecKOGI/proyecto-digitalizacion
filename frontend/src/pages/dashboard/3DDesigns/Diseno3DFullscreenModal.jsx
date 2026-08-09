@@ -152,7 +152,7 @@ export default function Diseno3DFullscreenModal({
           }}
         >
           <Typography variant="subtitle1" sx={{ color: "#111827", fontWeight: 800 }}>
-            Detalles del Diseño 3D
+            Detalles del Modelo 3D
           </Typography>
 
           <Button

@@ -17,7 +17,7 @@ const CITIES = [
   {
     name: 'Cusco',
     coordinates: [-13.5319, -71.9675],
-    color: '#0891B2',
+    color: '#6802C1',
   },
   {
     name: 'Arequipa',

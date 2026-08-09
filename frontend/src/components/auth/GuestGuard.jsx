@@ -32,8 +32,7 @@ export function GuestGuard({ children }) {
 
 	React.useEffect(() => {
 		checkPermissions().catch(() => {
-			// noop
-		}); // eslint-disable-next-line react-hooks/exhaustive-deps -- Expected
+		});
 	}, [user, error, isLoading]);
 
 	if (isChecking) {

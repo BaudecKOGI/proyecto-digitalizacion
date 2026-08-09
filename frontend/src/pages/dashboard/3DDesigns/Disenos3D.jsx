@@ -101,10 +101,10 @@ export default function Disenos3D() {
       setDisenos(arrayDisenos);
       setCategorias(arrayCats);
     } catch (err) {
-      console.error("Error cargando diseños 3D:", err);
+      console.error("Error cargando modelos 3D:", err);
       setSnackbar({
         open: true,
-        message: "No se pudo cargar la lista de diseños 3D.",
+        message: "No se pudo cargar la lista de modelos 3D.",
         severity: "error"
       });
     } finally {
@@ -148,6 +148,19 @@ export default function Disenos3D() {
     setSelectedCategoria("");
     setSelectedOds("");
     setTabValue("todos");
+  };
+
+  const handleUpdateEstado = async (id, nuevoEstado) => {
+    try {
+      const formData = new FormData();
+      formData.append("estado_publicacion", nuevoEstado);
+      const res = await updateProyecto3D(id, formData);
+      setDisenos(prev => prev.map(p => p.id === id ? { ...p, estado_publicacion: nuevoEstado } : p));
+      setSnackbar({ open: true, message: "Estado actualizado exitosamente.", severity: "success" });
+    } catch (err) {
+      console.error(err);
+      setSnackbar({ open: true, message: err.message || "Error al actualizar estado.", severity: "error" });
+    }
   };
 
   const handleOpenCreate = () => {
@@ -195,7 +208,7 @@ export default function Disenos3D() {
     setFormError("");
 
     if (!formDiseno.titulo.trim()) {
-      setFormError("El título del diseño 3D es obligatorio.");
+      setFormError("El título del modelo 3D es obligatorio.");
       return;
     }
     if (!editingDiseno && !archivoFBX) {
@@ -239,7 +252,7 @@ export default function Disenos3D() {
         await updateProyecto3D(editingDiseno.id, formData);
         setSnackbar({
           open: true,
-          message: "Diseño 3D actualizado exitosamente.",
+          message: "Modelo 3D actualizado exitosamente.",
           severity: "success"
         });
         if (selectedDiseno && selectedDiseno.id === editingDiseno.id) {
@@ -253,7 +266,7 @@ export default function Disenos3D() {
         await createProyecto3D(formData);
         setSnackbar({
           open: true,
-          message: "Nuevo Diseño 3D creado con éxito.",
+          message: "Nuevo Modelo 3D creado con éxito.",
           severity: "success"
         });
       }
@@ -278,7 +291,7 @@ export default function Disenos3D() {
       await deleteProyecto3D(item.id);
       setSnackbar({
         open: true,
-        message: `Diseño 3D "${item.titulo}" eliminado correctamente.`,
+        message: `Modelo 3D "${item.titulo}" eliminado correctamente.`,
         severity: "success"
       });
       if (selectedDiseno && selectedDiseno.id === item.id) {
@@ -286,10 +299,10 @@ export default function Disenos3D() {
       }
       loadData();
     } catch (err) {
-      console.error("Error eliminando diseño 3D:", err);
+      console.error("Error eliminando modelo 3D:", err);
       setSnackbar({
         open: true,
-        message: err.message || "No se pudo eliminar el diseño 3D.",
+        message: err.message || "No se pudo eliminar el modelo 3D.",
         severity: "error"
       });
     } finally {
@@ -382,14 +395,14 @@ export default function Disenos3D() {
             }
           }}
         >
-          Nuevo Diseño 3D
+          Nuevo Modelo 3D
         </Button>
       </Stack>
 
       <Box sx={{ borderBottom: "1px solid rgba(0, 0, 0, 0.08)", mb: 3.5 }}>
         <Stack direction="row" spacing={4}>
           {[
-            { label: `Todos los Diseños: ${totalCount}`, value: "todos" },
+            { label: `Todos los Modelos: ${totalCount}`, value: "todos" },
             { label: `Publicaciones: ${publicadosCount}`, value: "PUBLICADO" },
             { label: `Borradores: ${borradorCount}`, value: "BORRADOR" }
           ].map((tab) => {
@@ -610,6 +623,7 @@ export default function Disenos3D() {
         </Stack>
       </Box>
 
+      {/* TABLA O GRID DE MODELOS 3D */}
       <Disenos3DTable
         disenos={filteredDisenos}
         categorias={categorias}
@@ -618,6 +632,7 @@ export default function Disenos3D() {
         onView={(item) => setSelectedDiseno(item)}
         onEdit={(item) => handleOpenEdit(item)}
         onDelete={(item) => handleDeleteDiseno(item)}
+        onUpdateEstado={handleUpdateEstado}
       />
 
       <Diseno3DDeleteModal

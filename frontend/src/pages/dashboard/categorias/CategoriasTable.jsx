@@ -141,19 +141,18 @@ export default function CategoriasTable({
                   {/* Categoría / Icono */}
                   <TableCell sx={{ py: 2.2 }}>
                     <Stack direction="row" spacing={2} alignItems="center">
-                      <Avatar
+                      <Box
+                        component="img"
+                        src="/assets/tag.png"
+                        alt="Categoría"
                         sx={{
-                          bgcolor: `${accentColor}1A`,
-                          color: accentColor,
-                          width: 44,
-                          height: 44,
-                          border: "1px solid",
-                          borderColor: `${accentColor}33`,
-                          fontWeight: 700
+                          width: 28,
+                          height: 28,
+                          ml: 1,
+                          mr: 0.5,
+                          objectFit: "contain"
                         }}
-                      >
-                        <TagIcon size={22} weight="fill" />
-                      </Avatar>
+                      />
                       <Box>
                         <Typography variant="subtitle2" sx={{ fontWeight: 800, color: "text.primary" }}>
                           {cat.nombre}

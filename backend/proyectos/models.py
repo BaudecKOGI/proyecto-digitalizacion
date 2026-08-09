@@ -52,27 +52,6 @@ class Proyecto(models.Model):
     ESTADOS = (
         ('BORRADOR', 'Borrador'),
         ('PUBLICADO', 'Publicado'),
-        ('ARCHIVADO', 'Archivado'),
-    )
-    # Mantenemos ODS_CHOICES solo para referencia, pero ya no lo usamos como campo
-    ODS_CHOICES = (
-        (1, 'ODS 1: Fin de la Pobreza'),
-        (2, 'ODS 2: Hambre Cero'),
-        (3, 'ODS 3: Salud y Bienestar'),
-        (4, 'ODS 4: Educación de Calidad'),
-        (5, 'ODS 5: Igualdad de Género'),
-        (6, 'ODS 6: Agua Limpia y Saneamiento'),
-        (7, 'ODS 7: Energía Asequible y No Contaminante'),
-        (8, 'ODS 8: Trabajo Decente y Crecimiento Económico'),
-        (9, 'ODS 9: Industria, Innovación e Infraestructura'),
-        (10, 'ODS 10: Reducción de las Desigualdades'),
-        (11, 'ODS 11: Ciudades y Comunidades Sostenibles'),
-        (12, 'ODS 12: Producción y Consumo Responsables'),
-        (13, 'ODS 13: Acción por el Clima'),
-        (14, 'ODS 14: Vida Submarina'),
-        (15, 'ODS 15: Vida de Ecosistemas Terrestres'),
-        (16, 'ODS 16: Paz, Justicia e Instituciones Sólidas'),
-        (17, 'ODS 17: Alianzas para Lograr los Objetivos'),
     )
 
     titulo = models.CharField(max_length=150)

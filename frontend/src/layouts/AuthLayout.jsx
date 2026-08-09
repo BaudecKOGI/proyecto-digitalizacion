@@ -5,7 +5,6 @@ import Typography from "@mui/material/Typography";
 import { Outlet, Link as RouterLink } from "react-router-dom";
 
 import { paths } from "@/paths";
-import { DynamicLogo } from "@/components/core/Logo";
 import Spline from "@splinetool/react-spline";
 
 export function Layout({ children }) {
@@ -23,7 +22,7 @@ export function Layout({ children }) {
 			<Box sx={{ display: "flex", flex: "1 1 auto", flexDirection: "column", position: "relative" }}>
 				<Box sx={{ p: 3, position: "absolute", top: 0, left: 0 }}>
 					<Box component={RouterLink} to={paths.home} sx={{ display: "inline-block", fontSize: 0 }}>
-						<DynamicLogo colorDark="light" colorLight="dark" height={50} width={200} />
+						<Box component="img" src="/assets/logos/logo-continental-negro.png" alt="Universidad Continental Logo" sx={{ height: { xs: 40, md: 50, lg: 60 }, maxWidth: "100%", width: "auto", objectFit: "contain" }} />
 					</Box>
 				</Box>
 				<Box sx={{ alignItems: "center", display: "flex", flex: "1 1 auto", justifyContent: "center", p: 3 }}>
@@ -51,11 +50,11 @@ export function Layout({ children }) {
 						Plataforma de gestión y control para el laboratorio de fabricación.
 					</Typography>
 				</Stack>
-				<Box sx={{ 
-					flex: 1, 
-					width: "100%", 
-					minHeight: 0, 
-					overflow: "hidden", 
+				<Box sx={{
+					flex: 1,
+					width: "100%",
+					minHeight: 0,
+					overflow: "hidden",
 					display: "flex",
 					WebkitMaskImage: "radial-gradient(circle at center, black 30%, transparent 80%)",
 					maskImage: "radial-gradient(circle at center, black 30%, transparent 80%)"

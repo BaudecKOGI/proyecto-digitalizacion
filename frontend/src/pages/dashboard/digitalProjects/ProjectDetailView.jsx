@@ -137,7 +137,7 @@ export default function ProjectDetailView({ proyecto: propProyecto, onBack, onEd
             Volver al listado
           </Button>
           <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-            / Proyectos Software / <strong style={{ color: "inherit" }}>{proyecto.titulo}</strong>
+            / Proyectos Digitales / <strong style={{ color: "inherit" }}>{proyecto.titulo}</strong>
           </Typography>
         </Stack>
 
@@ -190,7 +190,7 @@ export default function ProjectDetailView({ proyecto: propProyecto, onBack, onEd
                     key={ods.id}
                     label={ods.label}
                     size="small"
-                    sx={{ bgcolor: odsColor, color: '#fff', fontWeight: 600 }}
+                    sx={{ bgcolor: '#E2E8F0', color: '#475569', fontWeight: 600 }}
                   />
                 );
               })}

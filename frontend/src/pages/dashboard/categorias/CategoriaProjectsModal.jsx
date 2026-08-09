@@ -150,12 +150,12 @@ export default function CategoriaProjectsModal({ open, categoria, onClose }) {
           <Tab
             icon={<CubeIcon size={18} />}
             iconPosition="start"
-            label={`Diseños 3D (${disenos3D.length})`}
+            label={`Modelos 3D (${disenos3D.length})`}
           />
           <Tab
             icon={<CodeIcon size={18} />}
             iconPosition="start"
-            label={`Proyectos de Software (${proyectosSoftware.length})`}
+            label={`Proyectos Digitales (${proyectosSoftware.length})`}
           />
         </Tabs>
       </Box>
@@ -170,7 +170,7 @@ export default function CategoriaProjectsModal({ open, categoria, onClose }) {
             </Typography>
           </Box>
         ) : tabIndex === 0 ? (
-          /* TAB 0: DISEÑOS 3D */
+          /* TAB 0: MODELOS 3D */
           disenos3D.length === 0 ? (
             <Paper
               elevation={0}
@@ -185,7 +185,7 @@ export default function CategoriaProjectsModal({ open, categoria, onClose }) {
             >
               <CubeIcon size={44} weight="duotone" style={{ opacity: 0.5, marginBottom: 12 }} />
               <Typography variant="subtitle1" fontWeight={700} color="text.primary" gutterBottom>
-                Sin Diseños 3D vinculados
+                Sin Modelos 3D vinculados
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 Actualmente no hay modelos 3D que pertenezcan a la categoría "{categoria.nombre}".
@@ -285,7 +285,7 @@ export default function CategoriaProjectsModal({ open, categoria, onClose }) {
             >
               <FolderIcon size={44} weight="duotone" style={{ opacity: 0.5, marginBottom: 12 }} />
               <Typography variant="subtitle1" fontWeight={700} color="text.primary" gutterBottom>
-                Sin Proyectos de Software vinculados
+                Sin Proyectos Digitales vinculados
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 Actualmente no hay repositorios o demos que pertenezcan a la categoría "{categoria.nombre}".

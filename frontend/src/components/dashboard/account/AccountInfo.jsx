@@ -15,6 +15,11 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Tooltip from "@mui/material/Tooltip";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogActions from "@mui/material/DialogActions";
 
 import { Camera as CameraIcon } from "@phosphor-icons/react/dist/ssr/Camera";
 import { Trash as TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
@@ -33,6 +38,14 @@ export function AccountInfo() {
     severity: "success",
   });
 
+  const [confirmDialog, setConfirmDialog] = React.useState({
+    open: false,
+    title: "",
+    content: "",
+    action: null,
+    file: null,
+  });
+
   const showSnackbar = (message, severity = "success") => {
     setSnackbar({ open: true, message, severity });
   };
@@ -44,12 +57,12 @@ export function AccountInfo() {
   const nombre = user?.name || user?.firstName || "Administrador General";
   const email = user?.email || "admin@continental.edu.pe";
   const rol = user?.rol === "ADMIN" ? "Administrador General" : "Editor";
-  const avatarUrl = user?.avatar || "/assets/avatar_jonel.png";
+  const avatarUrl = user?.avatar || "/assets/user.png";
 
   const isCustomAvatar =
     user?.avatar &&
-    !user.avatar.includes("/assets/avatar_jonel.png") &&
-    user.avatar !== "/assets/avatar_jonel.png";
+    !user.avatar.includes("/assets/user.png") &&
+    user.avatar !== "/assets/user.png";
 
   const handleFileSelect = () => {
     if (fileInputRef.current) {
@@ -57,7 +70,7 @@ export function AccountInfo() {
     }
   };
 
-  const handleFileChange = async (event) => {
+  const handleFileChange = (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -66,51 +79,68 @@ export function AccountInfo() {
       return;
     }
 
-    setUploading(true);
-    try {
-      const res = await authClient.updateProfile({
-        nombre: user?.name || "Administrador",
-        email: user?.email || "",
-        avatar: file,
-      });
-
-      if (res.error) {
-        showSnackbar(res.error, "error");
-      } else {
-        showSnackbar("Foto de perfil actualizada correctamente.", "success");
-        if (checkSession) {
-          await checkSession();
-        }
-      }
-    } catch (err) {
-      showSnackbar("Error al subir la imagen.", "error");
-    } finally {
-      setUploading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
+    setConfirmDialog({
+      open: true,
+      title: "Actualizar foto de perfil",
+      content: "¿Estás seguro de que deseas cambiar tu foto de perfil?",
+      action: "upload",
+      file: file,
+    });
+    
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   };
 
-  const handleRemoveAvatar = async () => {
+  const handleRemoveAvatar = () => {
+    setConfirmDialog({
+      open: true,
+      title: "Eliminar foto de perfil",
+      content: "¿Estás seguro de que deseas eliminar tu foto de perfil actual?",
+      action: "remove",
+      file: null,
+    });
+  };
+
+  const handleCloseDialog = () => {
+    setConfirmDialog((prev) => ({ ...prev, open: false }));
+  };
+
+  const executeConfirmAction = async () => {
+    const { action, file } = confirmDialog;
+    handleCloseDialog();
+    
     setUploading(true);
     try {
-      const res = await authClient.updateProfile({
-        nombre: user?.name || "Administrador",
-        email: user?.email || "",
-        remove_avatar: true,
-      });
+      if (action === "upload") {
+        const res = await authClient.updateProfile({
+          nombre: user?.name || "Administrador",
+          email: user?.email || "",
+          avatar: file,
+        });
 
-      if (res.error) {
-        showSnackbar(res.error, "error");
-      } else {
-        showSnackbar("Foto de perfil eliminada.", "success");
-        if (checkSession) {
-          await checkSession();
+        if (res.error) {
+          showSnackbar(res.error, "error");
+        } else {
+          showSnackbar("Foto de perfil actualizada correctamente.", "success");
+          if (checkSession) await checkSession();
+        }
+      } else if (action === "remove") {
+        const res = await authClient.updateProfile({
+          nombre: user?.name || "Administrador",
+          email: user?.email || "",
+          remove_avatar: true,
+        });
+
+        if (res.error) {
+          showSnackbar(res.error, "error");
+        } else {
+          showSnackbar("Foto de perfil eliminada.", "success");
+          if (checkSession) await checkSession();
         }
       }
     } catch (err) {
-      showSnackbar("Error al eliminar la foto de perfil.", "error");
+      showSnackbar("Ha ocurrido un error inesperado.", "error");
     } finally {
       setUploading(false);
     }
@@ -248,6 +278,46 @@ export function AccountInfo() {
           {snackbar.message}
         </Alert>
       </Snackbar>
+
+      {/* DIÁLOGO DE CONFIRMACIÓN */}
+      <Dialog
+        open={confirmDialog.open}
+        onClose={handleCloseDialog}
+        PaperProps={{
+          sx: { borderRadius: "12px", p: 1 }
+        }}
+      >
+        <DialogTitle sx={{ fontWeight: 700, color: "#002B49" }}>
+          {confirmDialog.title}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ color: "text.secondary" }}>
+            {confirmDialog.content}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ pb: 2, px: 3 }}>
+          <Button onClick={handleCloseDialog} sx={{ color: "text.secondary", textTransform: "none", fontWeight: 600 }}>
+            Cancelar
+          </Button>
+          <Button
+            onClick={executeConfirmAction}
+            variant="contained"
+            sx={{
+              bgcolor: "#002B49",
+              color: "#fff",
+              textTransform: "none",
+              fontWeight: 600,
+              boxShadow: "none",
+              "&:hover": {
+                bgcolor: "#001e33",
+                boxShadow: "none"
+              }
+            }}
+          >
+            Confirmar
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Card>
   );
 }

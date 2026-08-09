@@ -143,7 +143,7 @@ const CanvasLoader = () => {
   );
 };
 
-export default function ProjectViewer3D({ project, onClose }) {
+export default function ProjectViewer3D({ project }) {
   const [habilitarCamara, setHabilitarCamara] = useState(true);
   const [likesCount, setLikesCount] = useState(0);
   const [sharesCount, setSharesCount] = useState(0);
@@ -232,18 +232,7 @@ export default function ProjectViewer3D({ project, onClose }) {
           exit="exit"
           className="fixed inset-0 z-[300] flex flex-col bg-bg overflow-hidden"
         >
-          {/* HEADER (Boton Volver) */}
-          <div className="absolute top-0 z-20 flex w-full items-center justify-between bg-gradient-to-b from-bg/80 to-transparent px-[8vw] py-8 pointer-events-none">
-            <button
-              onClick={onClose}
-              className="group flex items-center gap-3 font-sans text-[11px] font-bold uppercase tracking-widest text-text transition-colors hover:text-c3d pointer-events-auto"
-            >
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-panel text-text transition-all group-hover:bg-c3d group-hover:text-white shadow-md">
-                ←
-              </span>
-              <span>Volver a la Galería</span>
-            </button>
-          </div>
+
 
           {/* PANEL LATERAL ELEGANTE (Presentación del Proyecto) */}
           <div className="absolute left-8 top-1/2 z-20 flex w-80 -translate-y-1/2 flex-col gap-4 rounded-2xl bg-panel/80 p-8 backdrop-blur-xl shadow-2xl border border-line pointer-events-auto">

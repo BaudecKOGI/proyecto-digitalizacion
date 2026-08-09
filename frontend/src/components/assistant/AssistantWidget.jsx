@@ -1,19 +1,25 @@
 // src/components/assistant/AssistantWidget.jsx
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import FloatingAvatar from './avatar/FloatingAvatar';
 import ChatPanel from './chat/ChatPanel';
 import { useAssistant } from './hooks/useAssistant';
 
 export default function AssistantWidget() {
+  const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const { messages, isLoading, handleSearch, resetChat } = useAssistant();
+
+  // No mostrar el asistente en la vista 3D para evitar superposiciones
+  if (location.pathname.includes('/proyecto/3d/')) {
+    return null;
+  }
 
   const handleClose = () => setIsOpen(false);
   const handleToggle = () => setIsOpen((prev) => !prev);
 
   return (
-    // En mobile: bottom/right más pequeños. En desktop: 28px
     <div
       className="fixed z-[9000] flex flex-col items-end"
       style={{
@@ -37,7 +43,7 @@ export default function AssistantWidget() {
           initial={{ opacity: 0, x: 8 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: 8 }}
-          transition={{ delay: 2, duration: 0.4 }}
+          transition={{ delay: 1, duration: 0.4 }}
           className="mb-2 mr-1 pointer-events-none"
         >
           <div
