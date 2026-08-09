@@ -36,15 +36,18 @@ import ResetPasswordPage from "@/pages/auth/reset-password/ResetPassword";
 import AccountPage from "@/pages/dashboard/account/Account";
 import DashboardOverviewPage from "@/pages/dashboard/dashboard/Dashboard";
 import Disenos3DPage from "@/pages/dashboard/3DDesigns/Disenos3D";
-import Diseno3DDetailView from "@/pages/dashboard/3DDesigns/Diseno3DDetailView"; // NUEVO
+import Diseno3DDetailView from "@/pages/dashboard/3DDesigns/Diseno3DDetailView";
 import ProyectosDigitalesPage from "@/pages/dashboard/digitalProjects/ProyectosDigitales";
-import ProjectDetailView from "@/pages/dashboard/digitalProjects/ProjectDetailView"; // NUEVO
+import ProjectDetailView from "@/pages/dashboard/digitalProjects/ProjectDetailView";
 import EditoresPage from "@/pages/dashboard/editores/Editores";
 import CategoriasPage from "@/pages/dashboard/categorias/Categorias";
 import CarrerasPage from "@/pages/dashboard/carreras/CarrerasPage";
 import CarreraDetailView from "@/pages/dashboard/carreras/CarreraDetailView";
 import CarreraCicloDetailView from "@/pages/dashboard/carreras/CarreraCicloDetailView";
 import VisualizacionesPage from "@/pages/dashboard/visualizaciones/Visualizaciones";
+
+// PÁGINA PÚBLICA PARA COMPLETAR PROYECTO POR INVITACIÓN
+import CompletarProyectoPage from "@/pages/CompletarProyecto/CompletarProyectoPage";
 
 // Layouts
 import { Layout as AuthLayout } from "@/layouts/AuthLayout";
@@ -69,6 +72,8 @@ export default function App() {
           <Route path="/galeria/software" element={<GallerySoftwarePage />} />
           <Route path="/ods" element={<PublicODSPage />} />
           <Route path="/fablab" element={<PublicFabLabPage />} />
+          {/* Ruta para completar proyecto con token de invitación */}
+          <Route path="/completar/:token" element={<CompletarProyectoPage />} />
         </Route>
 
         {/* Editor */}
@@ -157,12 +162,12 @@ export default function App() {
             <Route index element={<DashboardOverviewPage />} />
             <Route path="cuenta" element={<AccountPage />} />
             <Route path="disenos-3d" element={<Disenos3DPage />} />
-            <Route path="disenos-3d/detalle/:id" element={<Diseno3DDetailView />} /> {/* NUEVO */}
+            <Route path="disenos-3d/detalle/:id" element={<Diseno3DDetailView />} />
             <Route
               path="proyectos-digitales"
               element={<ProyectosDigitalesPage />}
             />
-            <Route path="proyectos-digitales/detalle/:id" element={<ProjectDetailView />} /> {/* NUEVO */}
+            <Route path="proyectos-digitales/detalle/:id" element={<ProjectDetailView />} />
             <Route path="editores" element={<EditoresPage />} />
             <Route path="categorias" element={<CategoriasPage />} />
             <Route path="carreras" element={<CarrerasPage />} />

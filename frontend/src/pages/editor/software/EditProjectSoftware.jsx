@@ -20,12 +20,13 @@ import {
 } from '@/services/api';
 import { ODS_LIST } from "@/pages/dashboard/digitalProjects/odsData";
 
+import { MultiSelectODS } from '@/components/editor/MultiSelectODS';
+
 export default function EditProjectSoftware() {
   const navigate = useNavigate();
   const { id } = useParams();
   const { user } = useUser();
 
-  // Estados para datos dinámicos desde Django
   const [categorias, setCategorias] = useState([]);
   const [tecnologias, setTecnologias] = useState([]);
   const [carreras, setCarreras] = useState([]);
@@ -33,7 +34,6 @@ export default function EditProjectSoftware() {
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [error, setError] = useState('');
 
-  // Formulario alineado con Django
   const [formData, setFormData] = useState({
     titulo: '',
     estado_publicacion: 'BORRADOR',
@@ -42,21 +42,17 @@ export default function EditProjectSoftware() {
     carrera: '',   // ID de carrera
     ciclo: '',     // número de ciclo
     categoria: '',
-    ods: '',
+    ods_ids: [],
     url_repositorio: '',
     url_demo_live: '',
     tecnologias: []
   });
 
-  // Archivos nuevos seleccionados
   const [archivoPortada, setArchivoPortada] = useState(null);
   const [archivoVideo, setArchivoVideo] = useState(null);
-
-  // URLs para previsualización
   const [imagenUrl, setImagenUrl] = useState(null);
   const [videoUrlExistente, setVideoUrlExistente] = useState(null);
 
-  // 1. CARGAR CATEGORÍAS, TECNOLOGÍAS, CARRERAS Y EL PROYECTO DESDE DJANGO
   useEffect(() => {
     const loadAllData = async () => {
       setLoadingFetch(true);
@@ -67,51 +63,38 @@ export default function EditProjectSoftware() {
           fetchTecnologias(),
           fetchCarreras('activo=true')
         ]);
-        
-        const listaCats = Array.isArray(catsData) ? catsData : catsData?.results || [];
-        const listaTechs = Array.isArray(techsData) ? techsData : techsData?.results || [];
-        const listaCarreras = Array.isArray(carrerasData) ? carrerasData : carrerasData?.results || [];
-        
-        setCategorias(listaCats);
-        setTecnologias(listaTechs);
-        setCarreras(listaCarreras);
+        setCategorias(Array.isArray(catsData) ? catsData : catsData?.results || []);
+        setTecnologias(Array.isArray(techsData) ? techsData : techsData?.results || []);
+        setCarreras(Array.isArray(carrerasData) ? carrerasData : carrerasData?.results || []);
 
         const backendUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
         const response = await fetch(`${backendUrl}/api/proyectos-software/${id}/`);
-        
         if (!response.ok) throw new Error("No se pudo encontrar el proyecto");
-        
         const proyectoData = await response.json();
 
-        if (proyectoData) {
-          let techIds = [];
-          if (Array.isArray(proyectoData.tecnologias)) {
-            techIds = proyectoData.tecnologias.map(t => typeof t === 'object' ? t.id : t);
-          } else if (Array.isArray(proyectoData.tecnologias_detalle)) {
-            techIds = proyectoData.tecnologias_detalle.map(t => t.id);
-          }
-
-          setFormData({
-            titulo: proyectoData.titulo || '',
-            estado_publicacion: proyectoData.estado_publicacion || proyectoData.estado || 'BORRADOR',
-            descripcion: proyectoData.descripcion || '',
-            autor_nombre: proyectoData.autor_nombre || '',
-            carrera: proyectoData.carrera || '',
-            ciclo: proyectoData.ciclo || '',
-            categoria: proyectoData.categoria ? String(proyectoData.categoria) : '',
-            ods: proyectoData.ods ? String(proyectoData.ods) : '',
-            url_repositorio: proyectoData.url_repositorio || '',
-            url_demo_live: proyectoData.url_demo_live || '',
-            tecnologias: techIds
-          });
-
-          if (proyectoData.imagen_portada) {
-            setImagenUrl(proyectoData.imagen_portada);
-          }
-          if (proyectoData.archivo_video) {
-            setVideoUrlExistente(proyectoData.archivo_video);
-          }
+        let techIds = [];
+        if (Array.isArray(proyectoData.tecnologias)) {
+          techIds = proyectoData.tecnologias.map(t => typeof t === 'object' ? t.id : t);
+        } else if (Array.isArray(proyectoData.tecnologias_detalle)) {
+          techIds = proyectoData.tecnologias_detalle.map(t => t.id);
         }
+
+        setFormData({
+          titulo: proyectoData.titulo || '',
+          estado_publicacion: proyectoData.estado_publicacion || proyectoData.estado || 'BORRADOR',
+          descripcion: proyectoData.descripcion || '',
+          autor_nombre: proyectoData.autor_nombre || '',
+          carrera: proyectoData.carrera || '',
+          ciclo: proyectoData.ciclo || '',
+          categoria: proyectoData.categoria ? String(proyectoData.categoria) : '',
+          ods_ids: proyectoData.ods_detalle?.map(o => o.id) || [],
+          url_repositorio: proyectoData.url_repositorio || '',
+          url_demo_live: proyectoData.url_demo_live || '',
+          tecnologias: techIds
+        });
+
+        if (proyectoData.imagen_portada) setImagenUrl(proyectoData.imagen_portada);
+        if (proyectoData.archivo_video) setVideoUrlExistente(proyectoData.archivo_video);
       } catch (err) {
         console.error("Error cargando los datos del proyecto:", err);
         setError("No se pudieron cargar los datos del proyecto. Verifica que Django esté corriendo.");
@@ -119,13 +102,9 @@ export default function EditProjectSoftware() {
         setLoadingFetch(false);
       }
     };
-
-    if (id) {
-      loadAllData();
-    }
+    if (id) loadAllData();
   }, [id]);
 
-  // Previsualización de nueva imagen de portada seleccionada
   useEffect(() => {
     if (archivoPortada) {
       const url = URL.createObjectURL(archivoPortada);
@@ -139,7 +118,6 @@ export default function EditProjectSoftware() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // Manejador para Selección Múltiple de Tecnologías
   const handleTechChange = (techId) => {
     setFormData(prev => {
       const current = prev.tecnologias;
@@ -152,7 +130,6 @@ export default function EditProjectSoftware() {
     });
   };
 
-  // Helper para números romanos
   const toRoman = (num) => {
     const romanos = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
     return romanos[num - 1] || num;
@@ -161,7 +138,27 @@ export default function EditProjectSoftware() {
   const carreraSeleccionada = carreras.find(c => String(c.id) === String(formData.carrera));
   const duracionCiclos = carreraSeleccionada ? carreraSeleccionada.duracion_ciclos : 0;
 
-  // 2. ENVÍO DE ACTUALIZACIÓN A DJANGO
+  const renderSelectedODS = () => {
+    if (!formData.ods_ids || formData.ods_ids.length === 0) return null;
+    return (
+      <div className="flex flex-wrap gap-1.5 mt-2">
+        {formData.ods_ids.map(id => {
+          const ods = ODS_LIST.find(o => o.id === id);
+          if (!ods) return null;
+          return (
+            <span 
+              key={id}
+              className="text-[10px] font-bold px-2.5 py-1 rounded-full text-white"
+              style={{ backgroundColor: ods.color || '#6b7280' }}
+            >
+              ODS {id}
+            </span>
+          );
+        })}
+      </div>
+    );
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoadingSubmit(true);
@@ -169,10 +166,13 @@ export default function EditProjectSoftware() {
 
     try {
       const data = new FormData();
-      
       Object.keys(formData).forEach(key => {
         if (key === 'tecnologias') {
           formData.tecnologias.forEach(techId => data.append('tecnologias', techId));
+        } else if (key === 'ods_ids') {
+          if (formData.ods_ids && formData.ods_ids.length > 0) {
+            data.append('ods_ids', JSON.stringify(formData.ods_ids));
+          }
         } else if (key === 'carrera' || key === 'ciclo') {
           if (formData[key]) data.append(key, formData[key]);
         } else if (formData[key] !== '' && formData[key] !== null) {
@@ -180,16 +180,9 @@ export default function EditProjectSoftware() {
         }
       });
 
-      if (user?.id) {
-        data.append('actualizado_por', user.id);
-      }
-      
-      if (archivoPortada) {
-        data.append('imagen_portada', archivoPortada); 
-      }
-      if (archivoVideo) {
-        data.append('archivo_video', archivoVideo);
-      }
+      if (user?.id) data.append('actualizado_por', user.id);
+      if (archivoPortada) data.append('imagen_portada', archivoPortada);
+      if (archivoVideo) data.append('archivo_video', archivoVideo);
 
       if (typeof updateProyectoSoftware === 'function') {
         await updateProyectoSoftware(id, data);
@@ -224,7 +217,6 @@ export default function EditProjectSoftware() {
   return (
     <div className="flex flex-col gap-6 pb-16">
       
-      {/* BARRA SUPERIOR */}
       <div className="flex items-center justify-between gap-4">
         <button 
           onClick={() => navigate('/editor/software/proyectos')}
@@ -235,7 +227,6 @@ export default function EditProjectSoftware() {
         </button>
       </div>
 
-      {/* MENSAJE DE ERROR */}
       {error && (
         <div className="bg-red-500/10 text-red-500 p-4 rounded-xl border border-red-500/20 flex items-center gap-3">
           <Info size={20} />
@@ -243,10 +234,8 @@ export default function EditProjectSoftware() {
         </div>
       )}
 
-      {/* CONTENEDOR PRINCIPAL */}
       <div className="grid grid-cols-1 xl:grid-cols-[7fr_3fr] gap-8 items-start">
         
-        {/* FORMULARIO */}
         <div className="bg-[var(--panel)] p-6 md:p-10 rounded-2xl border border-[var(--line)] shadow-sm">
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-[var(--text-main)]">Editar Proyecto de Software</h2>
@@ -334,7 +323,6 @@ export default function EditProjectSoftware() {
               </div>
             </div>
 
-            {/* CATEGORÍAS Y ODS */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-semibold text-[var(--text-main)]">Categoría / Área</label>
@@ -351,19 +339,15 @@ export default function EditProjectSoftware() {
 
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-semibold text-[var(--text-main)]">ODS de Impacto (ONU)</label>
-                <select 
-                  name="ods" value={formData.ods} onChange={handleChange}
-                  className="bg-[var(--bg-general)] border border-[var(--line)] text-[var(--text-main)] rounded-lg px-4 py-2.5 focus:outline-none focus:border-[var(--accent)] transition-colors w-full cursor-pointer"
-                >
-                  <option value="">Ninguno / No especificado</option>
-                  {ODS_LIST.map(o => (
-                    <option key={o.id} value={o.id}>{o.label}</option>
-                  ))}
-                </select>
+                <MultiSelectODS
+                  value={formData.ods_ids}
+                  onChange={(values) => setFormData(prev => ({ ...prev, ods_ids: values }))}
+                  placeholder="Seleccionar ODS..."
+                />
+                {renderSelectedODS()}
               </div>
             </div>
 
-            {/* REPOSITORIO Y DEMO */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-semibold text-[var(--text-main)]">URL Repositorio Git</label>
@@ -383,7 +367,6 @@ export default function EditProjectSoftware() {
               </div>
             </div>
 
-            {/* SELECCIÓN MÚLTIPLE DE TECNOLOGÍAS */}
             <div className="flex flex-col gap-2">
               <label className="text-sm font-semibold text-[var(--text-main)]">Tecnologías Utilizadas</label>
               <div className="flex flex-wrap gap-2 p-3 bg-[var(--bg-general)] border border-[var(--line)] rounded-lg min-h-[48px]">
@@ -410,7 +393,6 @@ export default function EditProjectSoftware() {
               </div>
             </div>
 
-            {/* ARCHIVOS */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-semibold text-[var(--text-main)]">Imagen de Portada</label>
@@ -448,7 +430,6 @@ export default function EditProjectSoftware() {
           </form>
         </div>
 
-        {/* VISTA PREVIA */}
         <div className="xl:sticky xl:top-6 self-start flex flex-col gap-3 w-full">
           <h3 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">
             Vista Previa en Vivo
@@ -556,7 +537,6 @@ export default function EditProjectSoftware() {
         </div>
       </div>
 
-      {/* BARRA INFERIOR */}
       <div className="flex justify-end pt-4 border-t border-[var(--line)] mt-4">
         <button 
           type="submit"

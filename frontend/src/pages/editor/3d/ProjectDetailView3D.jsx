@@ -49,7 +49,6 @@ const FBXModel = ({ url, piezasMoviles, setHabilitarCamara }) => {
       const deltaX = e.clientX - lastX;
       const deltaY = e.clientY - lastY;
 
-      // Aquí aplicamos la lógica de invertir giro
       const sensiblidad = config.invertir_giro ? -0.01 : 0.01;
       const cambioRotacion = (deltaX + deltaY) * sensiblidad;
 
@@ -83,22 +82,16 @@ const FBXModel = ({ url, piezasMoviles, setHabilitarCamara }) => {
     };
   }, [setHabilitarCamara]);
 
-  // Función para buscar el nombre en el objeto tocado o en sus "padres" (Grupos)
   const encontrarConfiguracionDePieza = (objetoTocado) => {
     let nodoActual = objetoTocado;
-    
     while (nodoActual) {
       const nombreNodo = nodoActual.name ? nodoActual.name.trim().toLowerCase() : '';
-      
       const piezaConfig = piezasMoviles.find(
         p => p.nombre_objeto && p.nombre_objeto.trim().toLowerCase() === nombreNodo
       );
-
       if (piezaConfig) {
         return { config: piezaConfig, mesh: nodoActual };
       }
-      
-      // Si no lo encuentra, sube un nivel al grupo padre
       nodoActual = nodoActual.parent;
     }
     return null;
@@ -106,14 +99,11 @@ const FBXModel = ({ url, piezasMoviles, setHabilitarCamara }) => {
 
   const onPointerDown = (e) => {
     const resultado = encontrarConfiguracionDePieza(e.object);
-
     if (resultado) {
-      // Detenemos el evento para que OrbitControls no mueva toda la escena
       e.stopPropagation(); 
       setHabilitarCamara(false); 
-      
       dragRef.current = {
-        mesh: resultado.mesh, // Rotamos el grupo/malla correcto
+        mesh: resultado.mesh,
         config: resultado.config,
         lastX: e.clientX,
         lastY: e.clientY
@@ -153,15 +143,12 @@ export const ProjectDetailView3D = () => {
   const [categoriaNombre, setCategoriaNombre] = useState('Cargando...');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  
-  // Estado para controlar la cámara del visor 3D
   const [habilitarCamara, setHabilitarCamara] = useState(true);
 
   useEffect(() => {
     const loadProjectDetails = async () => {
       try {
         setLoading(true);
-        // Traemos todos los proyectos y categorías (o usa tu endpoint por ID si lo tienes)
         const [data3D, catsData] = await Promise.all([
           fetchProyectos3D(),
           fetchCategorias()
@@ -178,7 +165,6 @@ export const ProjectDetailView3D = () => {
 
         setProject(foundProject);
 
-        // Buscar el nombre de la categoría
         const categories = Array.isArray(catsData) ? catsData : catsData?.results || [];
         const cat = categories.find(c => String(c.id) === String(foundProject.categoria));
         setCategoriaNombre(cat ? cat.nombre : 'Sin categoría');
@@ -216,10 +202,10 @@ export const ProjectDetailView3D = () => {
     );
   }
 
-  // Procesar datos para mostrar
-  const odsObj = ODS_LIST?.find(o => String(o.id) === String(project.ods));
-  
-  // Procesar URL de miniatura
+  const odsDetalle = project.ods_detalle || [];
+  const isPublicado = project.estado_publicacion === 'PUBLICADO';
+  const fechaProyecto = project.created_at || project.fecha_creacion || project.fecha;
+
   let imageUrl = project.imagen_miniatura || '';
   if (imageUrl.startsWith('/')) {
     imageUrl = `http://localhost:8000${imageUrl}`;
@@ -230,23 +216,17 @@ export const ProjectDetailView3D = () => {
     fbxUrl = `http://localhost:8000${fbxUrl}`;
   }
 
-  // Extraer configuración interactiva (piezas móviles)
   let piezasMoviles = [];
   try {
     if (project.configuracion_interactiva) {
       const config = typeof project.configuracion_interactiva === 'string' 
         ? JSON.parse(project.configuracion_interactiva) 
         : project.configuracion_interactiva;
-      
       piezasMoviles = config?.piezas_moviles || [];
     }
   } catch (err) {
     console.error("Error al parsear la configuración interactiva:", err);
   }
-
-  const isPublicado = project.estado_publicacion === 'PUBLICADO';
-
-  const fechaProyecto = project.fecha_creacion || project.created_at || project.fecha;
 
   return (
     <div className="flex flex-col gap-6 h-full pb-8 max-w-7xl mx-auto w-full">
@@ -292,7 +272,6 @@ export const ProjectDetailView3D = () => {
         <div className="lg:col-span-7 flex flex-col gap-6">
           <div className="bg-[var(--panel)] border border-[var(--line)] rounded-2xl p-1 shadow-sm overflow-hidden flex flex-col">
             
-            {/* CONTENEDOR DEL VISUALIZADOR 3D */}
             <div className="bg-[#1e293b] rounded-xl aspect-video relative flex items-center justify-center overflow-hidden shadow-inner cursor-grab active:cursor-grabbing">
               {!fbxUrl ? (
                 <div className="text-center text-slate-400">
@@ -333,12 +312,11 @@ export const ProjectDetailView3D = () => {
             </div>
           </div>
 
-          {/* Sección de Descripción si la hay */}
+          {/* Descripción */}
           <div className="bg-[var(--panel)] border border-[var(--line)] rounded-2xl p-6 shadow-sm">
             <h3 className="text-lg font-bold text-[var(--text-main)] mb-3 flex items-center gap-2">
               <FileText size={20} className="text-[var(--accent)]" /> Descripción
             </h3>
-            {/* CORRECCIÓN: Se añadió 'break-all' para evitar que textos sin espacios rompan el diseño */}
             <p className="text-[var(--text-muted)] leading-relaxed whitespace-pre-wrap break-all text-sm md:text-base">
               {project.descripcion || 'Este proyecto no cuenta con una descripción detallada en este momento.'}
             </p>
@@ -389,30 +367,32 @@ export const ProjectDetailView3D = () => {
                 </div>
               </div>
 
-              {/* ODS */}
-              <div>
-                <span className="text-[12px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2 block">
-                  Objetivo de Desarrollo Sostenible
-                </span>
-                {odsObj ? (
-                  <div className="inline-flex items-center gap-3 bg-[#f05c36]/10 border border-[#f05c36]/20 p-3 rounded-xl w-full">
-                    <div className="bg-[#f05c36] text-white p-2 rounded-lg shrink-0">
-                      <Target size={20} />
-                    </div>
-                    <div className="font-bold text-[#f05c36] text-sm leading-tight">
-                      {odsObj.label}
-                    </div>
+              {/* ODS MÚLTIPLES */}
+              {odsDetalle.length > 0 && (
+                <div>
+                  <span className="text-[12px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2 block">
+                    Objetivos de Desarrollo Sostenible
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {odsDetalle.map((ods) => {
+                      const odsData = ODS_LIST.find(o => o.id === ods.id);
+                      return (
+                        <span 
+                          key={ods.id}
+                          className="text-xs font-bold px-3 py-1.5 rounded-full text-white"
+                          style={{ backgroundColor: odsData?.color || '#6b7280' }}
+                        >
+                          {ods.label}
+                        </span>
+                      );
+                    })}
                   </div>
-                ) : (
-                  <div className="text-sm text-[var(--text-muted)] italic bg-[var(--bg-general)] p-3 rounded-xl border border-[var(--line)]">
-                    Ningún ODS asignado a este proyecto.
-                  </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Tarjeta de Detalles Extra / Sistema */}
+          {/* Tarjeta de Datos del Sistema */}
           <div className="bg-[var(--panel)] border border-[var(--line)] rounded-2xl p-6 shadow-sm">
              <h3 className="text-[14px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-4 border-b border-[var(--line)] pb-2">
                Datos del Sistema
@@ -443,7 +423,6 @@ export const ProjectDetailView3D = () => {
 
         </div>
       </div>
-      {/* CORRECCIÓN: Este bloque "invisible" fuerza al navegador a generar espacio abajo para que no pegue el contenido */}
       <div className="h-24 w-full shrink-0"></div>
     </div>
   );

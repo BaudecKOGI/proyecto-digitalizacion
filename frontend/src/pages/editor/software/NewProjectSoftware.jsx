@@ -15,18 +15,18 @@ import { useUser } from '@/hooks/use-user';
 import { fetchCategorias, fetchTecnologias, fetchCarreras, createProyectoSoftware } from '@/services/api';
 import { ODS_LIST } from "@/pages/dashboard/digitalProjects/odsData";
 
+import { MultiSelectODS } from '@/components/editor/MultiSelectODS';
+
 export default function NewProjectSoftware() {
   const navigate = useNavigate();
   const { user } = useUser();
 
-  // Estados para datos dinámicos desde Django
   const [categorias, setCategorias] = useState([]);
   const [tecnologias, setTecnologias] = useState([]);
   const [carreras, setCarreras] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Formulario alineado EXACTAMENTE con Django y el Admin Modal
   const [formData, setFormData] = useState({
     titulo: '',
     estado_publicacion: 'BORRADOR',
@@ -35,18 +35,17 @@ export default function NewProjectSoftware() {
     carrera: '',   // ID de carrera
     ciclo: '',     // número de ciclo
     categoria: '',
-    ods: '',
+    ods_ids: [],
     url_repositorio: '',
     url_demo_live: '',
-    tecnologias: [] // Array de IDs
+    tecnologias: []
   });
 
-  // Archivos
   const [archivoPortada, setArchivoPortada] = useState(null);
   const [archivoVideo, setArchivoVideo] = useState(null);
   const [imagenUrl, setImagenUrl] = useState(null);
 
-  // 1. CARGAR CATEGORÍAS, TECNOLOGÍAS Y CARRERAS DESDE DJANGO
+  // Cargar datos
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -55,7 +54,6 @@ export default function NewProjectSoftware() {
           fetchTecnologias(),
           fetchCarreras('activo=true')
         ]);
-        
         setCategorias(Array.isArray(catsData) ? catsData : catsData?.results || []);
         setTecnologias(Array.isArray(techsData) ? techsData : techsData?.results || []);
         setCarreras(Array.isArray(carrerasData) ? carrerasData : carrerasData?.results || []);
@@ -66,7 +64,6 @@ export default function NewProjectSoftware() {
     loadData();
   }, []);
 
-  // Previsualización de imagen de portada
   useEffect(() => {
     if (archivoPortada) {
       const url = URL.createObjectURL(archivoPortada);
@@ -82,7 +79,6 @@ export default function NewProjectSoftware() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // Manejador para el Select Múltiple de Tecnologías
   const handleTechChange = (techId) => {
     setFormData(prev => {
       const current = prev.tecnologias;
@@ -95,7 +91,6 @@ export default function NewProjectSoftware() {
     });
   };
 
-  // Helper para números romanos
   const toRoman = (num) => {
     const romanos = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
     return romanos[num - 1] || num;
@@ -104,7 +99,27 @@ export default function NewProjectSoftware() {
   const carreraSeleccionada = carreras.find(c => String(c.id) === String(formData.carrera));
   const duracionCiclos = carreraSeleccionada ? carreraSeleccionada.duracion_ciclos : 0;
 
-  // 2. ENVÍO REAL A DJANGO
+  const renderSelectedODS = () => {
+    if (!formData.ods_ids || formData.ods_ids.length === 0) return null;
+    return (
+      <div className="flex flex-wrap gap-1.5 mt-2">
+        {formData.ods_ids.map(id => {
+          const ods = ODS_LIST.find(o => o.id === id);
+          if (!ods) return null;
+          return (
+            <span 
+              key={id}
+              className="text-[10px] font-bold px-2.5 py-1 rounded-full text-white"
+              style={{ backgroundColor: ods.color || '#6b7280' }}
+            >
+              ODS {id}
+            </span>
+          );
+        })}
+      </div>
+    );
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -112,11 +127,13 @@ export default function NewProjectSoftware() {
 
     try {
       const data = new FormData();
-      
-      // Adjuntamos valores de texto simples
       Object.keys(formData).forEach(key => {
         if (key === 'tecnologias') {
           formData.tecnologias.forEach(id => data.append('tecnologias', id));
+        } else if (key === 'ods_ids') {
+          if (formData.ods_ids && formData.ods_ids.length > 0) {
+            data.append('ods_ids', JSON.stringify(formData.ods_ids));
+          }
         } else if (key === 'carrera' || key === 'ciclo') {
           if (formData[key]) data.append(key, formData[key]);
         } else if (formData[key] !== '' && formData[key] !== null) {
@@ -124,18 +141,10 @@ export default function NewProjectSoftware() {
         }
       });
 
-      // Adjuntar usuario si se requiere
-      if (user?.id) {
-        data.append('creado_por', user.id);
-      }
+      if (user?.id) data.append('creado_por', user.id);
       
-      // Adjuntar archivos si existen
-      if (archivoPortada) {
-        data.append('imagen_portada', archivoPortada); 
-      }
-      if (archivoVideo) {
-        data.append('archivo_video', archivoVideo);
-      }
+      if (archivoPortada) data.append('imagen_portada', archivoPortada);
+      if (archivoVideo) data.append('archivo_video', archivoVideo);
 
       await createProyectoSoftware(data);
       navigate('/editor/software/proyectos');
@@ -161,7 +170,6 @@ export default function NewProjectSoftware() {
         </button>
       </div>
 
-      {/* MENSAJE DE ERROR */}
       {error && (
         <div className="bg-red-500/10 text-red-500 p-4 rounded-xl border border-red-500/20 flex items-center gap-3">
           <Info size={20} />
@@ -169,12 +177,9 @@ export default function NewProjectSoftware() {
         </div>
       )}
 
-      {/* CONTENEDOR PRINCIPAL */}
       <div className="grid grid-cols-1 xl:grid-cols-[7fr_3fr] gap-8 items-start">
         
-        {/* =========================================
-            COLUMNA IZQUIERDA: FORMULARIO
-        ========================================= */}
+        {/* FORMULARIO */}
         <div className="bg-[var(--panel)] p-6 md:p-10 rounded-2xl border border-[var(--line)] shadow-sm">
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-[var(--text-main)]">Crear Nuevo Proyecto de Software</h2>
@@ -262,7 +267,6 @@ export default function NewProjectSoftware() {
               </div>
             </div>
 
-            {/* CATEGORÍAS Y ODS OFICIALES */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-semibold text-[var(--text-main)]">Categoría / Área</label>
@@ -279,19 +283,15 @@ export default function NewProjectSoftware() {
 
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-semibold text-[var(--text-main)]">ODS de Impacto (ONU)</label>
-                <select 
-                  name="ods" value={formData.ods} onChange={handleChange}
-                  className="bg-[var(--bg-general)] border border-[var(--line)] text-[var(--text-main)] rounded-lg px-4 py-2.5 focus:outline-none focus:border-[var(--accent)] transition-colors w-full cursor-pointer"
-                >
-                  <option value="">Ninguno / No especificado</option>
-                  {ODS_LIST.map(o => (
-                    <option key={o.id} value={o.id}>{o.label}</option>
-                  ))}
-                </select>
+                <MultiSelectODS
+                  value={formData.ods_ids}
+                  onChange={(values) => setFormData(prev => ({ ...prev, ods_ids: values }))}
+                  placeholder="Seleccionar ODS..."
+                />
+                {renderSelectedODS()}
               </div>
             </div>
 
-            {/* REPOSITORIO Y DEMO */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-semibold text-[var(--text-main)]">URL Repositorio Git</label>
@@ -311,7 +311,6 @@ export default function NewProjectSoftware() {
               </div>
             </div>
 
-            {/* SELECCIÓN MÚLTIPLE DE TECNOLOGÍAS */}
             <div className="flex flex-col gap-2">
               <label className="text-sm font-semibold text-[var(--text-main)]">Tecnologías Utilizadas</label>
               <div className="flex flex-wrap gap-2 p-3 bg-[var(--bg-general)] border border-[var(--line)] rounded-lg min-h-[48px]">
@@ -338,9 +337,7 @@ export default function NewProjectSoftware() {
               </div>
             </div>
 
-            {/* SUBIDA DE ARCHIVOS (PORTADA Y VIDEO) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-semibold text-[var(--text-main)]">Imagen de Portada</label>
                 <div className={`p-4 border-2 border-dashed rounded-xl text-center cursor-pointer relative transition-colors ${archivoPortada ? 'border-[var(--accent)] bg-[var(--accent)]/5' : 'border-[var(--line)] bg-[var(--bg-general)] hover:border-[var(--text-muted)]'}`}>
@@ -372,26 +369,19 @@ export default function NewProjectSoftware() {
                   </span>
                 </div>
               </div>
-
             </div>
-
           </form>
         </div>
 
-        {/* =========================================
-            COLUMNA DERECHA: VISTA PREVIA
-        ========================================= */}
+        {/* VISTA PREVIA */}
         <div className="xl:sticky xl:top-6 self-start flex flex-col gap-3 w-full">
           <h3 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">
             Vista Previa en Vivo
           </h3>
           
           <div className="bg-[var(--panel)] rounded-xl border border-[var(--line)] shadow-lg overflow-hidden flex flex-col">
-            
             <div className="h-44 bg-[#0f111a] flex flex-col items-center justify-center relative bg-cover bg-center" style={{ backgroundImage: imagenUrl ? `url(${imagenUrl})` : 'none' }}>
-              
               {imagenUrl && <div className="absolute inset-0 bg-black/40"></div>}
-
               <div className="absolute bottom-3 left-3 z-10">
                 <span className={`text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider ${
                   formData.estado_publicacion === 'PUBLICADO' ? 'bg-emerald-500/90 text-white' : 'bg-amber-500/90 text-white'
@@ -399,7 +389,6 @@ export default function NewProjectSoftware() {
                   {formData.estado_publicacion}
                 </span>
               </div>
-
               {!imagenUrl && (
                 <>
                   <div className="bg-white/5 p-3.5 rounded-xl mb-2">
@@ -411,7 +400,6 @@ export default function NewProjectSoftware() {
             </div>
 
             <div className="p-5 flex flex-col gap-3.5">
-              
               <div className="flex flex-wrap gap-2">
                 {formData.categoria && (
                   <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border border-[var(--accent)] text-[var(--accent)] bg-[var(--accent)]/10">
@@ -438,7 +426,6 @@ export default function NewProjectSoftware() {
                 {formData.descripcion || 'La descripción del proyecto se mostrará aquí...'}
               </p>
 
-              {/* Tecnologías Seleccionadas */}
               <div>
                 <h5 className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Tecnologías</h5>
                 <div className="flex flex-wrap gap-1">
@@ -483,13 +470,11 @@ export default function NewProjectSoftware() {
                   Demo
                 </button>
               </div>
-
             </div>
           </div>
         </div>
       </div>
 
-      {/* BARRA DE ACCIÓN INFERIOR */}
       <div className="flex justify-end items-center gap-3 pt-4 border-t border-[var(--line)] mt-4">
         <button 
           type="button"

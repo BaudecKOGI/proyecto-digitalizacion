@@ -326,3 +326,31 @@ export const deleteCarrera = async (id) => {
   });
   return handleResponse(res);
 };
+
+// ============================================================
+// INVITACIONES (enlace temporal para que un alumno complete un proyecto)
+// ============================================================
+
+export const createInvitacion = async ({ tipo, autor_nombre }) => {
+  const res = await fetch(`${API_BASE_URL}/invitaciones/`, {
+    method: "POST",
+    headers: getAuthHeaders(false),
+    body: JSON.stringify({ tipo, autor_nombre }),
+  });
+  return handleResponse(res);
+};
+
+export const fetchInvitacionByToken = async (token) => {
+  const res = await fetch(`${API_BASE_URL}/invitaciones/${token}/`, {
+    headers: { "Content-Type": "application/json" }, // pública, no lleva token de auth
+  });
+  return handleResponse(res);
+};
+
+export const completarInvitacion = async (token, formData) => {
+  const res = await fetch(`${API_BASE_URL}/invitaciones/${token}/completar/`, {
+    method: "PATCH",
+    body: formData, // FormData (por los archivos) — no le pongas Content-Type a mano
+  });
+  return handleResponse(res);
+};

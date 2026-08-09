@@ -12,6 +12,8 @@ import { ODS_LIST } from "@/pages/dashboard/digitalProjects/odsData";
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Stage, useFBX } from '@react-three/drei';
 
+import { MultiSelectODS } from '@/components/editor/MultiSelectODS';
+
 // --- COMPONENTE INTERNO PARA EL MODELO Y LA MANIPULACIÓN DIRECTA ---
 const FBXModel = ({ url, piezasMoviles, setHabilitarCamara }) => {
   const fbx = useFBX(url);
@@ -152,7 +154,7 @@ export const EditProject3D = () => {
     ciclo: '',     // número de ciclo
     estado_publicacion: 'BORRADOR', 
     categoria: '',
-    ods: '',
+    ods_ids: [],   // <-- Ahora es un array de IDs
   });
 
   const [archivoFbx, setArchivoFbx] = useState(null);
@@ -185,7 +187,7 @@ export const EditProject3D = () => {
           ciclo: proyecto.ciclo || '',
           estado_publicacion: proyecto.estado_publicacion || 'BORRADOR',
           categoria: proyecto.categoria || '',
-          ods: proyecto.ods || '',
+          ods_ids: proyecto.ods_detalle?.map(o => o.id) || [],  // <-- Cargar desde detalle
         });
 
         if (proyecto.archivo_fbx) {
@@ -266,8 +268,10 @@ export const EditProject3D = () => {
       Object.keys(formData).forEach(key => {
         if (key === 'categoria') {
           if (formData.categoria) data.append('categoria', formData.categoria);
-        } else if (key === 'ods') {
-          if (formData.ods) data.append('ods', formData.ods);
+        } else if (key === 'ods_ids') {
+          if (formData.ods_ids && formData.ods_ids.length > 0) {
+            data.append('ods_ids', JSON.stringify(formData.ods_ids));
+          }
         } else if (key === 'carrera' || key === 'ciclo') {
           if (formData[key]) data.append(key, formData[key]);
         } else {
@@ -307,6 +311,28 @@ export const EditProject3D = () => {
 
   const carreraSeleccionada = carreras.find(c => String(c.id) === String(formData.carrera));
   const duracionCiclos = carreraSeleccionada ? carreraSeleccionada.duracion_ciclos : 0;
+
+  // Renderizar ODS seleccionados
+  const renderSelectedODS = () => {
+    if (!formData.ods_ids || formData.ods_ids.length === 0) return null;
+    return (
+      <div className="flex flex-wrap gap-1.5 mt-2">
+        {formData.ods_ids.map(id => {
+          const ods = ODS_LIST.find(o => o.id === id);
+          if (!ods) return null;
+          return (
+            <span 
+              key={id}
+              className="text-[10px] font-bold px-2.5 py-1 rounded-full text-white"
+              style={{ backgroundColor: ods.color || '#6b7280' }}
+            >
+              ODS {id}
+            </span>
+          );
+        })}
+      </div>
+    );
+  };
 
   // Clases predefinidas utilizando tus variables CSS
   const inputClassName = "w-full p-2.5 bg-[var(--bg-general)] border border-[var(--line)] rounded-lg text-[var(--text-main)] text-sm mb-4 outline-none focus:border-[var(--accent)] transition-colors";
@@ -428,12 +454,12 @@ export const EditProject3D = () => {
               </div>
               <div className="flex-1">
                 <label className={labelClassName}>ODS de Impacto (ONU)</label>
-                <select className={inputClassName} name="ods" value={formData.ods || ""} onChange={handleChange}>
-                  <option value="">Ninguno / No especificado</option>
-                  {ODS_LIST.map(o => (
-                    <option key={o.id} value={o.id}>{o.label}</option>
-                  ))}
-                </select>
+                <MultiSelectODS
+                  value={formData.ods_ids}
+                  onChange={(values) => setFormData(prev => ({ ...prev, ods_ids: values }))}
+                  placeholder="Seleccionar ODS..."
+                />
+                {renderSelectedODS()}
               </div>
             </div>
 

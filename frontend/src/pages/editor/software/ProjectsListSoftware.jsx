@@ -25,42 +25,34 @@ export default function ProjectsListSoftware() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Estados para la data
   const [proyectos, setProyectos] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Filtros
   const [searchTerm, setSearchTerm] = useState('');
   const [odsFilter, setOdsFilter] = useState('');
   const [categoriaFilter, setCategoriaFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('TODOS');
 
-  // Paginación
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Toast
   const [toastMessage, setToastMessage] = useState(null);
 
-  // Modal de video
   const [modalVideoAbierto, setModalVideoAbierto] = useState(false);
   const [proyectoSeleccionado, setProyectoSeleccionado] = useState(null);
 
-  // Vista de detalle — se inicializa con el proyecto si venimos desde Carreras
   const [detalleProyecto, setDetalleProyecto] = useState(
     () => location.state?.openProject || null
   );
 
-  // Capturar mensaje de redirección (ej. después de crear/editar)
   useEffect(() => {
     if (location.state?.message) {
-      showToast(location.state.message);
+      setToastMessage(location.state.message);
       window.history.replaceState({}, document.title);
     }
   }, [location]);
 
-  // Si venimos desde Carreras con el proyecto completo, abrimos el detalle al instante
   useEffect(() => {
     if (location.state?.openProject) {
       setDetalleProyecto(location.state.openProject);
@@ -70,9 +62,7 @@ export default function ProjectsListSoftware() {
 
   const showToast = (msg) => {
     setToastMessage(msg);
-    setTimeout(() => {
-      setToastMessage(null);
-    }, 4000);
+    setTimeout(() => setToastMessage(null), 4000);
   };
 
   useEffect(() => {
@@ -96,7 +86,6 @@ export default function ProjectsListSoftware() {
         categoria: categoriaFilter,
         ods: odsFilter
       });
-      
       const listaProyectos = Array.isArray(data) ? data : (data?.results || []);
       setProyectos(listaProyectos);
       setCurrentPage(1);
@@ -110,7 +99,6 @@ export default function ProjectsListSoftware() {
 
   useEffect(() => {
     cargarDatos();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchTerm, statusFilter, categoriaFilter, odsFilter]);
 
   const handleAbrirVideo = (proyecto) => {
@@ -123,7 +111,6 @@ export default function ProjectsListSoftware() {
     setProyectoSeleccionado(null);
   };
 
-  // Limpiar todos los filtros
   const limpiarFiltros = () => {
     setSearchTerm('');
     setOdsFilter('');
@@ -132,20 +119,17 @@ export default function ProjectsListSoftware() {
     setCurrentPage(1);
   };
 
-  // ¿Hay filtros activos?
   const hayFiltrosActivos = 
     searchTerm !== '' || 
     odsFilter !== '' || 
     categoriaFilter !== '' || 
     statusFilter !== 'TODOS';
 
-  // Paginación
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentProjects = proyectos.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(proyectos.length / itemsPerPage);
 
-  // Si hay detalle abierto, mostramos solo el detalle (sin flash de la tabla)
   if (detalleProyecto) {
     return (
       <ProjectDetailViewSoftware 
@@ -158,7 +142,6 @@ export default function ProjectsListSoftware() {
   return (
     <div className="flex flex-col gap-6 h-full pb-8 relative">
       
-      {/* CABECERA */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-2xl font-bold text-[var(--text-main)]">Gestión de Proyectos Software</h2>
@@ -176,10 +159,7 @@ export default function ProjectsListSoftware() {
         </button>
       </div>
 
-      {/* FILTROS Y BÚSQUEDA */}
       <div className="bg-[var(--panel)] p-4 rounded-2xl border border-[var(--line)] flex flex-col sm:flex-row flex-wrap gap-3 items-center">
-        
-        {/* Buscador */}
         <div className="relative flex-1 min-w-[200px] w-full sm:w-auto">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={18} />
           <input 
@@ -191,7 +171,6 @@ export default function ProjectsListSoftware() {
           />
         </div>
         
-        {/* ODS */}
         <div className="w-full sm:w-44 shrink-0">
           <select 
             value={odsFilter}
@@ -205,7 +184,6 @@ export default function ProjectsListSoftware() {
           </select>
         </div>
 
-        {/* Categoría */}
         <div className="w-full sm:w-44 shrink-0">
           <select 
             value={categoriaFilter}
@@ -219,7 +197,6 @@ export default function ProjectsListSoftware() {
           </select>
         </div>
 
-        {/* Estado */}
         <div className="w-full sm:w-40 shrink-0">
           <select 
             value={statusFilter}
@@ -232,7 +209,6 @@ export default function ProjectsListSoftware() {
           </select>
         </div>
 
-        {/* Botón Limpiar */}
         {hayFiltrosActivos && (
           <button
             onClick={limpiarFiltros}
@@ -245,9 +221,7 @@ export default function ProjectsListSoftware() {
         )}
       </div>
 
-      {/* TABLA */}
       <div className="bg-[var(--panel)] rounded-2xl border border-[var(--line)] shadow-sm flex flex-col overflow-hidden">
-        
         <div className="overflow-x-auto overflow-y-auto max-h-[55vh] scrollbar-thin">
           <table className="w-full text-left border-collapse">
             <thead className="sticky top-0 z-10 bg-[var(--bg-general)] shadow-sm">
@@ -276,8 +250,8 @@ export default function ProjectsListSoftware() {
               ) : (
                 currentProjects.map((proyecto) => {
                   const estado = proyecto.estado_publicacion || proyecto.estado || 'BORRADOR';
-                  const odsObj = ODS_LIST.find(o => String(o.id) === String(proyecto.ods));
-                  
+                  const odsDetalle = proyecto.ods_detalle || [];
+
                   return (
                     <tr key={proyecto.id} className="hover:bg-[var(--bg-general)]/40 transition-colors group">
                       <td className="p-4">
@@ -326,7 +300,7 @@ export default function ProjectsListSoftware() {
                       <td className="p-4">
                         <div className="flex flex-col">
                           <span className="text-sm font-bold text-[var(--text-main)]">
-                            {proyecto.carrera || 'N/A'}
+                            {proyecto.carrera_nombre || proyecto.carrera || 'N/A'}
                           </span>
                           <span className="text-xs text-[var(--text-muted)]">
                             {proyecto.categoria_nombre || categorias.find(c => String(c.id) === String(proyecto.categoria))?.nombre || 'General'}
@@ -335,13 +309,29 @@ export default function ProjectsListSoftware() {
                       </td>
 
                       <td className="p-4">
-                        {odsObj ? (
-                          <span className="inline-block px-3 py-1 rounded-full text-[11px] font-semibold text-white bg-[#a21942] whitespace-nowrap">
-                            {odsObj.label}
-                          </span>
-                        ) : (
-                          <span className="text-xs text-[var(--text-muted)] italic">No especificado</span>
-                        )}
+                        <div className="flex flex-wrap gap-1">
+                          {odsDetalle.length > 0 ? (
+                            odsDetalle.slice(0, 2).map((ods) => {
+                              const odsData = ODS_LIST.find(o => o.id === ods.id);
+                              return (
+                                <span 
+                                  key={ods.id}
+                                  className="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold text-white"
+                                  style={{ backgroundColor: odsData?.color || '#6b7280' }}
+                                >
+                                  ODS {ods.id}
+                                </span>
+                              );
+                            })
+                          ) : (
+                            <span className="text-xs text-[var(--text-muted)] italic">Sin ODS</span>
+                          )}
+                          {odsDetalle.length > 2 && (
+                            <span className="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold text-white bg-gray-500">
+                              +{odsDetalle.length - 2}
+                            </span>
+                          )}
+                        </div>
                       </td>
 
                       <td className="p-4">
@@ -394,7 +384,6 @@ export default function ProjectsListSoftware() {
           </table>
         </div>
 
-        {/* FOOTER DE PAGINACIÓN */}
         {!loading && proyectos.length > 0 && (
           <div className="flex items-center justify-between p-4 border-t border-[var(--line)] bg-[var(--panel)]">
             <div className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
@@ -440,7 +429,6 @@ export default function ProjectsListSoftware() {
         )}
       </div>
 
-      {/* TOAST */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-emerald-500 text-white px-5 py-3.5 rounded-2xl shadow-xl animate-in fade-in slide-in-from-bottom-5">
           <CheckCircle2 size={20} />
@@ -454,7 +442,6 @@ export default function ProjectsListSoftware() {
         </div>
       )}
 
-      {/* MODAL DE VIDEO */}
       <VideoPlayerModal 
         open={modalVideoAbierto} 
         onClose={handleCerrarVideo} 

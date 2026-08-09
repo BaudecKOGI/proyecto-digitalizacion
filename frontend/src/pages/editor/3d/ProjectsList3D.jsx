@@ -253,8 +253,8 @@ export const ProjectsList3D = () => {
                 imageUrl = `http://localhost:8000${imageUrl}`; 
               }
 
-              const odsObj = ODS_LIST?.find(o => String(o.id) === String(project.ods));
               const catNombre = project.categoria_nombre || categorias.find(c => String(c.id) === String(project.categoria))?.nombre || 'Sin Cat';
+              const odsDetalle = project.ods_detalle || [];
 
               return (
                 <div key={project.id} className="bg-[var(--panel)] rounded-2xl border border-[var(--line)] overflow-hidden flex flex-col shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-1">
@@ -290,14 +290,29 @@ export const ProjectsList3D = () => {
                       </div>
                     </div>
 
-                    <div className="mt-auto pt-2">
-                      {odsObj ? (
-                        <span className="inline-block px-3 py-1.5 rounded-xl text-[11px] font-bold text-white shadow-sm bg-[#f05c36]">
-                          {odsObj.label}
-                        </span>
+                    {/* ODS MÚLTIPLES */}
+                    <div className="mt-auto pt-2 flex flex-wrap gap-1">
+                      {odsDetalle.length > 0 ? (
+                        odsDetalle.slice(0, 2).map((ods) => {
+                          const odsData = ODS_LIST.find(o => o.id === ods.id);
+                          return (
+                            <span 
+                              key={ods.id}
+                              className="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold text-white"
+                              style={{ backgroundColor: odsData?.color || '#6b7280' }}
+                            >
+                              ODS {ods.id}
+                            </span>
+                          );
+                        })
                       ) : (
                         <span className="inline-block px-3 py-1.5 rounded-xl text-[11px] font-bold text-[var(--text-muted)] bg-[var(--bg-general)] border border-[var(--line)]">
-                          ODS no asignado
+                          Sin ODS
+                        </span>
+                      )}
+                      {odsDetalle.length > 2 && (
+                        <span className="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold text-white bg-gray-500">
+                          +{odsDetalle.length - 2}
                         </span>
                       )}
                     </div>

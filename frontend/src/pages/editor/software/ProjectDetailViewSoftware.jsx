@@ -22,11 +22,10 @@ export default function ProjectDetailViewSoftware({ proyecto, onBack }) {
 
   if (!proyecto) return null;
 
-  const odsObj = ODS_LIST?.find(o => String(o.id) === String(proyecto.ods));
+  const odsDetalle = proyecto.ods_detalle || [];
   const isPublicado = (proyecto.estado_publicacion || proyecto.estado || '').toUpperCase() === 'PUBLICADO';
   const fechaProyecto = proyecto.created_at || proyecto.fecha_creacion || proyecto.fecha;
 
-  // Procesar URLs de media
   let videoUrl = proyecto.archivo_video || '';
   if (videoUrl.startsWith('/')) {
     videoUrl = `http://localhost:8000${videoUrl}`;
@@ -80,7 +79,6 @@ export default function ProjectDetailViewSoftware({ proyecto, onBack }) {
         {/* COLUMNA IZQUIERDA: Video + Descripción */}
         <div className="lg:col-span-7 flex flex-col gap-6 min-w-0">
           
-          {/* CONTENEDOR DEL VIDEO */}
           <div className="bg-[var(--panel)] border border-[var(--line)] rounded-2xl p-1 shadow-sm overflow-hidden flex flex-col">
             <div className="bg-[#0f111a] rounded-xl aspect-video relative flex items-center justify-center overflow-hidden shadow-inner">
               {videoUrl ? (
@@ -122,19 +120,16 @@ export default function ProjectDetailViewSoftware({ proyecto, onBack }) {
             </div>
           </div>
 
-          {/* DESCRIPCIÓN */}
           <div className="bg-[var(--panel)] border border-[var(--line)] rounded-2xl p-6 shadow-sm min-w-0">
             <h3 className="text-lg font-bold text-[var(--text-main)] mb-3 flex items-center gap-2">
               <FileText size={20} className="text-[var(--accent)]" /> 
               Acerca del Proyecto
             </h3>
-            {/* break-words + overflow-wrap evita el desbordamiento horizontal */}
             <p className="text-[var(--text-muted)] leading-relaxed whitespace-pre-wrap break-words overflow-wrap-anywhere text-sm md:text-base">
               {proyecto.descripcion || 'Este proyecto no cuenta con una descripción detallada en este momento.'}
             </p>
           </div>
 
-          {/* TECNOLOGÍAS */}
           <div className="bg-[var(--panel)] border border-[var(--line)] rounded-2xl p-6 shadow-sm">
             <h3 className="text-lg font-bold text-[var(--text-main)] mb-4 flex items-center gap-2">
               <Code2 size={20} className="text-[var(--accent)]" /> 
@@ -162,7 +157,6 @@ export default function ProjectDetailViewSoftware({ proyecto, onBack }) {
         {/* COLUMNA DERECHA: Metadatos */}
         <div className="lg:col-span-5 flex flex-col gap-6 min-w-0">
           
-          {/* Tarjeta principal */}
           <div className="bg-[var(--panel)] border border-[var(--line)] rounded-2xl p-6 shadow-sm flex flex-col gap-5">
             <div>
               <h1 className="text-2xl font-extrabold text-[var(--text-main)] mb-1 leading-tight break-words">
@@ -202,36 +196,37 @@ export default function ProjectDetailViewSoftware({ proyecto, onBack }) {
                 <div className="inline-flex items-center gap-2 bg-[var(--bg-general)] border border-[var(--line)] px-3 py-2 rounded-xl max-w-full">
                   <Tag size={16} className="text-[var(--accent)] shrink-0" />
                   <span className="font-semibold text-[var(--text-main)] text-sm truncate">
-                    {proyecto.carrera || 'N/A'}
+                    {proyecto.carrera_nombre || proyecto.carrera || 'N/A'}
                     {proyecto.categoria_nombre ? ` • ${proyecto.categoria_nombre}` : ''}
                   </span>
                 </div>
               </div>
 
-              {/* ODS */}
-              <div>
-                <span className="text-[12px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2 block">
-                  Objetivo de Desarrollo Sostenible
-                </span>
-                {odsObj ? (
-                  <div className="inline-flex items-center gap-3 bg-[#a21942]/10 border border-[#a21942]/20 p-3 rounded-xl w-full">
-                    <div className="bg-[#a21942] text-white p-2 rounded-lg shrink-0">
-                      <Target size={20} />
-                    </div>
-                    <div className="font-bold text-[#a21942] text-sm leading-tight break-words">
-                      {odsObj.label}
-                    </div>
+              {/* ODS MÚLTIPLES */}
+              {odsDetalle.length > 0 && (
+                <div>
+                  <span className="text-[12px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2 block">
+                    Objetivos de Desarrollo Sostenible
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {odsDetalle.map((ods) => {
+                      const odsData = ODS_LIST.find(o => o.id === ods.id);
+                      return (
+                        <span 
+                          key={ods.id}
+                          className="text-xs font-bold px-3 py-1.5 rounded-full text-white"
+                          style={{ backgroundColor: odsData?.color || '#6b7280' }}
+                        >
+                          {ods.label}
+                        </span>
+                      );
+                    })}
                   </div>
-                ) : (
-                  <div className="text-sm text-[var(--text-muted)] italic bg-[var(--bg-general)] p-3 rounded-xl border border-[var(--line)]">
-                    Ningún ODS asignado a este proyecto.
-                  </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Botones de acción */}
           <div className="flex flex-col gap-3">
             {proyecto.url_demo_live && (
               <a
@@ -258,7 +253,6 @@ export default function ProjectDetailViewSoftware({ proyecto, onBack }) {
             )}
           </div>
 
-          {/* Datos del sistema */}
           <div className="bg-[var(--panel)] border border-[var(--line)] rounded-2xl p-6 shadow-sm">
             <h3 className="text-[14px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-4 border-b border-[var(--line)] pb-2">
               Datos del Sistema
@@ -292,7 +286,6 @@ export default function ProjectDetailViewSoftware({ proyecto, onBack }) {
         </div>
       </div>
 
-      {/* Espaciador final */}
       <div className="h-24 w-full shrink-0"></div>
     </div>
   );
