@@ -23,9 +23,15 @@ export default function ViewerDigitalPage() {
         const data = await fetchProyectoSoftwareById(id, true);
         setProyecto(data);
 
-        fetch(`http://127.0.0.1:8000/api/metricas/por-proyecto/${id}/view/`, {
-          method: "POST",
-        }).catch(() => { });
+        // Evitar múltiples conteos de visualización
+        const viewed = JSON.parse(localStorage.getItem("viewed_digital_projects") || "[]");
+        if (!viewed.includes(id)) {
+          fetch(`http://127.0.0.1:8000/api/metricas/por-proyecto/${id}/view/`, {
+            method: "POST",
+          }).catch(() => { });
+          viewed.push(id);
+          localStorage.setItem("viewed_digital_projects", JSON.stringify(viewed));
+        }
       } catch (err) {
         setError("Error al cargar el proyecto. Puede que no exista o no sea público.");
       } finally {

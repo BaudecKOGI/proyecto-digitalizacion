@@ -11,13 +11,28 @@ export default function DigitalCanvas({
   const hasPortada = !!proyecto.imagen_portada;
 
   // Like logic
-  const [liked, setLiked] = useState(false);
+  const [liked, setLiked] = useState(() => {
+    if (typeof window !== "undefined" && proyecto?.id) {
+      const likes = JSON.parse(localStorage.getItem("liked_digital_projects") || "[]");
+      return likes.includes(proyecto.id);
+    }
+    return false;
+  });
   const [likesCount, setLikesCount] = useState(proyecto?.likes_totales || 0);
 
   const handleLike = () => {
+    const likes = JSON.parse(localStorage.getItem("liked_digital_projects") || "[]");
+    
     if (!liked) {
       setLiked(true);
       setLikesCount((prev) => prev + 1);
+      
+      // Guardar localmente para persistencia
+      if (!likes.includes(proyecto.id)) {
+        likes.push(proyecto.id);
+        localStorage.setItem("liked_digital_projects", JSON.stringify(likes));
+      }
+
       if (proyecto && proyecto.id) {
         fetch(`http://127.0.0.1:8000/api/metricas/por-proyecto/${proyecto.id}/like/`, {
           method: "POST",
@@ -26,6 +41,16 @@ export default function DigitalCanvas({
     } else {
       setLiked(false);
       setLikesCount((prev) => prev - 1);
+      
+      // Remover localmente
+      const updatedLikes = likes.filter(id => id !== proyecto.id);
+      localStorage.setItem("liked_digital_projects", JSON.stringify(updatedLikes));
+
+      if (proyecto && proyecto.id) {
+        fetch(`http://127.0.0.1:8000/api/metricas/por-proyecto/${proyecto.id}/unlike/`, {
+          method: "POST",
+        }).catch(() => {});
+      }
     }
   };
 

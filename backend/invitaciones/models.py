@@ -4,7 +4,7 @@ from datetime import timedelta
 from django.db import models
 from django.utils import timezone
 
-from usuarios.models import Usuario   # mismo import que ya usas en proyectos/models.py
+from usuarios.models import Usuario
 from proyectos.models import Proyecto
 
 

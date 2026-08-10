@@ -25,10 +25,15 @@ export default function Viewer3DPage() {
         const data = await fetchProyecto3DById(id, true);
         setDiseno(data);
 
-        // Registrar visita silenciosamente
-        fetch(`http://127.0.0.1:8000/api/metricas/por-proyecto/${id}/view/`, {
-          method: "POST",
-        }).catch(() => { });
+        // Registrar visita silenciosamente solo si no ha sido visto antes
+        const viewed = JSON.parse(localStorage.getItem("viewed_3d_projects") || "[]");
+        if (!viewed.includes(id)) {
+          fetch(`http://127.0.0.1:8000/api/metricas/por-proyecto/${id}/view/`, {
+            method: "POST",
+          }).catch(() => { });
+          viewed.push(id);
+          localStorage.setItem("viewed_3d_projects", JSON.stringify(viewed));
+        }
       } catch (err) {
         setError("Error al cargar el modelo 3D. Puede que no exista o no sea público.");
       } finally {

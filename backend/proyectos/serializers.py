@@ -209,7 +209,7 @@ class ProyectoSerializer(serializers.ModelSerializer):
         # Asignar campos simples (excluyendo los que son relaciones many-to-many o virtuales)
         for attr, value in validated_data.items():
             # Evitar asignar campos many-to-many o virtuales (esto se maneja en los hijos)
-            if attr not in ['tecnologias']:  # 'tecnologias' se maneja en ProyectoSoftwareSerializer
+            if attr not in ['tecnologias']:
                 setattr(instance, attr, value)
         instance.save()
         

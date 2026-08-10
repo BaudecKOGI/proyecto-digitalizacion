@@ -196,18 +196,6 @@ export default function EditorDetailView({ editor, onBack, showSnackbar }) {
                     {editor.nombre}
                   </Typography>
                   <Chip
-                    icon={<RoleIcon size={14} />}
-                    label="Editor"
-                    size="small"
-                    sx={{
-                      fontWeight: 600,
-                      fontSize: "0.75rem",
-                      bgcolor: "rgba(99, 102, 241, 0.08)",
-                      color: "#6366F1",
-                      border: "none"
-                    }}
-                  />
-                  <Chip
                     label={editor.is_active ? "Activo" : "Inactivo"}
                     size="small"
                     color={editor.is_active ? "success" : "default"}

@@ -14,23 +14,24 @@ from pathlib import Path
 from datetime import timedelta
 import os
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# Esta es la base de la app
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
+# No me importa si se expone por ahora
+# Se que esto es peligroso por ahora
+# https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
+# Esta es la clave secreta, la que hace que mi app sea segura
 SECRET_KEY = 'django-insecure-c)yplo(9syh!lg&zl-z_8$sa6)3(1^#e#3=@iak*n9zjzf5sh*'
 
-# SECURITY WARNING: don't run with debug turned on in production!
+# Esta es la clave para que funcione mi app
 DEBUG = True
 
 ALLOWED_HOSTS = []
 
 
-# Application definition
+# Aplicaciones de Django
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -40,11 +41,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # Third party apps
+    # Estas son apps de terceros
     'rest_framework',
     'corsheaders',
 
-    # Local apps
+    # Estas son mis aplicaciones
     'usuarios',
     'proyectos',
     'analitica',

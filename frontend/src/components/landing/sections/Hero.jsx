@@ -124,7 +124,7 @@ export default function Hero() {
               </a>
             </div>
 
-            {/* Cuadro Resumido de Estadísticas (Grid de 3 columnas) */}
+            {/* Cuadro Resumido de Estadísticas */}
             <div className="grid grid-cols-3 divide-x divide-white/20 bg-[#1E1E1E]/95 backdrop-blur-md border-l-4 border-[#5A00AA] shadow-2xl -mr-6 md:-mr-12 lg:-mr-20">
               {/* Stat 01: Modelos 3D */}
               <div className="flex flex-col justify-center px-6 sm:px-10 py-6">

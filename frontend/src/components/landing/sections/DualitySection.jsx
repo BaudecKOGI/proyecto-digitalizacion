@@ -2,9 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight } from "@phosphor-icons/react/dist/ssr/ArrowRight";
 
-/**
- * Sección Duality - Fondo blanco
- */
+/*Sección Duality - Fondo blanco*/
 export default function DualitySection({ onOpen3D, onOpenDigital }) {
   const containerVariants = {
     hidden: { opacity: 0, y: 25 },
@@ -26,8 +24,6 @@ export default function DualitySection({ onOpen3D, onOpenDigital }) {
       className="relative overflow-hidden pt-16 pb-24 px-[8vw] border-b border-line/40 bg-cover bg-center bg-fixed bg-no-repeat"
       style={{ backgroundImage: `url('/assets/uno.png')` }}
     >
-      {/* Sin capa oscura — fondo tal cual la imagen blanca */}
-
       <motion.div
         variants={containerVariants}
         initial="hidden"

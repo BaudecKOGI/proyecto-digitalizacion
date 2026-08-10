@@ -13,7 +13,13 @@ export default function Detalles3D({
 }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const shareOpen = Boolean(anchorEl);
-  const [liked, setLiked] = useState(false);
+  const [liked, setLiked] = useState(() => {
+    if (typeof window !== "undefined" && diseno?.id) {
+      const likes = JSON.parse(localStorage.getItem("liked_3d_projects") || "[]");
+      return likes.includes(diseno.id);
+    }
+    return false;
+  });
   const [likesCount, setLikesCount] = useState(0);
 
   React.useEffect(() => {
@@ -23,9 +29,18 @@ export default function Detalles3D({
   }, [diseno]);
 
   const handleLike = () => {
+    const likes = JSON.parse(localStorage.getItem("liked_3d_projects") || "[]");
+
     if (!liked) {
       setLiked(true);
       setLikesCount((prev) => prev + 1);
+
+      // Guardar localmente para persistencia
+      if (!likes.includes(diseno.id)) {
+        likes.push(diseno.id);
+        localStorage.setItem("liked_3d_projects", JSON.stringify(likes));
+      }
+
       if (diseno && diseno.id) {
         fetch(`http://127.0.0.1:8000/api/metricas/por-proyecto/${diseno.id}/like/`, {
           method: "POST",
@@ -34,6 +49,16 @@ export default function Detalles3D({
     } else {
       setLiked(false);
       setLikesCount((prev) => prev - 1);
+      
+      // Remover localmente
+      const updatedLikes = likes.filter(id => id !== diseno.id);
+      localStorage.setItem("liked_3d_projects", JSON.stringify(updatedLikes));
+
+      if (diseno && diseno.id) {
+        fetch(`http://127.0.0.1:8000/api/metricas/por-proyecto/${diseno.id}/unlike/`, {
+          method: "POST",
+        }).catch(() => { });
+      }
     }
   };
 

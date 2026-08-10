@@ -21,6 +21,7 @@ import { Link as RouterLink } from "react-router-dom";
 
 import { MagnifyingGlass as SearchIcon } from "@phosphor-icons/react/dist/ssr/MagnifyingGlass";
 import { Plus as PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
+import { DashboardLoader } from "@/components/dashboard/layout/DashboardLoader";
 import { FunnelX as ClearFilterIcon } from "@phosphor-icons/react/dist/ssr/FunnelX";
 import { Link2 } from "lucide-react";
 
@@ -380,9 +381,6 @@ export default function ProyectosDigitalesPage() {
             }}
           >
             <Box>
-              <Typography variant="caption" sx={{ color: "#64748B", fontWeight: 500, display: "block", mb: 0.5 }}>
-                <Link component={RouterLink} to="/dashboard" color="inherit" underline="hover">Inicio</Link> / Proyectos Digitales
-              </Typography>
               <Typography variant="h4" sx={{ fontWeight: 800, color: "text.primary", mb: 0.5 }}>
                 Gestión de Proyectos Digitales
               </Typography>
@@ -505,17 +503,16 @@ export default function ProyectosDigitalesPage() {
           </Box>
 
           {/* Pestaña de Proyectos Digitales (TODOS los proyectos) */}
-          {activeTab === 0 && (
-            <Box>
-              <Box
-                sx={{
-                  mb: 3,
-                  display: "flex",
-                  flexWrap: "wrap",
-                  gap: 2,
-                  alignItems: "center"
-                }}
-              >
+          {(activeTab === 0 || activeTab === 2) && (
+            <Box
+              sx={{
+                mb: 3,
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 2,
+                alignItems: "center"
+              }}
+            >
                 <TextField
                   size="small"
                   placeholder="Buscar por título, autor o carrera..."
@@ -680,12 +677,13 @@ export default function ProyectosDigitalesPage() {
                     Limpiar filtros
                   </Button>
                 )}
-              </Box>
+            </Box>
+          )}
 
+          {activeTab === 0 && (
+            <Box>
               {loading ? (
-                <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-                  <CircularProgress />
-                </Box>
+                <DashboardLoader text="Cargando proyectos..." />
               ) : (
                 <ProyectosTable
                   proyectos={proyectos}
@@ -714,9 +712,7 @@ export default function ProyectosDigitalesPage() {
           {activeTab === 2 && (
             <Box>
               {loading ? (
-                <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-                  <CircularProgress />
-                </Box>
+                <DashboardLoader text="Cargando invitaciones..." />
               ) : (
                 <ProyectosTable
                   proyectos={proyectosInvitacion}

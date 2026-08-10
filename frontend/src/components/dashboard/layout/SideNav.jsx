@@ -15,7 +15,7 @@ import { SignOutIcon } from "@phosphor-icons/react/dist/ssr/SignOut";
 
 import { paths } from "@/paths";
 import { isNavItemActive } from "@/lib/is-nav-item-active";
-import { Logo } from "@/components/core/Logo";
+import { Logo } from "@/components/core/logo";
 import { authClient } from "@/lib/auth/client";
 import { logger } from "@/lib/default-logger";
 import { useUser } from "@/hooks/use-user";

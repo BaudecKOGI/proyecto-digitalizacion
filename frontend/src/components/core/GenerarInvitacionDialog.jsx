@@ -58,8 +58,8 @@ const calcularTotalHoras = (dias, horas) => {
 
 export default function GenerarInvitacionDialog({ open, onClose, tipo, autorNombreInicial = "" }) {
   const [autorNombre, setAutorNombre] = React.useState(autorNombreInicial);
-  const [dias, setDias] = React.useState(1); // días
-  const [horas, setHoras] = React.useState(0); // horas
+  const [dias, setDias] = React.useState(1);
+  const [horas, setHoras] = React.useState(0);
   const [totalHoras, setTotalHoras] = React.useState(24);
   const [status, setStatus] = React.useState("idle");
   const [resultado, setResultado] = React.useState(null);
@@ -137,11 +137,11 @@ export default function GenerarInvitacionDialog({ open, onClose, tipo, autorNomb
 
   const expiraTexto = resultado?.expira_en
     ? new Date(resultado.expira_en).toLocaleString("es-PE", {
-        day: "2-digit",
-        month: "short",
-        hour: "2-digit",
-        minute: "2-digit",
-      })
+      day: "2-digit",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+    })
     : "";
 
   return (

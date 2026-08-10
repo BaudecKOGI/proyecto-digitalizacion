@@ -1,5 +1,6 @@
 import * as React from "react";
 import Grid from "@mui/material/Grid";
+import { DashboardLoader } from "@/components/dashboard/layout/DashboardLoader";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
@@ -85,16 +86,7 @@ export default function Dashboard() {
     proyectosSoftware.reduce((acc, p) => acc + (p.vistas_totales || 0), 0);
 
   if (loading) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: 400 }}>
-        <Stack spacing={2} alignItems="center">
-          <CircularProgress size={44} />
-          <Typography variant="body2" color="text.secondary" fontWeight={600}>
-            Cargando indicadores de FAB LAB...
-          </Typography>
-        </Stack>
-      </Box>
-    );
+    return <DashboardLoader text="Cargando indicadores de FAB LAB..." />;
   }
 
   return (

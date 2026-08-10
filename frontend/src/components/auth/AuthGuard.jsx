@@ -27,7 +27,7 @@ export function AuthGuard({ children, requiredRole }) {
 			return;
 		}
 
-		// Validación estricta por rol (ej. ADMIN vs EDITOR)
+		// Validación estricta por rol (ADMIN vs EDITOR)
 		if (requiredRole) {
 			const userRol = (user.rol || "").toUpperCase();
 			const allowedRoles = Array.isArray(requiredRole)

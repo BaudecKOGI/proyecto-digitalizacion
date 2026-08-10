@@ -194,14 +194,20 @@ export default function Diseno3DFullscreenModal({
           {diseno.categoria && (
             <Chip
               label={
-                typeof diseno.categoria === "object"
+                diseno.categoria_nombre ||
+                (typeof diseno.categoria === "object"
                   ? diseno.categoria.nombre
-                  : categorias.find((c) => c.id === Number(diseno.categoria))?.nombre
-                  || `Categoría #${diseno.categoria}`
+                  : categorias.find((c) => c.id === Number(diseno.categoria))?.nombre) ||
+                `Categoría #${diseno.categoria}`
               }
               size="small"
-              variant="outlined"
-              sx={{ fontWeight: 600, fontSize: "0.75rem", color: "#111827", borderColor: "rgba(0,0,0,0.23)" }}
+              sx={{ 
+                fontWeight: 600, 
+                fontSize: "0.75rem", 
+                color: "#111827", 
+                bgcolor: "rgba(0,0,0,0.05)",
+                border: "none"
+              }}
             />
           )}
 

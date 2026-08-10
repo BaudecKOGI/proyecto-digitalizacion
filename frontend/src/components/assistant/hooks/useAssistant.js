@@ -1,8 +1,7 @@
-// src/components/assistant/hooks/useAssistant.js
 import { useState, useCallback, useEffect } from 'react';
 import { fetchProyectos3D, fetchProyectosSoftware, fetchCategorias } from '@/services/api';
 
-/* ─── Mensajes de bienvenida ─── */
+/* Mensajes de bienvenida */
 const WELCOME_MESSAGES = [
   {
     id: 'welcome-1',
@@ -14,11 +13,11 @@ const WELCOME_MESSAGES = [
     id: 'welcome-2',
     role: 'bot',
     type: 'text',
-    text: 'Puedo ayudarte a encontrar proyectos de diseño 3D o software de la universidad. Prueba escribiendo algo como:\n\n• *"Proyectos de robótica"*\n• *"Diseños 3D de arquitectura"*\n• *"Software de salud"*',
+    text: 'Puedo ayudarte a encontrar proyectos de diseño 3D o digitales de la universidad. Prueba escribiendo algo como:\n• *"Proyectos de robótica"*\n• *"Diseños 3D de arquitectura"*\n• *"Software de salud"*',
   },
 ];
 
-/* ─── Lógica de filtrado inteligente ─── */
+/* Lógica de filtrado inteligente */
 function normalizeStr(str) {
   return (str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
@@ -27,9 +26,9 @@ function scoreResult(item, terms) {
   const fields = [
     item.titulo || '',
     item.descripcion || '',
-    item.categoria?.nombre || '',
-    ...(item.ods_relacionados?.map((o) => o.titulo || o.nombre || '') || []),
-    ...(item.tecnologias?.map((t) => t.nombre || '') || []),
+    item.categoria?.nombre || item.categoria_nombre || '',
+    ...((item.ods_detalle || item.ods_relacionados || []).map((o) => o.label || o.titulo || o.nombre || '')),
+    ...(item.tecnologias?.map((t) => typeof t === 'string' ? t : (t.nombre || '')) || []),
   ].map(normalizeStr).join(' ');
 
   return terms.filter((t) => fields.includes(t)).length;
@@ -52,7 +51,7 @@ function filterResults(proyectos3D, proyectosSoftware, query) {
     .map(({ item }) => item);
 }
 
-/* ─── Integración con Inteligencia Artificial (Gemini) ─── */
+/* Integración con Inteligencia Artificial (Gemini) */
 async function fetchGeminiResponse(query, allProjects) {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
   if (!apiKey) {
@@ -66,7 +65,7 @@ async function fetchGeminiResponse(query, allProjects) {
     descripcion: p.descripcion,
     categoria: p.categoria?.nombre || p.categoria_nombre || '',
     tecnologias: p.tecnologias?.map(t => typeof t === 'string' ? t : t.nombre) || [],
-    ods: (p.ods_relacionados || []).map(o => o.titulo || o.nombre || o),
+    ods: (p.ods_detalle || p.ods_relacionados || []).map(o => o.label || o.titulo || o.nombre || o),
     ods_id: p.ods,
     tipo: p._type
   }));
@@ -79,9 +78,8 @@ El usuario ha dicho: "${query}"
 
 Tu tarea es:
 1. Responder a la consulta de forma conversacional y muy breve (máx 2-3 líneas).
-2. Si el usuario está buscando proyectos por tema, tecnología, categoría u ODS (Objetivo de Desarrollo Sostenible), identifica los 'refId' de los proyectos que mejor coincidan y devuélvelos en el arreglo (máximo 6). Analiza inteligentemente la semántica.
+2. Si el usuario está buscando proyectos por tema, tecnología, categoría u ODS (Objetivo de Desarrollo Sostenible), identifica los 'refId' de los proyectos que mejor coincidan y devuélvelos en el arreglo (máximo 5). Analiza inteligentemente la semántica.
 3. IMPORTANTE: Si el usuario SOLAMENTE está saludando (ej. "Hola", "Buenos días") o haciendo charla casual, responde amablemente pero deja el arreglo 'refIds_recomendados' VACÍO []. No inventes recomendaciones si no te las han pedido implícita o explícitamente.
-4. Si preguntan por los creadores de la pagina fueron: Ing. Jonel y Ing. Joashin.
 
 DEBES responder EXCLUSIVAMENTE con un objeto JSON válido, sin usar bloques de código markdown (no uses \`\`\`json). El JSON debe tener esta estructura exacta:
 {
@@ -107,7 +105,7 @@ DEBES responder EXCLUSIVAMENTE con un objeto JSON válido, sin usar bloques de c
   // Limpiar posibles bloques markdown si el modelo desobedece
   textContent = textContent.replace(/```json/gi, '').replace(/```/g, '').trim();
   const parsed = JSON.parse(textContent);
-  
+
   if (!parsed.respuesta_texto || !Array.isArray(parsed.refIds_recomendados)) {
     throw new Error("Esquema JSON inválido retornado por Gemini");
   }
@@ -123,7 +121,7 @@ DEBES responder EXCLUSIVAMENTE con un objeto JSON válido, sin usar bloques de c
   };
 }
 
-/* ─── Hook principal ─── */
+/* Hook principal */
 export function useAssistant() {
   const [messages, setMessages] = useState(() => {
     try {
@@ -185,12 +183,12 @@ export function useAssistant() {
         } catch (aiError) {
           // 2. FALLBACK: Si falla la IA o no hay API Key, usamos la lógica simulada
           console.warn("Fallback del Asistente activado:", aiError.message);
-          
+
           // Agregamos un delay simulado solo si caemos en fallback para que no sea instantáneo
           await new Promise(resolve => setTimeout(resolve, 1000));
-          
+
           finalResults = filterResults(proyectos3D, proyectosSoftware, query);
-          
+
           if (finalResults.length === 0) {
             finalResponseText = `No encontré proyectos relacionados con **"${query}"**. Intenta con otra palabra clave como el tipo de tecnología o categoría.`;
           } else {
@@ -201,7 +199,7 @@ export function useAssistant() {
         // 3. Actualizamos el chat con los resultados
         setMessages((prev) => {
           const withoutTyping = prev.filter((m) => m.id !== typingId);
-          
+
           const newMessages = [
             ...withoutTyping,
             {

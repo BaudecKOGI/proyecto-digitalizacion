@@ -356,11 +356,8 @@ export default function EditoresPage() {
             }}
           >
             <Box>
-              <Typography variant="caption" sx={{ color: "#64748B", fontWeight: 500, display: "block", mb: 0.5 }}>
-                <Link component={RouterLink} to="/dashboard" color="inherit" underline="hover">Inicio</Link> / Editores
-              </Typography>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: "#111827", fontSize: { xs: "1.5rem", md: "1.75rem" } }}>
-                Gestión de editores
+              <Typography variant="h4" sx={{ fontWeight: 800, color: "text.primary", mb: 0.5 }}>
+                Gestión de Editores
               </Typography>
             </Box>
 

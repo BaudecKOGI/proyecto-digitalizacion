@@ -15,8 +15,16 @@ import {
   MenuItem,
   FormControl,
   Stack,
-  TablePagination
+  TablePagination,
+  TextField,
+  InputAdornment,
+  IconButton,
+  Button
 } from "@mui/material";
+import { MagnifyingGlass as SearchIcon } from "@phosphor-icons/react/dist/ssr/MagnifyingGlass";
+import { X as CloseIcon } from "@phosphor-icons/react/dist/ssr/X";
+import { Cube as CubeIcon } from "@phosphor-icons/react/dist/ssr/Cube";
+import { Monitor as MonitorIcon } from "@phosphor-icons/react/dist/ssr/Monitor";
 
 export default function MetricasRankingTable({ metricas = [] }) {
   const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:8000';
@@ -30,6 +38,7 @@ export default function MetricasRankingTable({ metricas = [] }) {
   const [order, setOrder] = useState("desc");
   const [orderBy, setOrderBy] = useState("vistas");
   const [filterType, setFilterType] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
@@ -43,6 +52,14 @@ export default function MetricasRankingTable({ metricas = [] }) {
     let data = [...metricas];
     if (filterType !== "all") {
       data = data.filter(item => item.proyecto_tipo === filterType);
+    }
+    
+    if (searchTerm.trim()) {
+      const lowerSearch = searchTerm.toLowerCase();
+      data = data.filter(item => 
+        (item.proyecto_titulo && item.proyecto_titulo.toLowerCase().includes(lowerSearch)) ||
+        (item.proyecto_categoria && item.proyecto_categoria.toLowerCase().includes(lowerSearch))
+      );
     }
 
     return data.sort((a, b) => {
@@ -74,7 +91,7 @@ export default function MetricasRankingTable({ metricas = [] }) {
       }
       return 0;
     });
-  }, [metricas, order, orderBy, filterType]);
+  }, [metricas, order, orderBy, filterType, searchTerm]);
 
   if (!metricas || metricas.length === 0) {
     return null;
@@ -82,27 +99,79 @@ export default function MetricasRankingTable({ metricas = [] }) {
 
   return (
     <Box sx={{ mt: 5 }}>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+      <Stack 
+        direction={{ xs: "column", md: "row" }} 
+        justifyContent="space-between" 
+        alignItems={{ xs: "flex-start", md: "center" }} 
+        spacing={2}
+        sx={{ mb: 2 }}
+      >
         <Typography variant="h6" sx={{ color: "#1E293B", fontWeight: 700 }}>
           Ranking de Proyectos
         </Typography>
-        <FormControl size="small">
-          <Select
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
-            sx={{ 
-              bgcolor: "#FFFFFF", 
-              borderRadius: "6px", 
-              fontWeight: 600, 
-              fontSize: "0.85rem",
-              minWidth: 150
+        <Stack 
+          direction={{ xs: "column", sm: "row" }} 
+          spacing={2} 
+          alignItems={{ xs: "stretch", sm: "center" }}
+          sx={{ width: { xs: "100%", md: "auto" } }}
+        >
+          <TextField
+            fullWidth
+            size="small"
+            placeholder="Buscar proyecto..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon size={18} color="#64748B" />
+                </InputAdornment>
+              ),
+              endAdornment: searchTerm ? (
+                <InputAdornment position="end">
+                  <IconButton size="small" onClick={() => setSearchTerm("")}>
+                    <CloseIcon size={14} />
+                  </IconButton>
+                </InputAdornment>
+              ) : null,
+              sx: { bgcolor: "#FFFFFF", borderRadius: "6px", fontSize: "0.85rem", minWidth: 200 }
             }}
-          >
-            <MenuItem value="all" sx={{ fontWeight: 600, fontSize: "0.85rem" }}>Todos los tipos</MenuItem>
-            <MenuItem value="Modelo 3D" sx={{ fontWeight: 600, fontSize: "0.85rem" }}>Modelo 3D</MenuItem>
-            <MenuItem value="Digital" sx={{ fontWeight: 600, fontSize: "0.85rem" }}>Digital</MenuItem>
-          </Select>
-        </FormControl>
+          />
+          <FormControl size="small">
+            <Select
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+              sx={{ 
+                bgcolor: "#FFFFFF", 
+                borderRadius: "6px", 
+                fontWeight: 600, 
+                fontSize: "0.85rem",
+                minWidth: 150
+              }}
+            >
+              <MenuItem value="all" sx={{ fontWeight: 600, fontSize: "0.85rem" }}>Todos los tipos</MenuItem>
+              <MenuItem value="Modelo 3D" sx={{ fontWeight: 600, fontSize: "0.85rem" }}>Modelo 3D</MenuItem>
+              <MenuItem value="Digital" sx={{ fontWeight: 600, fontSize: "0.85rem" }}>Digital</MenuItem>
+            </Select>
+          </FormControl>
+          {(searchTerm || filterType !== "all") && (
+            <Button
+              size="small"
+              onClick={() => {
+                setSearchTerm("");
+                setFilterType("all");
+              }}
+              sx={{
+                textTransform: "none",
+                color: "#64748B",
+                fontWeight: 600,
+                "&:hover": { bgcolor: "rgba(0,0,0,0.04)" }
+              }}
+            >
+              Limpiar
+            </Button>
+          )}
+        </Stack>
       </Stack>
       <TableContainer
         component={Paper}
@@ -177,7 +246,13 @@ export default function MetricasRankingTable({ metricas = [] }) {
                       style={{ width: 44, height: 44, borderRadius: 4, objectFit: "cover" }} 
                     />
                   ) : (
-                    <Box sx={{ width: 44, height: 44, borderRadius: 1, bgcolor: "#F1F5F9" }} />
+                    <Box sx={{ width: 44, height: 44, borderRadius: 1, bgcolor: "#F1F5F9", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      {row.proyecto_tipo === "Modelo 3D" ? (
+                        <CubeIcon size={24} color="#94A3B8" weight="duotone" />
+                      ) : (
+                        <MonitorIcon size={24} color="#94A3B8" weight="duotone" />
+                      )}
+                    </Box>
                   )}
                 </TableCell>
                 <TableCell component="th" scope="row">

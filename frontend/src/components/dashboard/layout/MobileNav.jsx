@@ -16,7 +16,7 @@ import { SignOutIcon } from "@phosphor-icons/react/dist/ssr/SignOut";
 
 import { paths } from "@/paths";
 import { isNavItemActive } from "@/lib/is-nav-item-active";
-import { Logo } from "@/components/core/Logo";
+import { Logo } from "@/components/core/logo";
 import { authClient } from "@/lib/auth/client";
 import { logger } from "@/lib/default-logger";
 import { useUser } from "@/hooks/use-user";
@@ -105,7 +105,7 @@ export function MobileNav({ open, onClose }) {
 				{renderNavItems({ pathname, items: getNavItems() })}
 			</Box>
 
-			{/* Botón de Cierre de sesión al pie de la barra lateral (punteagudo y sin bordes) */}
+			{/* Botón de Cierre de sesión al pie de la barra lateral */}
 			<Divider sx={{ borderColor: "var(--mui-palette-neutral-800)" }} />
 			<Box sx={{ p: "12px" }}>
 				<Box

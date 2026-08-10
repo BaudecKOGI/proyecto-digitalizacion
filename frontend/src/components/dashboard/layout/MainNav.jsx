@@ -9,8 +9,10 @@ import Stack from "@mui/material/Stack";
 import Tooltip from "@mui/material/Tooltip";
 import { BellIcon } from "@phosphor-icons/react/dist/ssr/Bell";
 import { ListIcon } from "@phosphor-icons/react/dist/ssr/List";
-import { MagnifyingGlassIcon } from "@phosphor-icons/react/dist/ssr/MagnifyingGlass";
 import { UsersIcon } from "@phosphor-icons/react/dist/ssr/Users";
+import { useLocation, Link as RouterLink } from "react-router-dom";
+import Typography from "@mui/material/Typography";
+import Link from "@mui/material/Link";
 
 import { usePopover } from "@/hooks/use-popover";
 import { useUser } from "@/hooks/use-user";
@@ -18,11 +20,40 @@ import { useUser } from "@/hooks/use-user";
 import { MobileNav } from "./MobileNav";
 import { UserPopover } from "./UserPopover";
 
+const BREADCRUMB_MAP = {
+  "disenos-3d": "Modelos 3D",
+  "proyectos-digitales": "Proyectos Digitales",
+  "editores": "Editores",
+  "categorias": "Categorías",
+  "carreras": "Carreras",
+  "visualizaciones": "Visualizaciones",
+  "cuenta": "Perfil",
+};
+
 export function MainNav() {
 	const [openNav, setOpenNav] = React.useState(false);
 	const { user } = useUser();
+	const location = useLocation();
 
 	const userPopover = usePopover();
+
+	const getBreadcrumb = () => {
+		const parts = location.pathname.split("/").filter(Boolean);
+		if (parts[0] !== "dashboard" || parts.length < 2) return null;
+		
+		let title = BREADCRUMB_MAP[parts[1]] || "";
+		if (!title) return null;
+
+		if (parts.length > 2 && parts[2] === "detalle") {
+			title += " / Detalles";
+		}
+
+		return (
+			<Typography variant="body2" sx={{ color: "#64748B", fontWeight: 500, display: "block", fontSize: "0.95rem" }}>
+				<Link component={RouterLink} to="/dashboard" color="inherit" underline="hover">Inicio</Link> / {title}
+			</Typography>
+		);
+	};
 
 	return (
 		<React.Fragment>
@@ -50,25 +81,9 @@ export function MainNav() {
 						>
 							<ListIcon />
 						</IconButton>
-						<Tooltip title="Buscar">
-							<IconButton>
-								<MagnifyingGlassIcon />
-							</IconButton>
-						</Tooltip>
+						{getBreadcrumb()}
 					</Stack>
 					<Stack sx={{ alignItems: "center" }} direction="row" spacing={2}>
-						<Tooltip title="Contactos">
-							<IconButton>
-								<UsersIcon />
-							</IconButton>
-						</Tooltip>
-						<Tooltip title="Notificaciones">
-							<Badge badgeContent={4} color="success" variant="dot">
-								<IconButton>
-									<BellIcon />
-								</IconButton>
-							</Badge>
-						</Tooltip>
 						<Avatar
 							onClick={userPopover.handleOpen}
 							ref={userPopover.anchorRef}

@@ -9,8 +9,8 @@ export default function EditorLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const [isCollapsed, setIsCollapsed] = useState(true);
-  
-  // ¡AQUÍ ESTÁ EL ESTADO QUE FALTABA PARA EL CELULAR!
+
+  // Esto es para el celular
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Detectamos si estamos en la sección de software o 3d
@@ -33,24 +33,24 @@ export default function EditorLayout() {
   return (
     <AuthGuard requiredRole={["EDITOR"]}>
       <div className="flex h-screen w-full overflow-hidden bg-[var(--bg-general)] font-sans text-[var(--text-main)] transition-colors duration-300">
-        
-        <EditorSidebar 
-          isCollapsed={isCollapsed} 
-          setIsCollapsed={setIsCollapsed} 
+
+        <EditorSidebar
+          isCollapsed={isCollapsed}
+          setIsCollapsed={setIsCollapsed}
           // Pasamos los estados del celular al sidebar
           isMobileMenuOpen={isMobileMenuOpen}
           setIsMobileMenuOpen={setIsMobileMenuOpen}
         />
 
         <div className="flex flex-1 flex-col min-w-0 transition-all duration-300">
-          
-          <EditorNavbar 
-            onGoToProfile={handleGoToProfile} 
+
+          <EditorNavbar
+            onGoToProfile={handleGoToProfile}
             // Pasamos la función para abrir el menú al navbar
             onToggleMobileMenu={() => setIsMobileMenuOpen(prev => !prev)}
           />
 
-          <main 
+          <main
             onClick={() => setIsCollapsed(true)}
             className="flex-1 overflow-y-auto p-4 md:p-8 cursor-default"
             style={{ scrollbarWidth: 'thin' }}
@@ -59,7 +59,7 @@ export default function EditorLayout() {
               <Outlet />
             </div>
           </main>
-          
+
         </div>
       </div>
     </AuthGuard>

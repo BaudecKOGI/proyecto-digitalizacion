@@ -8,10 +8,7 @@ const toRoman = (num) => {
   return romanos[num - 1] || num;
 };
 
-/**
- * Explorador de Carreras -> Ciclos -> Alumnos.
- * Agrupa proyectos por carrera (FK), ciclo (número) y autor.
- */
+/* Explorador de Carreras -> Ciclos -> Alumnos.*/
 export function CareersExplorer({ mode, fetchFn }) {
   const { carrera, ciclo } = useParams();
   const navigate = useNavigate();
@@ -39,11 +36,10 @@ export function CareersExplorer({ mode, fetchFn }) {
   const arbol = useMemo(() => {
     const tree = {};
     for (const p of proyectos) {
-      // Usar carrera_nombre si existe, sino usar el nombre de la carrera FK
       const carreraNombre = p.carrera_nombre || p.carrera?.nombre || 'Sin carrera';
-      const cicloNum = p.ciclo || 0; // número 1-12
+      const cicloNum = p.ciclo || 0;
       const autor = p.autor_nombre || 'Sin autor';
-      
+
       tree[carreraNombre] ??= {};
       tree[carreraNombre][cicloNum] ??= {};
       tree[carreraNombre][cicloNum][autor] ??= [];
@@ -56,8 +52,8 @@ export function CareersExplorer({ mode, fetchFn }) {
     if (mode === '3d') {
       navigate(`/editor/3d/detalle/${proyecto.id}`);
     } else {
-      navigate('/editor/software/proyectos', { 
-        state: { openProject: proyecto } 
+      navigate('/editor/software/proyectos', {
+        state: { openProject: proyecto }
       });
     }
   }
@@ -108,12 +104,12 @@ export function CareersExplorer({ mode, fetchFn }) {
     </div>
   );
 
-  // ---------- NIVEL 3: alumnos dentro de un ciclo ----------
+  // NIVEL 3: alumnos dentro de un ciclo
   if (carrera && ciclo) {
     const cicloNum = Number(ciclo);
     const alumnos = arbol[decodeURIComponent(carrera)]?.[cicloNum] || {};
     const entradas = Object.entries(alumnos);
-    
+
     // Si no hay alumnos, mostrar mensaje
     if (entradas.length === 0) {
       return (
@@ -155,12 +151,12 @@ export function CareersExplorer({ mode, fetchFn }) {
     );
   }
 
-  // ---------- NIVEL 2: ciclos dentro de una carrera ----------
+  // NIVEL 2: ciclos dentro de una carrera
   if (carrera) {
     const carreraNombre = decodeURIComponent(carrera);
     const ciclos = arbol[carreraNombre] || {};
     const entradas = Object.entries(ciclos);
-    
+
     if (entradas.length === 0) {
       return (
         <div className="flex flex-col gap-6 pb-24">
@@ -200,7 +196,7 @@ export function CareersExplorer({ mode, fetchFn }) {
     );
   }
 
-  // ---------- NIVEL 1: todas las carreras ----------
+  // NIVEL 1: todas las carreras
   const entradas = Object.entries(arbol);
   return (
     <div className="flex flex-col gap-6 pb-24">

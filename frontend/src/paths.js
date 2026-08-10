@@ -8,7 +8,7 @@ export const paths = {
         proyectosDigitales: "/dashboard/proyectos-digitales",
         editores: "/dashboard/editores",
         categorias: "/dashboard/categorias",
-        carreras: "/dashboard/carreras", // NUEVO
+        carreras: "/dashboard/carreras",
         visualizaciones: "/dashboard/visualizaciones",
     },
     // Bloque del editor:

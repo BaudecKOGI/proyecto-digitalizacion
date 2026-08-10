@@ -47,7 +47,6 @@ class ProyectoViewSet(viewsets.ModelViewSet):
         if ods_param:
             ods_list = [int(x) for x in ods_param.split(',') if x.isdigit()]
             if ods_list:
-                # CORREGIDO: usar ods_relacionados (related_name del modelo ProyectoODS)
                 queryset = queryset.filter(ods_relacionados__ods_id__in=ods_list).distinct()
         categoria = self.request.query_params.get('categoria')
         if categoria:

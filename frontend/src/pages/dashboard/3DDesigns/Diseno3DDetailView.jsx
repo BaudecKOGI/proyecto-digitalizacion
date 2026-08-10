@@ -360,14 +360,19 @@ export default function Diseno3DDetailView({ diseno: propDiseno, onBack, onEdit,
               {diseno.categoria && (
                 <Chip
                   label={
-                    typeof diseno.categoria === "object"
+                    diseno.categoria_nombre ||
+                    (typeof diseno.categoria === "object"
                       ? diseno.categoria.nombre
-                      : `Categoría #${diseno.categoria}`
+                      : `Categoría #${diseno.categoria}`)
                   }
                   size="small"
-                  variant="outlined"
-                  color="primary"
-                  sx={{ fontWeight: 600, fontSize: "0.75rem" }}
+                  sx={{ 
+                    fontWeight: 600, 
+                    fontSize: "0.75rem", 
+                    color: "#111827", 
+                    bgcolor: "rgba(0,0,0,0.05)",
+                    border: "none"
+                  }}
                 />
               )}
 

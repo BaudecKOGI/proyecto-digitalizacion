@@ -24,6 +24,8 @@ import {
   FormControl
 } from "@mui/material";
 
+import { DashboardLoader } from "@/components/dashboard/layout/DashboardLoader";
+
 import { Eye as ViewIcon } from "@phosphor-icons/react/dist/ssr/Eye";
 import { PencilSimple as EditIcon } from "@phosphor-icons/react/dist/ssr/PencilSimple";
 import { Trash as TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
@@ -73,11 +75,7 @@ export default function Disenos3DTable({
   }, [disenos, page, rowsPerPage]);
 
   if (loading) {
-    return (
-      <Box sx={{ p: 6, textAlign: "center", color: "text.secondary" }}>
-        <Typography variant="body1">Cargando catálogo de modelos 3D...</Typography>
-      </Box>
-    );
+    return <DashboardLoader text="Cargando catálogo de modelos 3D..." />;
   }
 
   if (!disenos || disenos.length === 0) {

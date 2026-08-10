@@ -14,8 +14,7 @@ import {
 } from "@mui/material";
 
 /**
- * MODAL DE CREACIÓN / EDICIÓN DE CATEGORÍA
- * Formulario modular para mantener limpio el archivo principal de Categorías.
+ * MODAL DE CREACIÓN 
  */
 export default function CategoriaFormModal({
   open,
