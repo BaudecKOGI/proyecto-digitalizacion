@@ -1,122 +1,210 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import React, { useEffect } from "react";
+import { Navigate, Route, Routes, Outlet, useLocation } from "react-router-dom";
 
-function App() {
-  const [count, setCount] = useState(0)
+function ScrollToTop() {
+  const { pathname, hash } = useLocation();
 
-  return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+  useEffect(() => {
+    if (hash) {
+      setTimeout(() => {
+        const element = document.getElementById(hash.replace('#', ''));
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }, [pathname, hash]);
 
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+  return null;
 }
 
-export default App
+// Importación de las rutas del editor y la landing page
+import PublicHome from "./pages/PublicHome";
+import Viewer3DPage from "./pages/public/ProjectViewer/Viewer3D";
+import ViewerDigitalPage from "./pages/public/ProjectViewer/ViewerDigital";
+import Gallery3DPage from "./pages/public/Gallery/Gallery3DPage";
+import GallerySoftwarePage from "./pages/public/Gallery/GallerySoftwarePage";
+import PublicODSPage from "./pages/public/ODS/PublicODSPage";
+import FabLabPage from "./pages/public/FabLab/FabLabPage";
+import EditorLayout from "./layouts/EditorLayout";
+import PublicLayout from "./layouts/PublicLayout";
+import CleanLayout from "./layouts/CleanLayout"; // NUEVO
+import { Hub as EditorHub } from "./pages/editor/Hub";
+
+// RUTAS DE 3D
+import { Overview as EditorOverview } from "./pages/editor/3d/Dashboard3D";
+import { ProjectsList3D as EditorProjectsList } from "./pages/editor/3d/ProjectsList3D";
+import { ProjectForm3D } from "./pages/editor/3d/ProjectForm3D";
+import { ProjectDetailView3D } from "./pages/editor/3d/ProjectDetailView3D";
+import { Careers3D } from "./pages/editor/3d/Careers3D";
+
+// RUTAS DE SOFTWARE 
+import { DashboardSoftware } from "./pages/editor/software/DashboardSoftware";
+import ProjectsListSoftware from "./pages/editor/software/ProjectsListSoftware";
+import ProjectFormSoftware from "./pages/editor/software/ProjectFormSoftware";
+import CareersSoftware from "./pages/editor/software/CareersSoftware";
+
+// Perfil
+import { Profile as EditorProfile } from "./pages/editor/Profile";
+
+// Dashboard Admin
+import SignInPage from "@/pages/auth/sign-in/SignIn";
+import ResetPasswordPage from "@/pages/auth/reset-password/ResetPassword";
+import UpdatePasswordPage from "@/pages/auth/update-password/UpdatePassword";
+import AccountPage from "@/pages/dashboard/account/Account";
+import DashboardOverviewPage from "@/pages/dashboard/dashboard/Dashboard";
+import Disenos3DPage from "@/pages/dashboard/3DDesigns/Disenos3D";
+import Diseno3DDetailView from "@/pages/dashboard/3DDesigns/Diseno3DDetailView";
+import ProyectosDigitalesPage from "@/pages/dashboard/digitalProjects/ProyectosDigitales";
+import ProjectDetailView from "@/pages/dashboard/digitalProjects/ProjectDetailView";
+import EditoresPage from "@/pages/dashboard/editores/Editores";
+import CategoriasPage from "@/pages/dashboard/categorias/Categorias";
+import CarrerasPage from "@/pages/dashboard/carreras/CarrerasPage";
+import CarreraDetailView from "@/pages/dashboard/carreras/CarreraDetailView";
+import CarreraCicloDetailView from "@/pages/dashboard/carreras/CarreraCicloDetailView";
+import VisualizacionesPage from "@/pages/dashboard/visualizaciones/Visualizaciones";
+
+// PÁGINA PÚBLICA PARA COMPLETAR PROYECTO POR INVITACIÓN
+import CompletarProyectoPage from "@/pages/CompletarProyecto/CompletarProyectoPage";
+
+// Layouts
+import { Layout as AuthLayout } from "@/layouts/AuthLayout";
+import { Layout as DashboardLayout } from "@/layouts/DashboardLayout";
+
+export default function App() {
+  return (
+    <>
+      <ScrollToTop />
+      <Routes>
+        {/* Rutas públicas con Layout (Navbar y Footer persistentes) */}
+        <Route element={<PublicLayout />}>
+          <Route path="/" element={<PublicHome />} />
+          <Route path="/galeria/3d" element={<Gallery3DPage />} />
+          <Route path="/galeria/software" element={<GallerySoftwarePage />} />
+          <Route path="/ods" element={<PublicODSPage />} />
+          <Route path="/fablab" element={<FabLabPage />} />
+        </Route>
+
+        {/* Rutas sin layout (Visores y Completar proyecto) */}
+        <Route element={<CleanLayout />}>
+          <Route path="/proyecto/3d/:id" element={<Viewer3DPage />} />
+          <Route path="/proyecto/digitales/:id" element={<ViewerDigitalPage />} />
+          <Route path="/completar/:token" element={<CompletarProyectoPage />} />
+        </Route>
+
+        {/* Editor */}
+        <Route path="/editor">
+          {/* Sin Layout */}
+          <Route index element={<Navigate to="/auth/sign-in" replace />} />
+          <Route path="login" element={<Navigate to="/auth/sign-in" replace />} />
+          <Route path="hub" element={<EditorHub />} />
+
+          {/* Con Layout */}
+          <Route element={<EditorLayout />}>
+            {/* 3D */}
+            <Route path="3d">
+              <Route index element={<Navigate to="dashboard" replace />} />
+
+              <Route
+                path="dashboard"
+                element={<EditorOverview isDig={false} projectsCount={0} />}
+              />
+
+              <Route
+                path="proyectos"
+                element={<EditorProjectsList mode="3d" projects={[]} />}
+              />
+
+              <Route path="nuevo" element={<ProjectForm3D />} />
+              <Route path="editar/:id" element={<ProjectForm3D />} />
+              <Route path="detalle/:id" element={<ProjectDetailView3D />} />
+
+              <Route path="carreras" element={<Careers3D />} />
+              <Route path="carreras/:carrera" element={<Careers3D />} />
+              <Route
+                path="carreras/:carrera/:ciclo"
+                element={<Careers3D />}
+              />
+
+              <Route path="perfil" element={<EditorProfile />} />
+            </Route>
+
+            {/* SOFTWARE */}
+            <Route path="software">
+              <Route index element={<Navigate to="dashboard" replace />} />
+
+              <Route
+                path="dashboard"
+                element={<DashboardSoftware />}
+              />
+
+              <Route
+                path="proyectos"
+                element={<ProjectsListSoftware />}
+              />
+
+              <Route path="nuevo" element={<ProjectFormSoftware />} />
+              <Route path="editar/:id" element={<ProjectFormSoftware />} />
+
+              <Route path="carreras" element={<CareersSoftware />} />
+              <Route
+                path="carreras/:carrera"
+                element={<CareersSoftware />}
+              />
+              <Route
+                path="carreras/:carrera/:ciclo"
+                element={<CareersSoftware />}
+              />
+
+              <Route path="perfil" element={<EditorProfile />} />
+            </Route>
+          </Route>
+        </Route>
+
+        {/* Autenticación */}
+        <Route path="/auth">
+          <Route element={<AuthLayout />}>
+            <Route path="sign-in" element={<SignInPage />} />
+            <Route
+              path="reset-password"
+              element={<ResetPasswordPage />}
+            />
+            <Route
+              path="update-password"
+              element={<UpdatePasswordPage />}
+            />
+          </Route>
+        </Route>
+
+        {/* Dashboard */}
+        <Route path="/dashboard">
+          <Route element={<DashboardLayout />}>
+            <Route index element={<DashboardOverviewPage />} />
+            <Route path="cuenta" element={<AccountPage />} />
+            <Route path="disenos-3d" element={<Disenos3DPage />} />
+            <Route path="disenos-3d/detalle/:id" element={<Diseno3DDetailView />} />
+            <Route
+              path="proyectos-digitales"
+              element={<ProyectosDigitalesPage />}
+            />
+            <Route path="proyectos-digitales/detalle/:id" element={<ProjectDetailView />} />
+            <Route path="editores" element={<EditoresPage />} />
+            <Route path="categorias" element={<CategoriasPage />} />
+            <Route path="carreras" element={<CarrerasPage />} />
+            <Route path="carreras/:carrera" element={<CarreraDetailView />} />
+            <Route path="carreras/:carrera/:tipo/:ciclo" element={<CarreraCicloDetailView />} />
+            <Route
+              path="visualizaciones"
+              element={<VisualizacionesPage />}
+            />
+          </Route>
+        </Route>
+
+        {/* Ruta por defecto */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </>
+  );
+}
