@@ -12,6 +12,8 @@ import {
 import { fetchProyectos3D, fetchCategorias } from '@/services/api';
 import { ODS_LIST } from "@/pages/dashboard/digitalProjects/odsData"; 
 
+const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:8000';
+
 export const ProjectsList3D = () => {
   const navigate = useNavigate();
   
@@ -250,7 +252,7 @@ export const ProjectsList3D = () => {
               
               let imageUrl = project.imagen_miniatura || 'https://via.placeholder.com/400x300?text=Sin+Imagen';
               if (imageUrl.startsWith('/')) {
-                imageUrl = `http://localhost:8000${imageUrl}`; 
+                imageUrl = `${API_BASE}${imageUrl}`;
               }
 
               const catNombre = project.categoria_nombre || categorias.find(c => String(c.id) === String(project.categoria))?.nombre || 'Sin Cat';

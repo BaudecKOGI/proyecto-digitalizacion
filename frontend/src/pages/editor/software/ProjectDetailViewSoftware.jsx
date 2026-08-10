@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import { ODS_LIST } from "@/pages/dashboard/digitalProjects/odsData";
 
+const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:8000';
+
 export default function ProjectDetailViewSoftware({ proyecto, onBack }) {
   const navigate = useNavigate();
 
@@ -28,12 +30,12 @@ export default function ProjectDetailViewSoftware({ proyecto, onBack }) {
 
   let videoUrl = proyecto.archivo_video || '';
   if (videoUrl.startsWith('/')) {
-    videoUrl = `http://localhost:8000${videoUrl}`;
+    videoUrl = `${API_BASE}${videoUrl}`;
   }
 
   let portadaUrl = proyecto.imagen_portada || '';
   if (portadaUrl.startsWith('/')) {
-    portadaUrl = `http://localhost:8000${portadaUrl}`;
+    portadaUrl = `${API_BASE}${portadaUrl}`;
   }
 
   return (

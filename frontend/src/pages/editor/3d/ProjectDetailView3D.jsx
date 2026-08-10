@@ -22,6 +22,8 @@ import { OrbitControls, Stage, useFBX } from '@react-three/drei';
 import { ODS_LIST } from "@/pages/dashboard/digitalProjects/odsData";
 import { fetchProyectos3D, fetchCategorias } from '@/services/api'; 
 
+const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:8000';
+
 // --- COMPONENTE INTERNO PARA EL MODELO Y LA MANIPULACIÓN DIRECTA ---
 const FBXModel = ({ url, piezasMoviles, setHabilitarCamara }) => {
   const fbx = useFBX(url);
@@ -208,12 +210,12 @@ export const ProjectDetailView3D = () => {
 
   let imageUrl = project.imagen_miniatura || '';
   if (imageUrl.startsWith('/')) {
-    imageUrl = `http://localhost:8000${imageUrl}`;
+    imageUrl = `${API_BASE}${imageUrl}`;
   }
 
   let fbxUrl = project.archivo_fbx || '';
   if (fbxUrl.startsWith('/')) {
-    fbxUrl = `http://localhost:8000${fbxUrl}`;
+    fbxUrl = `${API_BASE}${fbxUrl}`;
   }
 
   let piezasMoviles = [];

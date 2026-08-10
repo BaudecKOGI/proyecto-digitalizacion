@@ -24,6 +24,8 @@ import { getODSById } from "./odsData";
 
 import { fetchProyectoSoftwareById } from "@/services/api";
 
+const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:8000';
+
 export default function ProjectDetailView({ proyecto: propProyecto, onBack, onEdit, onDelete }) {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -32,7 +34,6 @@ export default function ProjectDetailView({ proyecto: propProyecto, onBack, onEd
   const [loading, setLoading] = useState(!propProyecto);
   const [error, setError] = useState('');
 
-  // Cargar proyecto solo si no se pasó como prop
   useEffect(() => {
     if (propProyecto) {
       setProyecto(propProyecto);
@@ -49,6 +50,15 @@ export default function ProjectDetailView({ proyecto: propProyecto, onBack, onEd
       try {
         setLoading(true);
         const data = await fetchProyectoSoftwareById(id);
+        // Procesar URLs de imágenes antes de guardar
+        if (data) {
+          if (data.imagen_portada && data.imagen_portada.startsWith('/')) {
+            data.imagen_portada = `${API_BASE}${data.imagen_portada}`;
+          }
+          if (data.archivo_video && data.archivo_video.startsWith('/')) {
+            data.archivo_video = `${API_BASE}${data.archivo_video}`;
+          }
+        }
         setProyecto(data);
       } catch (err) {
         console.error('Error cargando proyecto de software:', err);
@@ -60,7 +70,6 @@ export default function ProjectDetailView({ proyecto: propProyecto, onBack, onEd
     loadProject();
   }, [id, propProyecto]);
 
-  // Manejadores de navegación (priorizan props si existen)
   const handleBack = () => {
     if (onBack) {
       onBack();
@@ -106,7 +115,6 @@ export default function ProjectDetailView({ proyecto: propProyecto, onBack, onEd
 
   return (
     <Box sx={{ width: "100%", pb: 6 }}>
-      {/* 1. BREADCRUMB / BARRA SUPERIOR DE NAVEGACIÓN */}
       <Box
         sx={{
           display: "flex",
@@ -164,7 +172,6 @@ export default function ProjectDetailView({ proyecto: propProyecto, onBack, onEd
         </Stack>
       </Box>
 
-      {/* 2. ENCABEZADO TÉCNICO PROFESIONAL */}
       <Box sx={{ mb: 4 }}>
         <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1.5 }} flexWrap="wrap" useFlexGap>
           <Chip
@@ -180,7 +187,6 @@ export default function ProjectDetailView({ proyecto: propProyecto, onBack, onEd
             sx={{ fontWeight: 700, borderRadius: 1, fontSize: "0.75rem" }}
           />
           
-          {/* ODS MÚLTIPLES */}
           {proyecto.ods_detalle && proyecto.ods_detalle.length > 0 && (
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
               {proyecto.ods_detalle.map((ods) => {
@@ -216,11 +222,8 @@ export default function ProjectDetailView({ proyecto: propProyecto, onBack, onEd
         </Typography>
       </Box>
 
-      {/* 3. CONTENIDO PRINCIPAL */}
       <Grid container spacing={4}>
-        {/* COLUMNA IZQUIERDA */}
         <Grid size={{ xs: 12, md: 8 }}>
-          {/* REPRODUCTOR DE VIDEO O PORTADA INTEGRADA EN EL FLUJO */}
           <Paper
             elevation={0}
             sx={{
@@ -280,7 +283,6 @@ export default function ProjectDetailView({ proyecto: propProyecto, onBack, onEd
             )}
           </Paper>
 
-          {/* DESCRIPCIÓN TÉCNICA Y ALCANCE */}
           <Box sx={{ mb: 4 }}>
             <Typography variant="h6" sx={{ fontWeight: 700, color: "text.primary", mb: 2 }}>
               Descripción del Proyecto & Alcance
@@ -309,10 +311,8 @@ export default function ProjectDetailView({ proyecto: propProyecto, onBack, onEd
           </Box>
         </Grid>
 
-        {/* COLUMNA DERECHA (33% - ESPECIFICACIONES TÉCNICAS Y STACK) */}
         <Grid size={{ xs: 12, md: 4 }}>
           <Stack spacing={3}>
-            {/* FICHA DE ESPECIFICACIONES */}
             <Paper
               elevation={0}
               sx={{
@@ -375,7 +375,6 @@ export default function ProjectDetailView({ proyecto: propProyecto, onBack, onEd
               </Stack>
             </Paper>
 
-            {/* STACK TECNOLÓGICO */}
             <Paper
               elevation={0}
               sx={{
@@ -414,7 +413,6 @@ export default function ProjectDetailView({ proyecto: propProyecto, onBack, onEd
               </Stack>
             </Paper>
 
-            {/* ENLACES DIRECTOS */}
             <Paper
               elevation={0}
               sx={{

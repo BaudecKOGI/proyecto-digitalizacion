@@ -29,6 +29,8 @@ import Diseno3DFullscreenModal from "./Diseno3DFullscreenModal";
 
 import { fetchProyecto3DById } from "@/services/api";
 
+const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:8000';
+
 export default function Diseno3DDetailView({ diseno: propDiseno, onBack, onEdit, onDelete, categorias = [] }) {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -39,7 +41,6 @@ export default function Diseno3DDetailView({ diseno: propDiseno, onBack, onEdit,
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [habilitarCamara, setHabilitarCamara] = useState(true);
 
-  // Cargar proyecto solo si no se pasó como prop
   useEffect(() => {
     if (propDiseno) {
       setDiseno(propDiseno);
@@ -56,6 +57,15 @@ export default function Diseno3DDetailView({ diseno: propDiseno, onBack, onEdit,
       try {
         setLoading(true);
         const data = await fetchProyecto3DById(id);
+        // Procesar URLs de archivos antes de guardar
+        if (data) {
+          if (data.archivo_fbx && data.archivo_fbx.startsWith('/')) {
+            data.archivo_fbx = `${API_BASE}${data.archivo_fbx}`;
+          }
+          if (data.imagen_miniatura && data.imagen_miniatura.startsWith('/')) {
+            data.imagen_miniatura = `${API_BASE}${data.imagen_miniatura}`;
+          }
+        }
         setDiseno(data);
       } catch (err) {
         console.error('Error cargando proyecto 3D:', err);
@@ -67,7 +77,6 @@ export default function Diseno3DDetailView({ diseno: propDiseno, onBack, onEdit,
     loadProject();
   }, [id, propDiseno]);
 
-  // Manejadores de navegación (priorizan props si existen)
   const handleBack = () => {
     if (onBack) {
       onBack();
@@ -116,7 +125,6 @@ export default function Diseno3DDetailView({ diseno: propDiseno, onBack, onEdit,
 
   return (
     <Box sx={{ width: "100%", pb: 6 }}>
-      {/* 1. BARRA SUPERIOR DE NAVEGACIÓN */}
       <Box
         sx={{
           display: "flex",
@@ -173,7 +181,6 @@ export default function Diseno3DDetailView({ diseno: propDiseno, onBack, onEdit,
         </Stack>
       </Box>
 
-      {/* CONTENIDO PRINCIPAL EN DOS COLUMNAS */}
       <Box
         sx={{
           display: "flex",
@@ -183,7 +190,6 @@ export default function Diseno3DDetailView({ diseno: propDiseno, onBack, onEdit,
           alignItems: "stretch"
         }}
       >
-        {/* COLUMNA IZQUIERDA: VISOR 3D EN VIVO */}
         <Box
           sx={{
             flex: { xs: "1 1 100%", md: "0 0 calc(50% - 12px)" },
@@ -305,7 +311,6 @@ export default function Diseno3DDetailView({ diseno: propDiseno, onBack, onEdit,
           </Paper>
         </Box>
 
-        {/* COLUMNA DERECHA: DATOS GENERALES DEL PROYECTO 3D */}
         <Box
           sx={{
             flex: { xs: "1 1 100%", md: "0 0 calc(50% - 12px)" },
@@ -340,7 +345,6 @@ export default function Diseno3DDetailView({ diseno: propDiseno, onBack, onEdit,
                 />
               </Stack>
 
-              {/* ODS MÚLTIPLES */}
               {diseno.ods_detalle && diseno.ods_detalle.length > 0 && (
                 <Box sx={{ mt: 1, mb: 2, display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                   {diseno.ods_detalle.map((ods) => {
@@ -454,7 +458,6 @@ export default function Diseno3DDetailView({ diseno: propDiseno, onBack, onEdit,
         </Box>
       </Box>
 
-      {/* 3. MODAL DE PANTALLA COMPLETA 3D MODULAR */}
       <Diseno3DFullscreenModal
         open={isFullScreen}
         onClose={() => setIsFullScreen(false)}
