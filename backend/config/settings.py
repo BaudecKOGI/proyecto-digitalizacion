@@ -39,6 +39,10 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
 
+    # Cloudinary
+    'cloudinary',
+    'cloudinary_storage',
+
     # Local apps
     'usuarios',
     'proyectos',
@@ -108,7 +112,25 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Media files (uploads)
+# Media files (uploads) - usando Cloudinary si está configurado, sino sistema de archivos local
+DEFAULT_FILE_STORAGE = os.environ.get(
+    'DEFAULT_FILE_STORAGE',
+    'django.core.files.storage.FileSystemStorage'
+)
+
+# Cloudinary configuration (solo si se usan las variables de entorno)
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
+}
+
+# Si las credenciales de Cloudinary están presentes, usar Cloudinary para archivos media
+if all([CLOUDINARY_STORAGE['CLOUD_NAME'], CLOUDINARY_STORAGE['API_KEY'], CLOUDINARY_STORAGE['API_SECRET']]):
+    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+    # Opcional: configurar también para archivos estáticos? No, solo media.
+
+# Media URL (solo para referencia, Cloudinary genera su propia URL)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
