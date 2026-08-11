@@ -30,7 +30,7 @@ import PublicODSPage from "./pages/public/ODS/PublicODSPage";
 import FabLabPage from "./pages/public/FabLab/FabLabPage";
 import EditorLayout from "./layouts/EditorLayout";
 import PublicLayout from "./layouts/PublicLayout";
-import CleanLayout from "./layouts/CleanLayout"; // NUEVO
+import CleanLayout from "./layouts/CleanLayout";
 import { Hub as EditorHub } from "./pages/editor/Hub";
 
 // RUTAS DE 3D

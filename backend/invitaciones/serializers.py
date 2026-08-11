@@ -12,7 +12,7 @@ class InvitacionCrearSerializer(serializers.ModelSerializer):
         required=False,
         default=24,
         min_value=1,
-        max_value=720,  # máximo 30 días (720 horas)
+        max_value=720,
         help_text="Duración del enlace en horas (1-720)"
     )
 

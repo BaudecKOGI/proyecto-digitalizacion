@@ -1,5 +1,3 @@
-// src/services/api.js
-
 export const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
 
 // Función auxiliar para obtener cabeceras con autenticación JWT
@@ -287,10 +285,7 @@ export const deleteProyectoSoftware = async (id) => {
   return handleResponse(res);
 };
 
-// ============================================================
 // CARRERAS
-// ============================================================
-
 export const fetchCarreras = async (params = "") => {
   const url = `${API_BASE_URL}/carreras/carreras/${params ? "?" + params : ""}`;
   const res = await fetch(url, {
@@ -325,10 +320,7 @@ export const deleteCarrera = async (id) => {
   return handleResponse(res);
 };
 
-// ============================================================
-// INVITACIONES (enlace temporal para que un alumno complete un proyecto)
-// ============================================================
-
+// INVITACIONES 
 export const createInvitacion = async ({ tipo, autor_nombre, duracion_horas = 24 }) => {
   const res = await fetch(`${API_BASE_URL}/invitaciones/`, {
     method: "POST",

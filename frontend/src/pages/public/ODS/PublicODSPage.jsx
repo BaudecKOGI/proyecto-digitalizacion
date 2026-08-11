@@ -2,45 +2,38 @@ import React, { useRef, useEffect, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
 import OdsWheel from '../../../components/landing/ods/OdsWheel';
 
-// Phosphor Icons — un ícono curado para cada ODS
-import { HandHeart } from '@phosphor-icons/react/dist/ssr/HandHeart';
-import { Plant } from '@phosphor-icons/react/dist/ssr/Plant';
-import { Heartbeat } from '@phosphor-icons/react/dist/ssr/Heartbeat';
-import { BookOpen } from '@phosphor-icons/react/dist/ssr/BookOpen';
-import { GenderIntersex } from '@phosphor-icons/react/dist/ssr/GenderIntersex';
-import { Drop } from '@phosphor-icons/react/dist/ssr/Drop';
-import { Lightning } from '@phosphor-icons/react/dist/ssr/Lightning';
-import { TrendUp } from '@phosphor-icons/react/dist/ssr/TrendUp';
-import { Factory } from '@phosphor-icons/react/dist/ssr/Factory';
-import { Scales } from '@phosphor-icons/react/dist/ssr/Scales';
-import { Buildings } from '@phosphor-icons/react/dist/ssr/Buildings';
-import { ArrowsClockwise } from '@phosphor-icons/react/dist/ssr/ArrowsClockwise';
-import { Wind } from '@phosphor-icons/react/dist/ssr/Wind';
-import { Fish } from '@phosphor-icons/react/dist/ssr/Fish';
-import { Tree } from '@phosphor-icons/react/dist/ssr/Tree';
-import { Bird } from '@phosphor-icons/react/dist/ssr/Bird';
-import { Handshake } from '@phosphor-icons/react/dist/ssr/Handshake';
+import { ODS_LIST } from '@/pages/dashboard/digitalProjects/odsData';
 
-/* DATOS ODS */
-const ODS_DATA = [
-  { id: 1, color: '#E5243B', Icon: HandHeart, title: 'Fin de la Pobreza', desc: 'Erradicar la pobreza extrema para todas las personas en el mundo de aquí a 2030.', img: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&q=80&w=800' },
-  { id: 2, color: '#DDA63A', Icon: Plant, title: 'Hambre Cero', desc: 'Lograr la seguridad alimentaria, mejorar la nutrición y promover la agricultura sostenible.', img: 'https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&q=80&w=800' },
-  { id: 3, color: '#4C9F38', Icon: Heartbeat, title: 'Salud y Bienestar', desc: 'Garantizar una vida sana y promover el bienestar para todos en todas las edades.', img: 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&q=80&w=800' },
-  { id: 4, color: '#C5192D', Icon: BookOpen, title: 'Educación de Calidad', desc: 'Garantizar una educación inclusiva, equitativa y de calidad y promover oportunidades de aprendizaje.', img: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&q=80&w=800' },
-  { id: 5, color: '#FF3A21', Icon: GenderIntersex, title: 'Igualdad de Género', desc: 'Lograr la igualdad de género y empoderar a todas las mujeres y niñas.', img: 'https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&q=80&w=800' },
-  { id: 6, color: '#26BDE2', Icon: Drop, title: 'Agua Limpia y Saneamiento', desc: 'Garantizar la disponibilidad y gestión sostenible del agua y el saneamiento para todos.', img: 'https://images.unsplash.com/photo-1470115636492-6d2b56f9146d?auto=format&fit=crop&q=80&w=800' },
-  { id: 7, color: '#FCC30B', Icon: Lightning, title: 'Energía Asequible', desc: 'Garantizar el acceso a energía asequible, fiable, sostenible y moderna para todos.', img: 'https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?auto=format&fit=crop&q=80&w=800' },
-  { id: 8, color: '#A21942', Icon: TrendUp, title: 'Trabajo Decente y Crecimiento', desc: 'Promover el crecimiento económico sostenido, inclusivo y el trabajo decente para todos.', img: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80&w=800' },
-  { id: 9, color: '#FD6925', Icon: Factory, title: 'Industria, Innovación e Infraestructura', desc: 'Construir infraestructuras resilientes, promover la industrialización y la innovación.', img: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=800' },
-  { id: 10, color: '#DD1367', Icon: Scales, title: 'Reducción de Desigualdades', desc: 'Reducir la desigualdad en y entre los países.', img: 'https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?auto=format&fit=crop&q=80&w=800' },
-  { id: 11, color: '#FD9D24', Icon: Buildings, title: 'Ciudades y Comunidades Sostenibles', desc: 'Lograr que las ciudades sean inclusivas, seguras, resilientes y sostenibles.', img: 'https://images.unsplash.com/photo-1449844908441-8829872d2607?auto=format&fit=crop&q=80&w=800' },
-  { id: 12, color: '#BF8B2E', Icon: ArrowsClockwise, title: 'Producción y Consumo Responsables', desc: 'Garantizar modalidades de consumo y producción sostenibles.', img: 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&q=80&w=800' },
-  { id: 13, color: '#3F7E44', Icon: Wind, title: 'Acción por el Clima', desc: 'Adoptar medidas urgentes para combatir el cambio climático y sus efectos.', img: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=800' },
-  { id: 14, color: '#0A97D9', Icon: Fish, title: 'Vida Submarina', desc: 'Conservar y utilizar de forma sostenible los océanos, los mares y los recursos marinos.', img: 'https://images.unsplash.com/photo-1582967788606-a171c1080cb0?auto=format&fit=crop&q=80&w=800' },
-  { id: 15, color: '#56C02B', Icon: Tree, title: 'Vida de Ecosistemas Terrestres', desc: 'Proteger, restablecer y promover el uso sostenible de los ecosistemas terrestres.', img: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&q=80&w=800' },
-  { id: 16, color: '#00689D', Icon: Bird, title: 'Paz, Justicia e Instituciones Sólidas', desc: 'Promover sociedades pacíficas e inclusivas para el desarrollo sostenible.', img: 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&q=80&w=800' },
-  { id: 17, color: '#19486A', Icon: Handshake, title: 'Alianzas para Lograr los Objetivos', desc: 'Fortalecer los medios de implementación y revitalizar la Alianza Mundial para el DS.', img: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&q=80&w=800' },
-];
+/* DESCRIPCIONES E IMÁGENES EXTRA PARA LA WEB PÚBLICA */
+const ODS_EXTRA_INFO = {
+  1: { title: 'Fin de la Pobreza', desc: 'Erradicar la pobreza extrema para todas las personas en el mundo de aquí a 2030.', img: '/assets/ods/ods1.png' },
+  2: { title: 'Hambre Cero', desc: 'Lograr la seguridad alimentaria, mejorar la nutrición y promover la agricultura sostenible.', img: '/assets/ods/ods2.png' },
+  3: { title: 'Salud y Bienestar', desc: 'Garantizar una vida sana y promover el bienestar para todos en todas las edades.', img: '/assets/ods/ods3.png' },
+  4: { title: 'Educación de Calidad', desc: 'Garantizar una educación inclusiva, equitativa y de calidad y promover oportunidades de aprendizaje.', img: '/assets/ods/ods4.png' },
+  5: { title: 'Igualdad de Género', desc: 'Lograr la igualdad de género y empoderar a todas las mujeres y niñas.', img: '/assets/ods/ods5.png' },
+  6: { title: 'Agua Limpia y Saneamiento', desc: 'Garantizar la disponibilidad y gestión sostenible del agua y el saneamiento para todos.', img: '/assets/ods/ods6.jpg' },
+  7: { title: 'Energía Asequible y No Contaminante', desc: 'Garantizar el acceso a energía asequible, fiable, sostenible y moderna para todos.', img: '/assets/ods/ods7.png' },
+  8: { title: 'Trabajo Decente y Crecimiento Económico', desc: 'Promover el crecimiento económico sostenido, inclusivo y el trabajo decente para todos.', img: '/assets/ods/ods8.png' },
+  9: { title: 'Industria, Innovación e Infraestructura', desc: 'Construir infraestructuras resilientes, promover la industrialización y la innovación.', img: '/assets/ods/ods9.png' },
+  10: { title: 'Reducción de las Desigualdades', desc: 'Reducir la desigualdad en y entre los países.', img: '/assets/ods/ods10.png' },
+  11: { title: 'Ciudades y Comunidades Sostenibles', desc: 'Lograr que las ciudades sean inclusivas, seguras, resilientes y sostenibles.', img: '/assets/ods/ods11.png' },
+  12: { title: 'Producción y Consumo Responsables', desc: 'Garantizar modalidades de consumo y producción sostenibles.', img: '/assets/ods/ods12.png' },
+  13: { title: 'Acción por el Clima', desc: 'Adoptar medidas urgentes para combatir el cambio climático y sus efectos.', img: '/assets/ods/ods13.png' },
+  14: { title: 'Vida Submarina', desc: 'Conservar y utilizar de forma sostenible los océanos, los mares y los recursos marinos.', img: '/assets/ods/ods14.png' },
+  15: { title: 'Vida de Ecosistemas Terrestres', desc: 'Proteger, restablecer y promover el uso sostenible de los ecosistemas terrestres.', img: '/assets/ods/ods15.png' },
+  16: { title: 'Paz, Justicia e Instituciones Sólidas', desc: 'Promover sociedades pacíficas e inclusivas para el desarrollo sostenible.', img: '/assets/ods/ods16.png' },
+  17: { title: 'Alianzas para Lograr los Objetivos', desc: 'Fortalecer los medios de implementación y revitalizar la Alianza Mundial para el DS.', img: '/assets/ods/ods17.png' },
+};
+
+/* COMBINANDO LA DATA OFICIAL CON LA INFO DE LA WEB */
+const ODS_DATA = ODS_LIST.map(ods => ({
+  id: ods.id,
+  color: ods.color,
+  Icon: ods.icon,
+  title: ODS_EXTRA_INFO[ods.id].title,
+  desc: ODS_EXTRA_INFO[ods.id].desc,
+  img: ODS_EXTRA_INFO[ods.id].img
+}));
 
 /*SUB-COMPONENTES*/
 function OdsCard({ ods, index }) {
@@ -101,16 +94,13 @@ export default function PublicODSPage() {
     <div className="w-full flex flex-col" style={{ background: '#f8f9fb' }}>
 
       {/* HERO ODS */}
-      <section className="relative flex min-h-[58vh] items-end overflow-hidden bg-white">
+      <section className="relative flex min-h-[58vh] items-end overflow-hidden bg-gray-950"> {/* Cambiado a fondo oscuro para que resalte la imagen si es clara, o puedes dejarlo bg-white si la imagen es oscura */}
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: "url('/assets/heros/ods-hero-bg.png')" }}
         />
-        {/* Gradient overlays to protect text legibility while showing image on the right */}
-        <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/70 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-white via-white/20 to-transparent" />
-
-        {/* Orbs decorativos para darle vida extra */}
+        <div className="absolute inset-0 bg-gradient-to-r from-white/80 via-white/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-white/60 via-transparent to-transparent" />
         <div className="pointer-events-none absolute left-[12%] top-1/3 h-72 w-72 rounded-full bg-blue-500/10 blur-[100px]" />
         <div className="pointer-events-none absolute right-[8%] bottom-1/4 h-56 w-56 rounded-full bg-cyan-400/20 blur-[80px]" />
 
@@ -226,7 +216,7 @@ export default function PublicODSPage() {
                       >
                         {activeOds.title}
                       </h3>
-                      <p 
+                      <p
                         className="text-[18px] leading-[19px] text-[#212529] font-light"
                         style={{ fontFamily: 'Roboto, sans-serif' }}
                       >

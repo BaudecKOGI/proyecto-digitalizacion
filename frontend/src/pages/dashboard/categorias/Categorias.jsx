@@ -19,6 +19,7 @@ import { Link as RouterLink } from "react-router-dom";
 
 import { MagnifyingGlass as SearchIcon } from "@phosphor-icons/react/dist/ssr/MagnifyingGlass";
 import { Plus as PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
+import { DashboardLoader } from "@/components/dashboard/layout/DashboardLoader";
 import { Tag as TagIcon } from "@phosphor-icons/react/dist/ssr/Tag";
 
 import {
@@ -200,9 +201,6 @@ export default function CategoriasPage() {
         }}
       >
         <Box>
-          <Typography variant="caption" sx={{ color: "#64748B", fontWeight: 500, display: "block", mb: 0.5 }}>
-            <Link component={RouterLink} to="/dashboard" color="inherit" underline="hover">Inicio</Link> / Categorías
-          </Typography>
           <Typography variant="h4" sx={{ fontWeight: 800, color: "text.primary", mb: 0.5 }}>
             Gestión de Categorías
           </Typography>
@@ -217,20 +215,21 @@ export default function CategoriasPage() {
         sx={{
           mb: 4,
           display: "flex",
-          flexWrap: "wrap",
+          flexDirection: { xs: "column", md: "row" },
           gap: 2,
-          alignItems: "center",
+          alignItems: { xs: "stretch", md: "center" },
           justifyContent: "space-between"
         }}
       >
         <TextField
+          fullWidth
           size="small"
           placeholder="Buscar categoría por nombre o descripción..."
           label="Buscar"
           value={searchTerm}
           onChange={handleSearchChange}
           sx={{
-            width: { xs: "100%", sm: 360 },
+            width: { xs: "100%", md: 360 },
             "& .MuiOutlinedInput-root": {
               bgcolor: "#FFFFFF",
               borderRadius: "2px",
@@ -248,8 +247,12 @@ export default function CategoriasPage() {
           }}
         />
 
-        <Stack direction="row" alignItems="center" spacing={3}>
-          <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
+        <Stack 
+          direction={{ xs: "column", sm: "row" }} 
+          alignItems={{ xs: "stretch", sm: "center" }} 
+          spacing={3}
+        >
+          <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600, textAlign: { xs: "center", sm: "left" } }}>
             Total categorías: <strong>{categorias.length}</strong>
           </Typography>
           <Button
@@ -276,9 +279,7 @@ export default function CategoriasPage() {
 
       {/* Tabla de Categorías */}
       {loading ? (
-        <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-          <CircularProgress sx={{ color: "#F79009" }} />
-        </Box>
+        <DashboardLoader text="Cargando categorías..." />
       ) : categorias.length === 0 ? (
         <Card
           sx={{

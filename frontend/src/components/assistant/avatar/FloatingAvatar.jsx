@@ -1,10 +1,9 @@
-// src/components/assistant/avatar/FloatingAvatar.jsx
 import React from 'react';
 import { Canvas } from '@react-three/fiber';
 import { motion } from 'framer-motion';
 import { RobotHead } from './RobotHead3D';
 
-/* ─── Botón flotante con Canvas ─── */
+/* Botón flotante con Canvas*/
 export default function FloatingAvatar({ onClick, isOpen }) {
   return (
     <motion.button

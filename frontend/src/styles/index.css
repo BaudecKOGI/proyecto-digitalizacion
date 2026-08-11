@@ -2,29 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ==========================================================
-   Variables Globales - Diseño Institucional
-========================================================== */
+/* Variables Globales - Diseño Institucional */
 :root {
   --bg: #FFFFFF;
   --panel: #F8F9FA;
   --grid: #E9ECEF;
   --line: #DEE2E6;
   --text: #0F172A;
-  /* Deep dark blue for text */
   --muted: #64748B;
   --c3d: #6802C1;
-  /* Cyan/Teal for 3D */
   --c3d-soft: #ECFEFF;
   --cdig: #4F46E5;
-  /* Indigo for Digital */
   --cdig-soft: #EEF2FF;
 
-  /* Additions: Senior Design System Palette */
   --surface: #F1F5F9;
-  /* Elevated surface */
   --accent: #F43F5E;
-  /* Interactive Coral Accent */
   --accent-soft: #FFE4E6;
   --success: #10B981;
   --warning: #F59E0B;
@@ -50,7 +42,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* All headings inherit Poppins secondary typography with tighter letter spacing */
 h1,
 h2,
 h3,

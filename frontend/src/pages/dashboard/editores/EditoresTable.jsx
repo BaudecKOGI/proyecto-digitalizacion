@@ -23,6 +23,8 @@ import {
 } from "@mui/material";
 
 import { Eye as EyeIcon } from "@phosphor-icons/react/dist/ssr/Eye";
+import { MagnifyingGlass as SearchIcon } from "@phosphor-icons/react/dist/ssr/MagnifyingGlass";
+import { DashboardLoader } from "@/components/dashboard/layout/DashboardLoader";
 import { PencilSimple as EditIcon } from "@phosphor-icons/react/dist/ssr/PencilSimple";
 import { Trash as TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
 import { DotsThreeVertical } from "@phosphor-icons/react/dist/ssr/DotsThreeVertical";
@@ -106,11 +108,7 @@ export default function EditoresTable({
   }, [sortedEditores, page, rowsPerPage]);
 
   if (loading) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-        <CircularProgress size={36} sx={{ color: "#6366F1" }} />
-      </Box>
-    );
+    return <DashboardLoader text="Cargando editores..." />;
   }
 
   if (editores.length === 0) {

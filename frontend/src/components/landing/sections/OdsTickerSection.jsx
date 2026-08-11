@@ -3,23 +3,23 @@ import { ODS_LIST } from '@/pages/dashboard/digitalProjects/odsData';
 
 // Imágenes de mayor resolución y calidad
 const ODS_BG_IMAGES = {
-  1: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=800&q=90",
-  2: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=800&q=90",
-  3: "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=800&q=90",
-  4: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=800&q=90",
-  5: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=90",
-  6: "https://images.unsplash.com/photo-1548826879-189bc7504044?auto=format&fit=crop&w=800&q=90",
-  7: "https://images.unsplash.com/photo-1466611653911-95081537e5b7?auto=format&fit=crop&w=800&q=90",
-  8: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=90",
-  9: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=800&q=90",
-  10: "https://images.unsplash.com/photo-1531206715517-5c0ba140e2b8?auto=format&fit=crop&w=800&q=90",
-  11: "https://images.unsplash.com/photo-1449034446853-66c86144b0ad?auto=format&fit=crop&w=800&q=90",
-  12: "https://images.unsplash.com/photo-1532996127008-052445996306?auto=format&fit=crop&w=800&q=90",
-  13: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=800&q=90",
-  14: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=90",
-  15: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=800&q=90",
-  16: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=90",
-  17: "https://images.unsplash.com/photo-1511556532299-8f662fc26c06?auto=format&fit=crop&w=800&q=90",
+  1: "/assets/ods/ods1.png",
+  2: "/assets/ods/ods2.png",
+  3: "/assets/ods/ods3.png",
+  4: "/assets/ods/ods4.png",
+  5: "/assets/ods/ods5.png",
+  6: "/assets/ods/ods6.jpg",
+  7: "/assets/ods/ods7.png",
+  8: "/assets/ods/ods8.png",
+  9: "/assets/ods/ods9.png",
+  10: "/assets/ods/ods10.png",
+  11: "/assets/ods/ods11.png",
+  12: "/assets/ods/ods12.png",
+  13: "/assets/ods/ods13.png",
+  14: "/assets/ods/ods14.png",
+  15: "/assets/ods/ods15.png",
+  16: "/assets/ods/ods16.png",
+  17: "/assets/ods/ods17.png",
 };
 
 export default function OdsTickerSection({ onSelectOds }) {
@@ -88,7 +88,7 @@ export default function OdsTickerSection({ onSelectOds }) {
                 key={`${ods.id}-${index}`}
                 className="group relative flex h-[260px] w-[200px] sm:h-[340px] sm:w-[260px] shrink-0 flex-col justify-between p-4 sm:p-6 text-left text-white transition-all duration-500 hover:scale-[1.03] hover:shadow-2xl cursor-default rounded-none select-none shadow-lg overflow-hidden border border-white/10"
               >
-                {/* Imagen de fondo (ahora de alta calidad) */}
+                {/* Imagen de fondo */}
                 {bgImage && (
                   <div
                     className="absolute inset-0 z-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"

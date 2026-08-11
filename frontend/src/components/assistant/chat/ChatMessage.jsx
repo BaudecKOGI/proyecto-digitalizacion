@@ -74,7 +74,6 @@ export default function ChatMessage({ message }) {
         <div
           style={{
             background: '#FFFFFF',
-            /* Cola apuntando al avatar (abajo-izquierda) */
             borderRadius: '18px 18px 18px 2px',
             boxShadow: '0 1px 4px rgba(0,0,0,0.18)',
           }}

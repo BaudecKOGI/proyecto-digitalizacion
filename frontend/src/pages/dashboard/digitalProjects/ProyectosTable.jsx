@@ -174,14 +174,14 @@ export default function ProyectosTable({
                       fontWeight: 700,
                       height: 24,
                       borderRadius: "12px",
-                      bgcolor: p.estado_publicacion === "PUBLICADO" ? "#E8F5E9" : "#FFF8E1",
-                      color: p.estado_publicacion === "PUBLICADO" ? "#2E7D32" : "#F57F17",
+                      bgcolor: p.estado_publicacion === "PUBLICADO" ? "#E8F5E9" : "#F5F5F5",
+                      color: p.estado_publicacion === "PUBLICADO" ? "#2E7D32" : "#616161",
                       "& .MuiOutlinedInput-notchedOutline": { border: "none" },
                       "& .MuiSelect-icon": { color: "inherit" }
                     }}
                   >
                     <MenuItem value="PUBLICADO" sx={{ fontSize: "0.75rem", fontWeight: 700, color: "#2E7D32" }}>PUBLICADO</MenuItem>
-                    <MenuItem value="BORRADOR" sx={{ fontSize: "0.75rem", fontWeight: 700, color: "#F57F17" }}>BORRADOR</MenuItem>
+                    <MenuItem value="BORRADOR" sx={{ fontSize: "0.75rem", fontWeight: 700, color: "#616161" }}>BORRADOR</MenuItem>
                   </Select>
                 </FormControl>
               </Stack>
@@ -408,14 +408,14 @@ export default function ProyectosTable({
                       fontWeight: 700,
                       height: 28,
                       borderRadius: "16px",
-                      bgcolor: p.estado_publicacion === "PUBLICADO" ? "#E8F5E9" : "#FFF8E1",
-                      color: p.estado_publicacion === "PUBLICADO" ? "#2E7D32" : "#F57F17",
+                      bgcolor: p.estado_publicacion === "PUBLICADO" ? "#E8F5E9" : "#F5F5F5",
+                      color: p.estado_publicacion === "PUBLICADO" ? "#2E7D32" : "#616161",
                       "& .MuiOutlinedInput-notchedOutline": { border: "none" },
                       "& .MuiSelect-icon": { color: "inherit" }
                     }}
                   >
                     <MenuItem value="PUBLICADO" sx={{ fontSize: "0.75rem", fontWeight: 700, color: "#2E7D32" }}>PUBLICADO</MenuItem>
-                    <MenuItem value="BORRADOR" sx={{ fontSize: "0.75rem", fontWeight: 700, color: "#F57F17" }}>BORRADOR</MenuItem>
+                    <MenuItem value="BORRADOR" sx={{ fontSize: "0.75rem", fontWeight: 700, color: "#616161" }}>BORRADOR</MenuItem>
                   </Select>
                 </FormControl>
               </TableCell>

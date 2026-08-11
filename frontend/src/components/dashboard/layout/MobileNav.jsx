@@ -105,7 +105,7 @@ export function MobileNav({ open, onClose }) {
 				{renderNavItems({ pathname, items: getNavItems() })}
 			</Box>
 
-			{/* Botón de Cierre de sesión al pie de la barra lateral (punteagudo y sin bordes) */}
+			{/* Botón de Cierre de sesión al pie de la barra lateral */}
 			<Divider sx={{ borderColor: "var(--mui-palette-neutral-800)" }} />
 			<Box sx={{ p: "12px" }}>
 				<Box

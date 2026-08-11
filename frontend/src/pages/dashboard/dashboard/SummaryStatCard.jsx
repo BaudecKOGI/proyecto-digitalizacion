@@ -3,8 +3,7 @@ import { Card, Box, Typography, Stack } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 
 /**
- * TARJETA DE ESTADÍSTICA (KPI) DEL DASHBOARD
- * Diseño inspirado en el panel del Editor, sin subtítulo.
+ * TARJETA DE ESTADÍSTICA 
  */
 export default function SummaryStatCard({
   title,

@@ -12,7 +12,7 @@ class UsuarioSerializer(serializers.ModelSerializer):
     proyectos_3d_count = serializers.SerializerMethodField()
     proyectos_software_count = serializers.SerializerMethodField()
     
-    # NUEVOS: listas de proyectos con título y fecha
+    # Listas de proyectos con título y fecha
     proyectos_3d_list = serializers.SerializerMethodField()
     proyectos_software_list = serializers.SerializerMethodField()
 
@@ -27,8 +27,8 @@ class UsuarioSerializer(serializers.ModelSerializer):
             'avatar_url',
             'proyectos_3d_count',
             'proyectos_software_count',
-            'proyectos_3d_list',        # nuevo
-            'proyectos_software_list',  # nuevo
+            'proyectos_3d_list',  
+            'proyectos_software_list',
             'is_active',
             'password',
             'updated_at',
@@ -61,7 +61,7 @@ class UsuarioSerializer(serializers.ModelSerializer):
         from proyectos.models import ProyectoSoftware
         return ProyectoSoftware.objects.filter(creado_por=obj).count()
 
-    # NUEVOS: métodos para obtener listas de proyectos
+    # Obtener listas de proyectos
     def get_proyectos_3d_list(self, obj):
         from proyectos.models import Proyecto3D
         proyectos = Proyecto3D.objects.filter(creado_por=obj).order_by('-created_at')

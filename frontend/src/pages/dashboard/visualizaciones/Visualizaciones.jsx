@@ -65,12 +65,7 @@ export default function VisualizacionesPage() {
   return (
     <Box sx={{ pb: 4, maxWidth: 1360, margin: "0 auto" }}>
       <Box sx={{ width: "100%" }}>
-        <Typography variant="caption" sx={{ color: "#64748B", fontWeight: 500, display: "block", mb: 0.5 }}>
-          <Link component={RouterLink} to="/dashboard" color="inherit" underline="hover">Inicio</Link> / Visualizaciones
-        </Typography>
-
         <VisualizacionesChart metricas={metricas} syncButton={syncButton} />
-        
         <MetricasRankingTable metricas={metricas} />
       </Box>
     </Box>

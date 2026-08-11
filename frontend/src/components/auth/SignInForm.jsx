@@ -88,7 +88,6 @@ export function SignInForm() {
 				return;
 			}
 
-			// Refresh the auth state
 			await checkSession?.();
 
 			if (data?.user?.rol === "EDITOR") {

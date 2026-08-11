@@ -36,7 +36,6 @@ export function UserProvider({ children }) {
 			logger.error(error);
 			// noop
 		});
-		// eslint-disable-next-line react-hooks/exhaustive-deps -- Expected
 	}, []);
 
 	return <UserContext.Provider value={{ ...state, checkSession }}>{children}</UserContext.Provider>;

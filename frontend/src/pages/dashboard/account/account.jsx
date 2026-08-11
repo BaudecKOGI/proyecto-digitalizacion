@@ -12,9 +12,6 @@ export default function Page() {
 	return (
 		<Stack spacing={3}>
 			<div>
-				<Typography variant="caption" sx={{ color: "#64748B", fontWeight: 500, display: "block", mb: 0.5 }}>
-					<Link component={RouterLink} to="/dashboard" color="inherit" underline="hover">Inicio</Link> / Cuenta
-				</Typography>
 				<Typography variant="h4">Cuenta</Typography>
 			</div>
 			<Grid container spacing={3}>

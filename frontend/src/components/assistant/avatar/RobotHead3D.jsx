@@ -1,9 +1,7 @@
-// src/components/assistant/avatar/RobotHead3D.jsx
-// Componente reutilizable: el robot 3D que se usa tanto en el botón flotante como en el chat
 import React, { useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 
-/* ─── Geometría del robot (compartida) ─── */
+/* Geometría del robot */
 export function RobotHead() {
   const groupRef = useRef();
   const eyeLeftRef = useRef();
@@ -101,7 +99,7 @@ export function RobotHead() {
   );
 }
 
-/* ─── Mini avatar para usar dentro del chat ─── */
+/* Mini avatar para usar dentro del chat */
 export function MiniRobotAvatar({ size = 36 }) {
   return (
     <div

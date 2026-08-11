@@ -20,6 +20,8 @@ import {
 } from "@mui/material";
 
 import { PencilSimple as EditIcon } from "@phosphor-icons/react/dist/ssr/PencilSimple";
+import { DotsThreeVertical } from "@phosphor-icons/react/dist/ssr/DotsThreeVertical";
+import { DashboardLoader } from "@/components/dashboard/layout/DashboardLoader";
 import { Trash as TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
 import { Eye as EyeIcon } from "@phosphor-icons/react/dist/ssr/Eye";
 import { GraduationCap as CarreraIcon } from "@phosphor-icons/react/dist/ssr/GraduationCap";
@@ -62,11 +64,7 @@ export default function CarrerasTable({
   };
 
   if (loading) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-        <CircularProgress size={36} sx={{ color: "#6366F1" }} />
-      </Box>
-    );
+    return <DashboardLoader text="Cargando carreras..." />;
   }
 
   // Estado "sin resultados" (búsqueda sin coincidencias)

@@ -56,6 +56,15 @@ class MetricaProyectoViewSet(viewsets.ModelViewSet):
         metrica.save()
         return Response(self.get_serializer(metrica).data, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=['post'], url_path=r'por-proyecto/(?P<proyecto_id>\d+)/unlike')
+    def unlike_por_proyecto(self, request, proyecto_id=None):
+        proyecto = get_object_or_404(Proyecto, pk=proyecto_id)
+        metrica, _ = MetricaProyecto.objects.get_or_create(proyecto=proyecto)
+        if metrica.likes_totales > 0:
+            metrica.likes_totales -= 1
+            metrica.save()
+        return Response(self.get_serializer(metrica).data, status=status.HTTP_200_OK)
+
     @action(detail=False, methods=['post'], url_path=r'por-proyecto/(?P<proyecto_id>\d+)/share')
     def share_por_proyecto(self, request, proyecto_id=None):
         proyecto = get_object_or_404(Proyecto, pk=proyecto_id)

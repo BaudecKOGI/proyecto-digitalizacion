@@ -24,16 +24,16 @@ export default function ChatPanel({ isOpen, messages, isLoading, onSend, onClose
           transition={{ type: 'spring', stiffness: 400, damping: 30 }}
           className="absolute bottom-20 right-0 flex flex-col overflow-hidden"
           style={{
-            /* ── Responsive: full-screen en mobile, panel fijo en desktop ── */
+            /* Responsive: full-screen en mobile, panel fijo en desktop */
             width: 'min(360px, calc(100vw - 32px))',
             height: 'min(520px, calc(100dvh - 130px))',
-            borderRadius: 0,                                    /* Sin border radius */
+            borderRadius: 0,
             background: '#F1F5F9',
             border: '1px solid rgba(0,0,0,0.1)',
             boxShadow: '0 24px 80px rgba(0,0,0,0.2), 0 0 0 1px rgba(0,0,0,0.05)',
           }}
         >
-          {/* ── Header ── */}
+          {/* Header */}
           <div
             className="shrink-0 flex items-center gap-3 px-4 py-3 border-b"
             style={{ borderColor: 'rgba(0,0,0,0.08)' }}
@@ -72,7 +72,7 @@ export default function ChatPanel({ isOpen, messages, isLoading, onSend, onClose
             </div>
           </div>
 
-          {/* ── Mensajes ── */}
+          {/* Mensajes */}
           <div
             ref={scrollRef}
             className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-4"
@@ -83,7 +83,7 @@ export default function ChatPanel({ isOpen, messages, isLoading, onSend, onClose
             ))}
           </div>
 
-          {/* ── Input ── */}
+          {/* Input */}
           <div className="shrink-0 px-4 pb-4">
             <ChatInput onSend={onSend} isLoading={isLoading} />
           </div>
