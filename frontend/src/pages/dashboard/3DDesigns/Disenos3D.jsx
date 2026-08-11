@@ -392,6 +392,7 @@ export default function Disenos3D() {
       <GenerarInvitacionDialog
         open={openInvitacionDialog}
         onClose={() => setOpenInvitacionDialog(false)}
+        tipo="3D"
         onSuccess={() => {
           setOpenInvitacionDialog(false);
           loadData();
