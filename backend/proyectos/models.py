@@ -1,6 +1,12 @@
 from django.db import models
+from cloudinary_storage.storage import (
+    MediaCloudinaryStorage,
+    RawMediaCloudinaryStorage,
+    VideoMediaCloudinaryStorage,
+)
 from usuarios.models import Usuario
 from carreras.models import Carrera
+
 
 class Categoria(models.Model):
     nombre = models.CharField(max_length=50, unique=True)
@@ -35,7 +41,11 @@ class ProyectoODS(models.Model):
     """
     Modelo intermedio para relacionar muchos ODS con un proyecto.
     """
-    proyecto = models.ForeignKey('Proyecto', on_delete=models.CASCADE, related_name='ods_relacionados')
+    proyecto = models.ForeignKey(
+        'Proyecto',
+        on_delete=models.CASCADE,
+        related_name='ods_relacionados',
+    )
     ods_id = models.PositiveSmallIntegerField()  # 1-17
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -64,18 +74,30 @@ class Proyecto(models.Model):
         null=True,
         blank=True,
         related_name='proyectos',
-        verbose_name="Carrera"
+        verbose_name="Carrera",
     )
     ciclo = models.PositiveSmallIntegerField(
         null=True,
         blank=True,
         choices=[(i, i) for i in range(1, 13)],
-        verbose_name="Ciclo"
+        verbose_name="Ciclo",
     )
 
-    estado_publicacion = models.CharField(max_length=20, choices=ESTADOS, default='BORRADOR')
-    creado_por = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='proyectos')
-    categoria = models.ForeignKey(Categoria, on_delete=models.SET_NULL, null=True)
+    estado_publicacion = models.CharField(
+        max_length=20,
+        choices=ESTADOS,
+        default='BORRADOR',
+    )
+    creado_por = models.ForeignKey(
+        Usuario,
+        on_delete=models.CASCADE,
+        related_name='proyectos',
+    )
+    categoria = models.ForeignKey(
+        Categoria,
+        on_delete=models.SET_NULL,
+        null=True,
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -89,8 +111,18 @@ class Proyecto(models.Model):
 
 
 class Proyecto3D(Proyecto):
-    archivo_fbx = models.FileField(upload_to='modelos_3d/fbx/')
-    imagen_miniatura = models.ImageField(upload_to='portadas/3d/', null=True, blank=True)
+    # FBX / modelos 3D → raw (NO image)
+    archivo_fbx = models.FileField(
+        upload_to='modelos_3d/fbx/',
+        storage=RawMediaCloudinaryStorage(),
+    )
+    # Miniatura → image
+    imagen_miniatura = models.ImageField(
+        upload_to='portadas/3d/',
+        storage=MediaCloudinaryStorage(),
+        null=True,
+        blank=True,
+    )
     configuracion_interactiva = models.JSONField(default=dict, blank=True)
 
     class Meta:
@@ -99,11 +131,27 @@ class Proyecto3D(Proyecto):
 
 
 class ProyectoSoftware(Proyecto):
-    archivo_video = models.FileField(upload_to='videos_software/', null=True, blank=True)
+    # Video → video
+    archivo_video = models.FileField(
+        upload_to='videos_software/',
+        storage=VideoMediaCloudinaryStorage(),
+        null=True,
+        blank=True,
+    )
     url_repositorio = models.URLField(max_length=200, blank=True, null=True)
     url_demo_live = models.URLField(max_length=200, blank=True, null=True)
-    imagen_portada = models.ImageField(upload_to='portadas/software/', null=True, blank=True)
-    tecnologias = models.ManyToManyField(Tecnologia, related_name='proyectos_software', blank=True)
+    # Portada → image
+    imagen_portada = models.ImageField(
+        upload_to='portadas/software/',
+        storage=MediaCloudinaryStorage(),
+        null=True,
+        blank=True,
+    )
+    tecnologias = models.ManyToManyField(
+        Tecnologia,
+        related_name='proyectos_software',
+        blank=True,
+    )
 
     class Meta:
         verbose_name = "Proyecto de Software"
