@@ -1,8 +1,21 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Box, Typography, Button, Stack, Chip, Divider, Menu, MenuItem, ListItemIcon, ListItemText } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Button,
+  Stack,
+  Chip,
+  Divider,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
+} from "@mui/material";
 import { Heart, Download } from "lucide-react";
 import { OdsBadge } from "@/pages/dashboard/digitalProjects/odsData";
+
+const API_BASE = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api";
 
 export default function Detalles3D({
   diseno,
@@ -28,37 +41,53 @@ export default function Detalles3D({
     }
   }, [diseno]);
 
-  const handleLike = () => {
-    const likes = JSON.parse(localStorage.getItem("liked_3d_projects") || "[]");
+  const handleLike = async () => {
+    if (!diseno?.id) return;
+
+    const key = "liked_3d_projects";
+    const likes = JSON.parse(localStorage.getItem(key) || "[]");
+    const id = diseno.id;
 
     if (!liked) {
       setLiked(true);
       setLikesCount((prev) => prev + 1);
 
-      // Guardar localmente para persistencia
-      if (!likes.includes(diseno.id)) {
-        likes.push(diseno.id);
-        localStorage.setItem("liked_3d_projects", JSON.stringify(likes));
+      if (!likes.includes(id)) {
+        likes.push(id);
+        localStorage.setItem(key, JSON.stringify(likes));
       }
 
-      if (diseno && diseno.id) {
-        fetch(`http://127.0.0.1:8000/api/metricas/por-proyecto/${diseno.id}/like/`, {
+      try {
+        const res = await fetch(`${API_BASE}/metricas/por-proyecto/${id}/like/`, {
           method: "POST",
-        }).catch(() => { });
-      }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (typeof data.likes_totales === "number") {
+            setLikesCount(data.likes_totales);
+          }
+        }
+      } catch (_) {}
     } else {
       setLiked(false);
-      setLikesCount((prev) => prev - 1);
-      
-      // Remover localmente
-      const updatedLikes = likes.filter(id => id !== diseno.id);
-      localStorage.setItem("liked_3d_projects", JSON.stringify(updatedLikes));
+      setLikesCount((prev) => Math.max(0, prev - 1));
 
-      if (diseno && diseno.id) {
-        fetch(`http://127.0.0.1:8000/api/metricas/por-proyecto/${diseno.id}/unlike/`, {
+      localStorage.setItem(
+        key,
+        JSON.stringify(likes.filter((x) => x !== id))
+      );
+
+      try {
+        const res = await fetch(`${API_BASE}/metricas/por-proyecto/${id}/unlike/`, {
           method: "POST",
-        }).catch(() => { });
-      }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (typeof data.likes_totales === "number") {
+            setLikesCount(data.likes_totales);
+          }
+        }
+      } catch (_) {}
     }
   };
 
@@ -71,7 +100,10 @@ export default function Detalles3D({
   };
 
   const shareWhatsApp = () => {
-    window.open(`https://api.whatsapp.com/send?text=¡Mira este modelo 3D! ${encodeURIComponent(window.location.href)}`, '_blank');
+    window.open(
+      `https://api.whatsapp.com/send?text=¡Mira este modelo 3D! ${encodeURIComponent(window.location.href)}`,
+      "_blank"
+    );
     handleShareClose();
   };
 
@@ -98,7 +130,6 @@ export default function Detalles3D({
         opacity: { xs: sidebarOpen ? 1 : 0, md: 1 },
       }}
     >
-      {/* Header del sidebar */}
       <Box
         sx={{
           p: 2.5,
@@ -115,16 +146,15 @@ export default function Detalles3D({
         >
           Detalles del Modelo 3D
         </Typography>
-        <Link to="/" style={{ display: 'inline-flex' }} title="Volver a la página principal">
+        <Link to="/" style={{ display: "inline-flex" }} title="Volver a la página principal">
           <img
             src="/assets/logos/logo-continental-negro.png"
             alt="Universidad Continental"
-            style={{ height: 32, objectFit: 'contain', opacity: 0.85 }}
+            style={{ height: 32, objectFit: "contain", opacity: 0.85 }}
           />
         </Link>
       </Box>
 
-      {/* Contenido scrolleable */}
       <Box
         sx={{
           p: 3,
@@ -167,7 +197,13 @@ export default function Detalles3D({
             variant={liked ? "contained" : "outlined"}
             size="small"
             onClick={handleLike}
-            startIcon={<Heart size={16} fill={liked ? "#fff" : "none"} color={liked ? "#fff" : "currentColor"} />}
+            startIcon={
+              <Heart
+                size={16}
+                fill={liked ? "#fff" : "none"}
+                color={liked ? "#fff" : "currentColor"}
+              />
+            }
             sx={{
               fontWeight: 600,
               borderRadius: "2px",
@@ -178,7 +214,7 @@ export default function Detalles3D({
               "&:hover": {
                 bgcolor: liked ? "#dc2626" : "rgba(239,68,68,0.05)",
                 color: liked ? "#fff" : "#ef4444",
-                borderColor: liked ? "#dc2626" : "#ef4444"
+                borderColor: liked ? "#dc2626" : "#ef4444",
               },
             }}
           >
@@ -188,7 +224,13 @@ export default function Detalles3D({
           <Button
             variant="outlined"
             size="small"
-            startIcon={<img src="/assets/icons/share.png" alt="Share" style={{ width: 16, height: 16, objectFit: 'contain', opacity: 0.7 }} />}
+            startIcon={
+              <img
+                src="/assets/icons/share.png"
+                alt="Share"
+                style={{ width: 16, height: 16, objectFit: "contain", opacity: 0.7 }}
+              />
+            }
             onClick={handleShareClick}
             sx={{
               fontWeight: 600,
@@ -202,36 +244,47 @@ export default function Detalles3D({
             {copied ? "¡Enlace copiado!" : "Compartir"}
           </Button>
 
-          {/* Menú desplegable de opciones de compartir */}
           <Menu
             anchorEl={anchorEl}
             open={shareOpen}
             onClose={handleShareClose}
-            anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-            transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+            anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+            transformOrigin={{ vertical: "top", horizontal: "left" }}
             PaperProps={{
               sx: {
                 mt: 1,
                 boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
                 borderRadius: "8px",
-                minWidth: 180
-              }
+                minWidth: 180,
+              },
             }}
           >
             <MenuItem onClick={handleCopyLink} sx={{ py: 1.2 }}>
               <ListItemIcon>
-                <img src="/assets/icons/link.png" alt="Link" style={{ width: 18, height: 18, objectFit: 'contain' }} />
+                <img
+                  src="/assets/icons/link.png"
+                  alt="Link"
+                  style={{ width: 18, height: 18, objectFit: "contain" }}
+                />
               </ListItemIcon>
-              <ListItemText primaryTypographyProps={{ fontSize: '0.9rem', fontWeight: 500 }}>
+              <ListItemText
+                primaryTypographyProps={{ fontSize: "0.9rem", fontWeight: 500 }}
+              >
                 Copiar enlace
               </ListItemText>
             </MenuItem>
 
             <MenuItem onClick={shareWhatsApp} sx={{ py: 1.2 }}>
               <ListItemIcon>
-                <img src="/assets/icons/whatsapp.png" alt="WhatsApp" style={{ width: 18, height: 18, objectFit: 'contain' }} />
+                <img
+                  src="/assets/icons/whatsapp.png"
+                  alt="WhatsApp"
+                  style={{ width: 18, height: 18, objectFit: "contain" }}
+                />
               </ListItemIcon>
-              <ListItemText primaryTypographyProps={{ fontSize: '0.9rem', fontWeight: 500 }}>
+              <ListItemText
+                primaryTypographyProps={{ fontSize: "0.9rem", fontWeight: 500 }}
+              >
                 WhatsApp
               </ListItemText>
             </MenuItem>
@@ -267,7 +320,10 @@ export default function Detalles3D({
                 border: "1px solid rgba(0, 43, 73, 0.2)",
               }}
             >
-              <Typography variant="subtitle2" sx={{ color: "#002B49", fontWeight: 800, mb: 0.5 }}>
+              <Typography
+                variant="subtitle2"
+                sx={{ color: "#002B49", fontWeight: 800, mb: 0.5 }}
+              >
                 {piezasMoviles.length} Pieza(s) Mecánica(s) Interactiva(s)
               </Typography>
               <Typography
@@ -288,7 +344,10 @@ export default function Detalles3D({
             >
               CREADOR
             </Typography>
-            <Typography variant="body1" sx={{ color: "#111827", fontWeight: 700, mt: 0.3 }}>
+            <Typography
+              variant="body1"
+              sx={{ color: "#111827", fontWeight: 700, mt: 0.3 }}
+            >
               {diseno.autor_nombre || "Sin autor"}
             </Typography>
           </Box>
@@ -300,8 +359,12 @@ export default function Detalles3D({
             >
               CARRERA Y CICLO
             </Typography>
-            <Typography variant="body1" sx={{ color: "#111827", fontWeight: 600, mt: 0.3 }}>
-              {diseno.carrera_nombre || "N/A"} - {diseno.ciclo_romano ? `Ciclo ${diseno.ciclo_romano}` : "N/A"}
+            <Typography
+              variant="body1"
+              sx={{ color: "#111827", fontWeight: 600, mt: 0.3 }}
+            >
+              {diseno.carrera_nombre || "N/A"} -{" "}
+              {diseno.ciclo_romano ? `Ciclo ${diseno.ciclo_romano}` : "N/A"}
             </Typography>
           </Box>
 
@@ -330,7 +393,7 @@ export default function Detalles3D({
                   "&:hover": {
                     bgcolor: "#001A2C",
                     boxShadow: "0 6px 20px rgba(0, 43, 73, 0.35)",
-                  }
+                  },
                 }}
               >
                 Descargar Modelo 3D

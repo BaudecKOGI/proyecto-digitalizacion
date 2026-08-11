@@ -7,6 +7,8 @@ import { fetchProyecto3DById } from "@/services/api";
 import Viewer3D from "./Viewer3D";
 import Detalles3D from "./Detalles3D";
 
+const API_BASE = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api";
+
 export default function Viewer3DPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -25,13 +27,12 @@ export default function Viewer3DPage() {
         const data = await fetchProyecto3DById(id, true);
         setDiseno(data);
 
-        // Registrar visita silenciosamente solo si no ha sido visto antes
         const viewed = JSON.parse(localStorage.getItem("viewed_3d_projects") || "[]");
-        if (!viewed.includes(id)) {
-          fetch(`http://127.0.0.1:8000/api/metricas/por-proyecto/${id}/view/`, {
+        if (!viewed.includes(String(id))) {
+          fetch(`${API_BASE}/metricas/por-proyecto/${id}/view/`, {
             method: "POST",
-          }).catch(() => { });
-          viewed.push(id);
+          }).catch(() => {});
+          viewed.push(String(id));
           localStorage.setItem("viewed_3d_projects", JSON.stringify(viewed));
         }
       } catch (err) {
@@ -46,13 +47,13 @@ export default function Viewer3DPage() {
 
   const handleShare = () => {
     const url = window.location.href;
-    navigator.clipboard?.writeText(url).catch(() => { });
+    navigator.clipboard?.writeText(url).catch(() => {});
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
 
-    fetch(`http://127.0.0.1:8000/api/metricas/por-proyecto/${id}/share/`, {
+    fetch(`${API_BASE}/metricas/por-proyecto/${id}/share/`, {
       method: "POST",
-    }).catch(() => { });
+    }).catch(() => {});
   };
 
   const toggleSidebar = (e) => {
@@ -61,7 +62,6 @@ export default function Viewer3DPage() {
     setSidebarOpen((prev) => !prev);
   };
 
-  // Estados de carga / error
   if (loading) {
     return (
       <Box
@@ -113,7 +113,6 @@ export default function Viewer3DPage() {
     );
   }
 
-  // Preparar datos del modelo
   let piezasMoviles = [];
   if (diseno.configuracion_interactiva) {
     let config = diseno.configuracion_interactiva;

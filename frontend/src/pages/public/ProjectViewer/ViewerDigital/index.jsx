@@ -7,6 +7,8 @@ import { fetchProyectoSoftwareById } from "@/services/api";
 import DigitalCanvas from "./DigitalCanvas";
 import DetallesDigital from "./DetallesDigital";
 
+const API_BASE = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api";
+
 export default function ViewerDigitalPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -23,17 +25,23 @@ export default function ViewerDigitalPage() {
         const data = await fetchProyectoSoftwareById(id, true);
         setProyecto(data);
 
-        // Evitar múltiples conteos de visualización
-        const viewed = JSON.parse(localStorage.getItem("viewed_digital_projects") || "[]");
-        if (!viewed.includes(id)) {
-          fetch(`http://127.0.0.1:8000/api/metricas/por-proyecto/${id}/view/`, {
+        const viewed = JSON.parse(
+          localStorage.getItem("viewed_digital_projects") || "[]"
+        );
+        if (!viewed.includes(String(id))) {
+          fetch(`${API_BASE}/metricas/por-proyecto/${id}/view/`, {
             method: "POST",
-          }).catch(() => { });
-          viewed.push(id);
-          localStorage.setItem("viewed_digital_projects", JSON.stringify(viewed));
+          }).catch(() => {});
+          viewed.push(String(id));
+          localStorage.setItem(
+            "viewed_digital_projects",
+            JSON.stringify(viewed)
+          );
         }
       } catch (err) {
-        setError("Error al cargar el proyecto. Puede que no exista o no sea público.");
+        setError(
+          "Error al cargar el proyecto. Puede que no exista o no sea público."
+        );
       } finally {
         setLoading(false);
       }
@@ -52,9 +60,27 @@ export default function ViewerDigitalPage() {
 
   if (loading) {
     return (
-      <Box sx={{ display: "flex", height: "100vh", alignItems: "center", justifyContent: "center", bgcolor: "#090D16", flexDirection: "column", gap: 3 }}>
+      <Box
+        sx={{
+          display: "flex",
+          height: "100vh",
+          alignItems: "center",
+          justifyContent: "center",
+          bgcolor: "#090D16",
+          flexDirection: "column",
+          gap: 3,
+        }}
+      >
         <CircularProgress size={48} sx={{ color: "#22d3ee" }} />
-        <Typography variant="body1" sx={{ color: "rgba(255,255,255,0.7)", fontWeight: 600, textTransform: "uppercase", letterSpacing: 2 }}>
+        <Typography
+          variant="body1"
+          sx={{
+            color: "rgba(255,255,255,0.7)",
+            fontWeight: 600,
+            textTransform: "uppercase",
+            letterSpacing: 2,
+          }}
+        >
           Cargando proyecto...
         </Typography>
       </Box>
@@ -63,7 +89,19 @@ export default function ViewerDigitalPage() {
 
   if (error || !proyecto) {
     return (
-      <Box sx={{ display: "flex", height: "100vh", alignItems: "center", justifyContent: "center", bgcolor: "#090D16", flexDirection: "column", gap: 2, textAlign: "center", px: 4 }}>
+      <Box
+        sx={{
+          display: "flex",
+          height: "100vh",
+          alignItems: "center",
+          justifyContent: "center",
+          bgcolor: "#090D16",
+          flexDirection: "column",
+          gap: 2,
+          textAlign: "center",
+          px: 4,
+        }}
+      >
         <Monitor size={56} color="rgba(255,255,255,0.3)" />
         <Typography variant="h5" sx={{ color: "white", fontWeight: 700, mt: 1 }}>
           {error || "Proyecto no encontrado"}
@@ -90,11 +128,8 @@ export default function ViewerDigitalPage() {
         sidebarOpen={sidebarOpen}
         toggleSidebar={toggleSidebar}
       />
-      
-      <DetallesDigital
-        proyecto={proyecto}
-        sidebarOpen={sidebarOpen}
-      />
+
+      <DetallesDigital proyecto={proyecto} sidebarOpen={sidebarOpen} />
     </Box>
   );
 }
