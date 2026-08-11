@@ -6,27 +6,23 @@ from pathlib import Path
 from datetime import timedelta
 import os
 import dj_database_url
+import cloudinary
 
-# Esta es la base de la app
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get(
     'SECRET_KEY',
     'django-insecure-c)yplo(9syh!lg&zl-z_8$sa6)3(1^#e#3=@iak*n9zjzf5sh*'
 )
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False').lower() in ('true', '1', 't')
 
-# Hosts: evita entradas vacías (causa errores si la env está vacía)
 ALLOWED_HOSTS = [
     h.strip()
     for h in os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
     if h.strip()
 ]
 
-# Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -35,15 +31,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # Estas son apps de terceros
     'rest_framework',
     'corsheaders',
 
-    # Cloudinary
-    'cloudinary',
+    # Cloudinary (orden como tu compañero)
     'cloudinary_storage',
+    'cloudinary',
 
-    # Local apps
     'usuarios',
     'proyectos',
     'analitica',
@@ -82,9 +76,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-# Database
-# Local: SQLite si no hay DATABASE_URL
-# Railway: Postgres vía DATABASE_URL
 DATABASES = {
     'default': dj_database_url.config(
         default=f'sqlite:///{BASE_DIR / "db.sqlite3"}',
@@ -93,7 +84,6 @@ DATABASES = {
     )
 }
 
-# Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -101,48 +91,45 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-# Internationalization
 LANGUAGE_CODE = 'es-pe'
 TIME_ZONE = 'America/Lima'
 USE_I18N = True
 USE_TZ = True
 
+# ---------------------------------------------------------------------------
+# Cloudinary (igual que tu compañero)
+# ---------------------------------------------------------------------------
+cloudinary.config(
+    cloud_name=os.environ.get('CLOUD_NAME'),
+    api_key=os.environ.get('CLOUD_API_KEY'),
+    api_secret=os.environ.get('CLOUD_API_SECRET'),
+    secure=True,
+)
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.environ.get('CLOUD_NAME'),
+    'API_KEY': os.environ.get('CLOUD_API_KEY'),
+    'API_SECRET': os.environ.get('CLOUD_API_SECRET'),
+}
+
+# Media siempre por Cloudinary (como tu compañero)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+STORAGES = {
+    'default': {
+        'BACKEND': 'cloudinary_storage.storage.MediaCloudinaryStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+    },
+}
+
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
-
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
-    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
-    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
-}
-
-# Storage por defecto: Cloudinary si hay credenciales, si no, disco local
-_default_storage = 'django.core.files.storage.FileSystemStorage'
-if all([CLOUDINARY_STORAGE['CLOUD_NAME'], CLOUDINARY_STORAGE['API_KEY'], CLOUDINARY_STORAGE['API_SECRET']]):
-    _default_storage = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-
-STORAGES = {
-    "default": {
-        "BACKEND": _default_storage,
-    },
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-    },
-}
-# Media URL (solo para referencia, Cloudinary genera su propia URL)
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
-
-# Custom user model
 AUTH_USER_MODEL = 'usuarios.Usuario'
 
-# ---------------------------------------------------------------------------
-# CORS / CSRF
-# Filtramos strings vacíos para evitar: corsheaders.E013 Origin ''
-# ---------------------------------------------------------------------------
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOW_CREDENTIALS = True
 
@@ -164,7 +151,6 @@ CSRF_TRUSTED_ORIGINS = [
     if o.strip()
 ]
 
-# Django REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
@@ -176,7 +162,6 @@ REST_FRAMEWORK = {
     ],
 }
 
-# JWT
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=7),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
@@ -185,7 +170,6 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
-# Email
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
 EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
@@ -193,10 +177,8 @@ EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True').lower() in ('true', '1',
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 
-# Frontend URL (links en emails, etc.)
 FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
 
-# Seguridad extra solo en producción
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SESSION_COOKIE_SECURE = True
