@@ -19,16 +19,15 @@ import {
   fetchTecnologias,
 } from '@/services/api';
 
-// Nuevos componentes separados
 import { GuiaPasos } from './components/GuiaPasos';
 import { FBXModelViewer } from './components/FBXModelViewer';
 import { ProyectoForm } from './components/ProyectoForm';
 
-// --- 3D ---
+// 3D
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Stage, Html } from '@react-three/drei';
 
-// --- COMPONENTE PRINCIPAL ---
+// COMPONENTE PRINCIPAL
 export default function CompletarProyectoPage() {
   const { token } = useParams();
   const navigate = useNavigate();
@@ -86,7 +85,7 @@ export default function CompletarProyectoPage() {
     loadData();
   }, [token]);
 
-  // --- LOGICA DE PASOS COMPLETADOS CORREGIDA ---
+  // LOGICA DE PASOS COMPLETADOS
   useEffect(() => {
     const is3D = invitacion?.tipo === '3D';
     let campos = {};

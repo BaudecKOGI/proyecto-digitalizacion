@@ -19,9 +19,6 @@ import {
 
 import { Tag as TagIcon } from "@phosphor-icons/react/dist/ssr/Tag";
 import { Folder as FolderIcon } from "@phosphor-icons/react/dist/ssr/Folder";
-import { Eye as EyeIcon } from "@phosphor-icons/react/dist/ssr/Eye";
-import { PencilSimple as EditIcon } from "@phosphor-icons/react/dist/ssr/PencilSimple";
-import { Trash as TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
 
 // Función auxiliar para generar un color de acento según la categoría
 function stringToColor(string) {
@@ -214,7 +211,7 @@ export default function CategoriasTable({
                         onClick={() => onView(cat)}
                         sx={{ color: "text.secondary", "&:hover": { color: "info.main" } }}
                       >
-                        <EyeIcon size={20} />
+                        <img src="/assets/icons/actions/detail.png" alt="Ver" style={{ width: 18, height: 18, objectFit: 'contain' }} />
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="Editar categoría">
@@ -222,7 +219,7 @@ export default function CategoriasTable({
                         onClick={() => onEdit(cat)}
                         sx={{ color: "text.secondary", "&:hover": { color: "primary.main" } }}
                       >
-                        <EditIcon size={20} />
+                        <img src="/assets/icons/actions/pencil.png" alt="Editar" style={{ width: 18, height: 18, objectFit: 'contain' }} />
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="Eliminar categoría">
@@ -230,7 +227,7 @@ export default function CategoriasTable({
                         onClick={() => onDelete(cat.id)}
                         sx={{ color: "text.secondary", "&:hover": { color: "error.main" } }}
                       >
-                        <TrashIcon size={20} />
+                        <img src="/assets/icons/actions/delete.png" alt="Eliminar" style={{ width: 18, height: 18, objectFit: 'contain' }} />
                       </IconButton>
                     </Tooltip>
                   </TableCell>

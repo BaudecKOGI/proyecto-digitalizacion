@@ -22,11 +22,8 @@ import {
   TablePagination
 } from "@mui/material";
 
-import { Eye as EyeIcon } from "@phosphor-icons/react/dist/ssr/Eye";
 import { MagnifyingGlass as SearchIcon } from "@phosphor-icons/react/dist/ssr/MagnifyingGlass";
 import { DashboardLoader } from "@/components/dashboard/layout/DashboardLoader";
-import { PencilSimple as EditIcon } from "@phosphor-icons/react/dist/ssr/PencilSimple";
-import { Trash as TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
 import { DotsThreeVertical } from "@phosphor-icons/react/dist/ssr/DotsThreeVertical";
 import { UserPlus as UserPlusIcon } from "@phosphor-icons/react/dist/ssr/UserPlus";
 import { Plus as PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
@@ -402,7 +399,7 @@ export default function EditoresTable({
           sx={{ fontSize: "0.85rem", fontWeight: 500, color: "#1E293B", py: 1 }}
         >
           <Box component="span" sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <EyeIcon size={18} color="#10B981" /> Ver
+            <img src="/assets/icons/actions/detail.png" alt="Ver" style={{ width: 18, height: 18, objectFit: 'contain' }} /> Ver
           </Box>
         </MenuItem>
         <MenuItem
@@ -413,7 +410,7 @@ export default function EditoresTable({
           sx={{ fontSize: "0.85rem", fontWeight: 500, color: "#1E293B", py: 1 }}
         >
           <Box component="span" sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <EditIcon size={18} color="#64748B" /> Editar
+            <img src="/assets/icons/actions/pencil.png" alt="Editar" style={{ width: 18, height: 18, objectFit: 'contain' }} /> Editar
           </Box>
         </MenuItem>
         <MenuItem
@@ -424,7 +421,7 @@ export default function EditoresTable({
           sx={{ fontSize: "0.85rem", fontWeight: 500, color: "#EF4444", py: 1 }}
         >
           <Box component="span" sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <TrashIcon size={18} color="#EF4444" /> Eliminar
+            <img src="/assets/icons/actions/delete.png" alt="Eliminar" style={{ width: 18, height: 18, objectFit: 'contain' }} /> Eliminar
           </Box>
         </MenuItem>
       </Menu>

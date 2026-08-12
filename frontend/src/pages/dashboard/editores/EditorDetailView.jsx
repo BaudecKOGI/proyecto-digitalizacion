@@ -31,8 +31,6 @@ import { ShieldCheck as RoleIcon } from "@phosphor-icons/react/dist/ssr/ShieldCh
 import { Cube as CubeIcon } from "@phosphor-icons/react/dist/ssr/Cube";
 import { Folder as FolderIcon } from "@phosphor-icons/react/dist/ssr/Folder";
 import { MagnifyingGlass as SearchIcon } from "@phosphor-icons/react/dist/ssr/MagnifyingGlass";
-import { PencilSimple as EditIcon } from "@phosphor-icons/react/dist/ssr/PencilSimple";
-import { Trash as TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
 import { Eye as EyeIcon } from "@phosphor-icons/react/dist/ssr/Eye";
 
 import {
@@ -449,7 +447,7 @@ export default function EditorDetailView({ editor, onBack, showSnackbar }) {
                               "&:hover": { color: "error.main", bgcolor: "error.lighter" }
                             }}
                           >
-                            <TrashIcon size={16} />
+                            <img src="/assets/icons/actions/delete.png" alt="Eliminar" style={{ width: 16, height: 16, objectFit: 'contain' }} />
                           </IconButton>
                         </Tooltip>
                       </Stack>

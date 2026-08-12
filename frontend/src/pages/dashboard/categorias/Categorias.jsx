@@ -34,9 +34,7 @@ import CategoriaFormModal from "./CategoriaFormModal";
 import CategoriaDeleteModal from "./CategoriaDeleteModal";
 import CategoriaDetailView from "./CategoriaDetailView";
 
-/**
- * GESTIÓN DE CATEGORÍAS
- */
+/* GESTIÓN DE CATEGORÍAS */
 export default function CategoriasPage() {
   const [categorias, setCategorias] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
@@ -204,7 +202,7 @@ export default function CategoriasPage() {
           <Typography variant="h4" sx={{ fontWeight: 800, color: "text.primary", mb: 0.5 }}>
             Gestión de Categorías
           </Typography>
-          <Typography variant="body1" color="text.secondary" fontWeight={500}>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
             Organiza y estructura las clasificaciones para modelos 3D y proyectos de desarrollo de software del FAB LAB.
           </Typography>
         </Box>
@@ -247,9 +245,9 @@ export default function CategoriasPage() {
           }}
         />
 
-        <Stack 
-          direction={{ xs: "column", sm: "row" }} 
-          alignItems={{ xs: "stretch", sm: "center" }} 
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          alignItems={{ xs: "stretch", sm: "center" }}
           spacing={3}
         >
           <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600, textAlign: { xs: "center", sm: "left" } }}>

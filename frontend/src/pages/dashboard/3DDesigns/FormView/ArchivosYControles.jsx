@@ -13,7 +13,24 @@ import {
   IconButton,
   Paper
 } from "@mui/material";
-import { Plus, Trash2, Upload } from "lucide-react";
+import { Plus, Trash2, Upload, Lightbulb, HelpCircle } from "lucide-react";
+import Tooltip, { tooltipClasses } from "@mui/material/Tooltip";
+import { styled } from "@mui/material/styles";
+
+const HtmlTooltip = styled(({ className, ...props }) => (
+  <Tooltip {...props} classes={{ popper: className }} />
+))(({ theme }) => ({
+  [`& .${tooltipClasses.tooltip}`]: {
+    backgroundColor: '#F8FAFC',
+    color: '#334155',
+    maxWidth: 280,
+    fontSize: theme.typography.pxToRem(12),
+    border: '1px solid #E2E8F0',
+    borderRadius: '8px',
+    padding: '12px',
+    boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+  },
+}));
 
 export default function ArchivosYControles({
   editingDiseno,
@@ -103,22 +120,53 @@ export default function ArchivosYControles({
           <Typography variant="body2" sx={labelSx}>
             Controles Mecánicos
           </Typography>
-          <Button
-            size="small"
-            variant="outlined"
-            startIcon={<Plus size={14} />}
-            onClick={agregarPieza}
-            sx={{
-              textTransform: "none",
-              fontWeight: 600,
-              borderRadius: "2px",
-              borderColor: "#002B49",
-              color: "#002B49",
-              "&:hover": { bgcolor: "rgba(0,43,73,0.04)" }
-            }}
-          >
-            Nueva Pieza
-          </Button>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <HtmlTooltip
+              title={
+                <React.Fragment>
+                  <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+                    <Lightbulb size={16} color="#002B49" />
+                    <Typography sx={{ fontWeight: 700, color: '#002B49', fontSize: '0.9rem' }}>
+                      Tips para piezas móviles
+                    </Typography>
+                  </Stack>
+                  <Typography variant="body2" sx={{ mb: 1 }}>
+                    • El <b>ID</b> debe coincidir con el nombre del componente de la pieza en Fusion 360.
+                  </Typography>
+                  <Typography variant="body2" sx={{ mb: 1 }}>
+                    • <b>Eje</b>: selecciona dirección de rotación (X, Y, Z).
+                  </Typography>
+                  <Typography variant="body2" sx={{ mb: 1 }}>
+                    • <b>Límites</b>: define el ángulo mínimo y máximo.
+                  </Typography>
+                  <Typography variant="body2">
+                    • <b>Invertir giro</b>: invierte la dirección del movimiento.
+                  </Typography>
+                </React.Fragment>
+              }
+              placement="left"
+            >
+              <IconButton size="small" sx={{ color: "#64748B", "&:hover": { color: "#002B49", bgcolor: "rgba(0,43,73,0.04)" } }}>
+                <HelpCircle size={20} />
+              </IconButton>
+            </HtmlTooltip>
+            <Button
+              size="small"
+              variant="outlined"
+              startIcon={<Plus size={14} />}
+              onClick={agregarPieza}
+              sx={{
+                textTransform: "none",
+                fontWeight: 600,
+                borderRadius: "2px",
+                borderColor: "#002B49",
+                color: "#002B49",
+                "&:hover": { bgcolor: "rgba(0,43,73,0.04)" }
+              }}
+            >
+              Nueva Pieza
+            </Button>
+          </Stack>
         </Stack>
 
         {piezasMoviles.length === 0 ? (

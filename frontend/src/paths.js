@@ -10,6 +10,7 @@ export const paths = {
         categorias: "/dashboard/categorias",
         carreras: "/dashboard/carreras",
         visualizaciones: "/dashboard/visualizaciones",
+        manual: "/dashboard/manual",
     },
     // Bloque del editor:
     editor: {

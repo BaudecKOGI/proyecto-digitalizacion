@@ -62,7 +62,7 @@ export default function EditorDeleteModal({
           variant="contained"
           disabled={submitting}
           sx={{
-            borderRadius: 1.5,
+            borderRadius: "2px",
             textTransform: "none",
             fontWeight: 600,
             boxShadow: "none"

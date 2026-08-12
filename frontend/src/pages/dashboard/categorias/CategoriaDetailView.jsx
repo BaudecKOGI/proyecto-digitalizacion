@@ -27,10 +27,7 @@ import { ArrowSquareOut as ExternalLinkIcon } from "@phosphor-icons/react/dist/s
 
 import { fetchProyectos3DAdmin, fetchProyectosSoftwareAdmin } from "@/services/api";
 
-/**
- * VISTA INTEGRADA (NO FLOTANTE) DEL DETALLE DE UNA CATEGORÍA
- * Muestra el contenido y los proyectos asociados directamente en la página principal.
- */
+// VISTA INTEGRADA DEL DETALLE DE UNA CATEGORÍA
 export default function CategoriaDetailView({ categoria, onBack }) {
   const [tabIndex, setTabIndex] = React.useState(0);
   const [loading, setLoading] = React.useState(true);
@@ -77,7 +74,7 @@ export default function CategoriaDetailView({ categoria, onBack }) {
   if (!categoria) return null;
 
   return (
-    <Box sx={{ pt: 0, pb: 6 }}>
+    <Box sx={{ pt: 0, pb: 6, maxWidth: 1360, margin: "0 auto" }}>
       {/* BOTÓN DE RETORNO AL LISTADO */}
       <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
         <Button
@@ -112,14 +109,14 @@ export default function CategoriaDetailView({ categoria, onBack }) {
           alignItems={{ xs: "flex-start", md: "center" }}
           spacing={3}
         >
-          <Stack direction="row" spacing={2.5} alignItems="center">
+          <Stack direction="row" spacing={{ xs: 1.5, sm: 2.5 }} alignItems="center">
             <Box
               component="img"
               src="/assets/tag.png"
               alt="Categoría"
               sx={{
-                width: 38,
-                height: 38,
+                width: { xs: 28, sm: 38 },
+                height: { xs: 28, sm: 38 },
                 ml: 1,
                 mr: 0.5,
                 objectFit: "contain"
@@ -127,32 +124,63 @@ export default function CategoriaDetailView({ categoria, onBack }) {
             />
             <Box>
               <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 0.5 }}>
-                <Typography variant="h4" sx={{ fontWeight: 800, color: "text.primary" }}>
+                <Typography
+                  variant="h4"
+                  sx={{
+                    fontWeight: 800,
+                    color: "text.primary",
+                    wordBreak: 'break-word',
+                    fontSize: { xs: '1.05rem', sm: '2.125rem' }
+                  }}
+                >
                   {categoria.nombre}
                 </Typography>
               </Stack>
-              <Typography variant="body1" color="text.secondary" fontWeight={500}>
+              <Typography
+                variant="body1"
+                color="text.secondary"
+                fontWeight={500}
+                sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}
+              >
                 {categoria.descripcion || "Categoría general en el catálogo del ecosistema digital FAB LAB."}
               </Typography>
             </Box>
           </Stack>
 
-          <Stack direction="row" spacing={1.5} alignItems="center">
+          <Stack
+            direction="row"
+            spacing={{ xs: 1, sm: 1.5 }}
+            alignItems="center"
+            sx={{ width: '100%', overflowX: 'auto' }}
+          >
             <Chip
-              icon={<CubeIcon size={16} weight="fill" />}
+              icon={<CubeIcon size={14} weight="fill" />}
               label={`${disenos3D.length} Modelos 3D`}
-              sx={{ fontWeight: 700, bgcolor: "action.hover", py: 2 }}
+              sx={{
+                fontWeight: 700,
+                bgcolor: "action.hover",
+                py: { xs: 0.5, sm: 2 },
+                fontSize: { xs: '0.7rem', sm: '0.875rem' },
+                height: 'auto'
+              }}
             />
             <Chip
-              icon={<CodeIcon size={16} weight="fill" />}
+              icon={<CodeIcon size={14} weight="fill" />}
               label={`${proyectosSoftware.length} Proyectos Digitales`}
-              sx={{ fontWeight: 700, bgcolor: "action.hover", py: 2 }}
+              sx={{
+                fontWeight: 700,
+                bgcolor: "action.hover",
+                py: { xs: 0.5, sm: 2 },
+                fontSize: { xs: '0.7rem', sm: '0.875rem' },
+                height: 'auto'
+              }}
             />
           </Stack>
+
         </Stack>
       </Paper>
 
-      {/* NAVEGACIÓN EN PESTAÑAS (TABS INTEGRADOS) */}
+      {/* NAVEGACIÓN EN PESTAÑAS */}
       <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 4 }}>
         <Tabs
           value={tabIndex}

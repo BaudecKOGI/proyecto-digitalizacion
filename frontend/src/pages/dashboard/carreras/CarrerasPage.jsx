@@ -13,7 +13,11 @@ import {
   Alert,
   Stack,
   Link,
-  Avatar
+  Avatar,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem
 } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 
@@ -38,6 +42,7 @@ export default function CarrerasPage() {
   const [carreras, setCarreras] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [searchTerm, setSearchTerm] = React.useState("");
+  const [statusFilter, setStatusFilter] = React.useState("ALL");
 
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
@@ -84,14 +89,25 @@ export default function CarrerasPage() {
   }, [loadCarreras]);
 
   const filteredCarreras = React.useMemo(() => {
-    if (!searchTerm.trim()) return carreras;
-    const query = searchTerm.toLowerCase().trim();
-    return carreras.filter((c) => {
-      const nombre = (c.nombre || "").toLowerCase();
-      const codigo = (c.codigo || "").toLowerCase();
-      return nombre.includes(query) || codigo.includes(query);
-    });
-  }, [carreras, searchTerm]);
+    let result = carreras;
+    
+    if (statusFilter === "ACTIVE") {
+      result = result.filter(c => c.activo === true);
+    } else if (statusFilter === "INACTIVE") {
+      result = result.filter(c => c.activo === false);
+    }
+
+    if (searchTerm.trim()) {
+      const query = searchTerm.toLowerCase().trim();
+      result = result.filter((c) => {
+        const nombre = (c.nombre || "").toLowerCase();
+        const codigo = (c.codigo || "").toLowerCase();
+        return nombre.includes(query) || codigo.includes(query);
+      });
+    }
+    
+    return result;
+  }, [carreras, searchTerm, statusFilter]);
 
   const paginatedCarreras = React.useMemo(() => {
     return filteredCarreras.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
@@ -303,57 +319,111 @@ export default function CarrerasPage() {
             Organiza y estructura las carreras para los proyectos del FAB LAB.
           </Typography>
         </Box>
-
-        <Button
-          variant="contained"
-          startIcon={<PlusIcon weight="bold" />}
-          onClick={handleOpenCreate}
-          elevation={0}
-          sx={{
-            bgcolor: "#002B49",
-            color: "#FFFFFF",
-            fontWeight: 600,
-            textTransform: "none",
-            borderRadius: "2px",
-            boxShadow: "none",
-            px: 3.5,
-            py: 1,
-            whiteSpace: "nowrap",
-            "&:hover": { bgcolor: "#001e33", boxShadow: "none" }
-          }}
-        >
-          Nueva Carrera
-        </Button>
       </Stack>
 
       <Box sx={{ borderBottom: "1px solid rgba(0, 0, 0, 0.06)", mb: 3 }} />
 
-      <Box sx={{ mb: 3, maxWidth: 400 }}>
-        <TextField
-          placeholder="Buscar carrera por nombre o código..."
-          label="Buscar"
-          value={searchTerm}
-          onChange={handleSearchChange}
-          size="small"
-          fullWidth
-          sx={{
-            "& .MuiOutlinedInput-root": {
-              bgcolor: "#FFFFFF",
+      {/* Barra de Acciones y Filtros */}
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", md: "row" },
+          justifyContent: "space-between",
+          alignItems: { xs: "stretch", md: "center" },
+          gap: 2,
+          mb: 3
+        }}
+      >
+        <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} alignItems="center">
+          <Button
+            variant="contained"
+            startIcon={<PlusIcon weight="bold" />}
+            onClick={handleOpenCreate}
+            elevation={0}
+            sx={{
+              bgcolor: "#002B49",
+              color: "#FFFFFF",
+              fontWeight: 600,
+              textTransform: "none",
               borderRadius: "2px",
-              "& fieldset": { borderColor: "rgba(0, 0, 0, 0.23)" },
-              "&:hover fieldset": { borderColor: "rgba(0, 0, 0, 0.4)" },
-              "&.Mui-focused fieldset": { borderColor: "#002B49" }
-            },
-            "& .MuiInputLabel-root.Mui-focused": { color: "#002B49" }
-          }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon size={18} color="#64748B" />
-              </InputAdornment>
-            )
-          }}
-        />
+              boxShadow: "none",
+              px: 3.5,
+              py: 1,
+              whiteSpace: "nowrap",
+              "&:hover": { bgcolor: "#001e33", boxShadow: "none" }
+            }}
+          >
+            Nueva Carrera
+          </Button>
+          <TextField
+            placeholder="Buscar carrera por nombre o código..."
+            label="Buscar"
+            value={searchTerm}
+            onChange={handleSearchChange}
+            size="small"
+            sx={{
+              width: { xs: "100%", sm: 300 },
+              "& .MuiOutlinedInput-root": {
+                bgcolor: "#FFFFFF",
+                borderRadius: "2px",
+                "& fieldset": { borderColor: "rgba(0, 0, 0, 0.23)" },
+                "&:hover fieldset": { borderColor: "rgba(0, 0, 0, 0.4)" },
+                "&.Mui-focused fieldset": { borderColor: "#002B49" }
+              },
+              "& .MuiInputLabel-root.Mui-focused": { color: "#002B49" }
+            }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon size={18} color="#64748B" />
+                </InputAdornment>
+              )
+            }}
+          />
+        </Stack>
+
+        <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap" useFlexGap>
+          <FormControl size="small" sx={{ minWidth: 160 }}>
+            <InputLabel>Estado</InputLabel>
+            <Select
+              value={statusFilter}
+              label="Estado"
+              onChange={(e) => {
+                setStatusFilter(e.target.value);
+                setPage(0);
+              }}
+            >
+              <MenuItem value="ALL">Todas las carreras</MenuItem>
+              <MenuItem value="ACTIVE">Activas</MenuItem>
+              <MenuItem value="INACTIVE">Inactivas</MenuItem>
+            </Select>
+          </FormControl>
+
+          {(searchTerm || statusFilter !== "ALL") && (
+            <Button
+              size="small"
+              variant="outlined"
+              color="inherit"
+              onClick={() => {
+                setSearchTerm("");
+                setStatusFilter("ALL");
+                setPage(0);
+              }}
+              sx={{
+                textTransform: "none",
+                fontWeight: 600,
+                borderRadius: "2px",
+                borderColor: "rgba(0, 0, 0, 0.23)",
+                color: "#475569",
+                px: 2,
+                py: 0.8,
+                "&:hover": { borderColor: "#002B49", bgcolor: "rgba(0, 43, 73, 0.04)", color: "#002B49" }
+              }}
+            >
+              Limpiar
+            </Button>
+          )}
+        </Stack>
       </Box>
 
       <CarrerasTable
@@ -371,7 +441,7 @@ export default function CarrerasPage() {
           setOpenDeleteDialog(true);
         }}
         onOpenCreate={handleOpenCreate}
-        onNavigate={navigate}  // <-- Pasamos navigate
+        onNavigate={navigate}
       />
 
       <CarreraFormModal

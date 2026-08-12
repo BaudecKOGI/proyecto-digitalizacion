@@ -26,9 +26,6 @@ import {
 
 import { DashboardLoader } from "@/components/dashboard/layout/DashboardLoader";
 
-import { Eye as ViewIcon } from "@phosphor-icons/react/dist/ssr/Eye";
-import { PencilSimple as EditIcon } from "@phosphor-icons/react/dist/ssr/PencilSimple";
-import { Trash as TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
 import { Cube as CubeIcon } from "@phosphor-icons/react/dist/ssr/Cube";
 
 import { ODS_LIST, OdsBadges } from "@/pages/dashboard/digitalProjects/odsData";
@@ -237,7 +234,7 @@ export default function Disenos3DTable({
                         onClick={() => onView(item)}
                         sx={{ color: "primary.main", bgcolor: "primary.50", "&:hover": { bgcolor: "primary.100" } }}
                       >
-                        <ViewIcon size={18} weight="bold" />
+                        <img src="/assets/icons/actions/detail.png" alt="Ver" style={{ width: 18, height: 18, objectFit: 'contain' }} />
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="Editar Diseño">
@@ -246,7 +243,7 @@ export default function Disenos3DTable({
                         onClick={() => onEdit(item)}
                         sx={{ color: "info.main", bgcolor: "info.50", "&:hover": { bgcolor: "info.100" } }}
                       >
-                        <EditIcon size={18} weight="bold" />
+                        <img src="/assets/icons/actions/pencil.png" alt="Editar" style={{ width: 18, height: 18, objectFit: 'contain' }} />
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="Eliminar">
@@ -255,7 +252,7 @@ export default function Disenos3DTable({
                         onClick={() => onDelete(item)}
                         sx={{ color: "error.main", bgcolor: "error.50", "&:hover": { bgcolor: "error.100" } }}
                       >
-                        <TrashIcon size={18} weight="bold" />
+                        <img src="/assets/icons/actions/delete.png" alt="Eliminar" style={{ width: 18, height: 18, objectFit: 'contain' }} />
                       </IconButton>
                     </Tooltip>
                   </Stack>
@@ -454,7 +451,7 @@ export default function Disenos3DTable({
               >
                 <Button
                   size="small"
-                  startIcon={<ViewIcon />}
+                  startIcon={<img src="/assets/icons/actions/detail.png" alt="Ver" style={{ width: 16, height: 16, objectFit: 'contain' }} />}
                   onClick={() => onView(item)}
                   sx={{ textTransform: "none", fontWeight: 700 }}
                 >
@@ -463,12 +460,12 @@ export default function Disenos3DTable({
                 <Stack direction="row" spacing={0.5}>
                   <Tooltip title="Editar">
                     <IconButton size="small" onClick={() => onEdit(item)} color="info">
-                      <EditIcon size={18} />
+                      <img src="/assets/icons/actions/pencil.png" alt="Editar" style={{ width: 18, height: 18, objectFit: 'contain' }} />
                     </IconButton>
                   </Tooltip>
                   <Tooltip title="Eliminar">
                     <IconButton size="small" onClick={() => onDelete(item)} color="error">
-                      <TrashIcon size={18} />
+                      <img src="/assets/icons/actions/delete.png" alt="Eliminar" style={{ width: 18, height: 18, objectFit: 'contain' }} />
                     </IconButton>
                   </Tooltip>
                 </Stack>

@@ -1,7 +1,6 @@
 import * as React from "react";
 import { Grid, Card, Box, Typography, Stack, IconButton, Checkbox, Tooltip, Fade } from "@mui/material";
 import { PencilSimple as EditIcon } from "@phosphor-icons/react/dist/ssr/PencilSimple";
-import { Trash as TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
 
 export default function TecnologiasGrid({ tecnologias, onEdit, onDelete, onDeleteMultiple }) {
   const [selected, setSelected] = React.useState([]);
@@ -47,7 +46,7 @@ export default function TecnologiasGrid({ tecnologias, onEdit, onDelete, onDelet
                 "&:hover": { bgcolor: "rgba(239, 68, 68, 0.16)" }
               }}
             >
-              <TrashIcon size={18} weight="bold" />
+              <img src="/assets/icons/actions/delete.png" alt="Eliminar" style={{ width: 18, height: 18, objectFit: 'contain' }} />
             </IconButton>
           </Tooltip>
         </Box>
@@ -105,10 +104,10 @@ export default function TecnologiasGrid({ tecnologias, onEdit, onDelete, onDelet
 
                 <Stack direction="row" spacing={0.5} sx={{ flexShrink: 0, ml: 1 }}>
                   <IconButton size="small" onClick={() => onEdit(tech)}>
-                    <EditIcon size={16} />
+                    <img src="/assets/icons/actions/pencil.png" alt="Editar" style={{ width: 16, height: 16, objectFit: 'contain' }} />
                   </IconButton>
                   <IconButton size="small" color="error" onClick={() => onDelete(tech.id)}>
-                    <TrashIcon size={16} />
+                    <img src="/assets/icons/actions/delete.png" alt="Eliminar" style={{ width: 16, height: 16, objectFit: 'contain' }} />
                   </IconButton>
                 </Stack>
               </Card>

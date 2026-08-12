@@ -17,8 +17,6 @@ import {
 import { ArrowLeft as BackIcon } from "@phosphor-icons/react/dist/ssr/ArrowLeft";
 import { GitBranch as GitIcon } from "@phosphor-icons/react/dist/ssr/GitBranch";
 import { Globe as GlobeIcon } from "@phosphor-icons/react/dist/ssr/Globe";
-import { PencilSimple as EditIcon } from "@phosphor-icons/react/dist/ssr/PencilSimple";
-import { Trash as TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
 import { VideoCameraSlash as NoVideoIcon } from "@phosphor-icons/react/dist/ssr/VideoCameraSlash";
 import { getODSById } from "./odsData";
 
@@ -145,7 +143,7 @@ export default function ProjectDetailView({ proyecto: propProyecto, onBack, onEd
           <Button
             variant="outlined"
             size="small"
-            startIcon={<EditIcon />}
+            startIcon={<img src="/assets/icons/actions/pencil.png" alt="Editar" style={{ width: 16, height: 16, objectFit: 'contain' }} />}
             onClick={handleEdit}
             sx={{ textTransform: "none", fontWeight: 600, borderRadius: 1.5 }}
           >
@@ -155,7 +153,7 @@ export default function ProjectDetailView({ proyecto: propProyecto, onBack, onEd
             variant="outlined"
             color="error"
             size="small"
-            startIcon={<TrashIcon />}
+            startIcon={<img src="/assets/icons/actions/delete.png" alt="Eliminar" style={{ width: 16, height: 16, objectFit: 'contain' }} />}
             onClick={handleDelete}
             sx={{ textTransform: "none", fontWeight: 600, borderRadius: 1.5 }}
           >
@@ -179,7 +177,7 @@ export default function ProjectDetailView({ proyecto: propProyecto, onBack, onEd
             }
             sx={{ fontWeight: 700, borderRadius: 1, fontSize: "0.75rem" }}
           />
-          
+
           {/* ODS MÚLTIPLES */}
           {proyecto.ods_detalle && proyecto.ods_detalle.length > 0 && (
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
@@ -265,11 +263,17 @@ export default function ProjectDetailView({ proyecto: propProyecto, onBack, onEd
                 sx={{
                   py: 10,
                   px: 4,
-                  textAlign: "center",
-                  color: "text.secondary"
+                  color: "text.secondary",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  textAlign: "center"
                 }}
               >
-                <NoVideoIcon size={40} style={{ opacity: 0.4, marginBottom: 12 }} />
+                <NoVideoIcon
+                  size={40}
+                  sx={{ opacity: 0.4, mb: 1.5 }}
+                />
                 <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                   Sin archivo de video ni imagen portada
                 </Typography>
@@ -309,7 +313,7 @@ export default function ProjectDetailView({ proyecto: propProyecto, onBack, onEd
           </Box>
         </Grid>
 
-        {/* COLUMNA DERECHA (33% - ESPECIFICACIONES TÉCNICAS Y STACK) */}
+        {/* COLUMNA DERECHA */}
         <Grid size={{ xs: 12, md: 4 }}>
           <Stack spacing={3}>
             {/* FICHA DE ESPECIFICACIONES */}
