@@ -12,6 +12,8 @@ import { ArrowClockwise as RefreshIcon } from "@phosphor-icons/react/dist/ssr/Ar
 import VisualizacionesChart from "./VisualizacionesChart";
 import MetricasRankingTable from "./MetricasRankingTable";
 
+const API_BASE = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api";
+
 export default function VisualizacionesPage() {
   const [metricas, setMetricas] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
@@ -19,13 +21,11 @@ export default function VisualizacionesPage() {
   const fetchMetricas = React.useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/metricas/");
+      const res = await fetch(`${API_BASE}/metricas/`);
       if (res.ok) {
         const data = await res.json();
         const lista = Array.isArray(data) ? data : data.results || [];
-        if (lista.length > 0) {
-          setMetricas(lista);
-        }
+        setMetricas(lista);
       }
     } catch (err) {
       console.error("No se pudieron cargar las métricas desde el servidor:", err);
