@@ -11,9 +11,10 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
-import { GearSixIcon } from "@phosphor-icons/react/dist/ssr/GearSix";
-import { SignOutIcon } from "@phosphor-icons/react/dist/ssr/SignOut";
-import { UserIcon } from "@phosphor-icons/react/dist/ssr/User";
+import { GearSix as GearSixIcon } from "@phosphor-icons/react/dist/ssr/GearSix";
+import { SignOut as SignOutIcon } from "@phosphor-icons/react/dist/ssr/SignOut";
+import { User as UserIcon } from "@phosphor-icons/react/dist/ssr/User";
+import { BookOpenText as BookUserIcon } from "@phosphor-icons/react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 
 import { paths } from "@/paths";
@@ -76,6 +77,14 @@ export function UserPopover({ anchorEl, onClose, open }) {
 					</ListItemIcon>
 					Perfil
 				</MenuItem>
+
+				<MenuItem component={RouterLink} to={paths.dashboard.manual} onClick={onClose}>
+					<ListItemIcon>
+						<BookUserIcon fontSize="var(--icon-fontSize-md)" />
+					</ListItemIcon>
+					Manual de usuario
+				</MenuItem>
+
 				<MenuItem onClick={() => setOpenLogoutModal(true)}>
 					<ListItemIcon>
 						<SignOutIcon fontSize="var(--icon-fontSize-md)" />

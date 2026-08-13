@@ -143,7 +143,7 @@ export function SideNav() {
 				</Box>
 			</Box>
 
-			{/* Modal de confirmación para cerrar sesión estilo imagen y adaptable en responsive */}
+			{/* Modal de confirmación para cerrar sesión */}
 			<Dialog
 				open={openLogoutModal}
 				onClose={() => setOpenLogoutModal(false)}

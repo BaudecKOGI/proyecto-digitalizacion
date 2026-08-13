@@ -1,8 +1,6 @@
 import React from "react";
-import { Box, Typography, Stack, Button, Link } from "@mui/material";
-import { Link as RouterLink } from "react-router-dom";
+import { Box, Typography, Stack, Button } from "@mui/material";
 import { Plus as PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
-import { Link2 } from "lucide-react";
 
 export default function Disenos3DHeader({ handleOpenCreate, setOpenInvitacionDialog }) {
   return (
@@ -48,7 +46,7 @@ export default function Disenos3DHeader({ handleOpenCreate, setOpenInvitacionDia
         <Button
           variant="outlined"
           size="medium"
-          startIcon={<Link2 size={18} />}
+          startIcon={<img src="/assets/icons/link.png" alt="Generar enlace" style={{ width: 18, height: 18, objectFit: 'contain' }} />}
           onClick={() => setOpenInvitacionDialog(true)}
           sx={{
             fontWeight: 600,

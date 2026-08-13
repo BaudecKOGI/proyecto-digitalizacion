@@ -13,9 +13,19 @@ import {
   Box
 } from "@mui/material";
 
-/**
- * MODAL DE CREACIÓN 
- */
+const generateSlug = (text) => {
+  return text
+    .toString()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/[^\w\-]+/g, "")
+    .replace(/\-\-+/g, "-");
+};
+
+// MODAL DE CREACIÓN
 export default function CategoriaFormModal({
   open,
   onClose,
@@ -69,7 +79,14 @@ export default function CategoriaFormModal({
                 required
                 placeholder="Ej. Robótica y Automática"
                 value={formData.nombre}
-                onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                onChange={(e) => {
+                  const newNombre = e.target.value;
+                  setFormData({ 
+                    ...formData, 
+                    nombre: newNombre,
+                    slug: generateSlug(newNombre)
+                  });
+                }}
                 sx={{
                   bgcolor: "#F8FAFC",
                   borderRadius: "2px 2px 0 0",

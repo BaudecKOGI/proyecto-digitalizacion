@@ -65,6 +65,7 @@ import CarrerasPage from "@/pages/dashboard/carreras/CarrerasPage";
 import CarreraDetailView from "@/pages/dashboard/carreras/CarreraDetailView";
 import CarreraCicloDetailView from "@/pages/dashboard/carreras/CarreraCicloDetailView";
 import VisualizacionesPage from "@/pages/dashboard/visualizaciones/Visualizaciones";
+import ManualPage from "@/pages/dashboard/manual/ManualPage";
 
 // PÁGINA PÚBLICA PARA COMPLETAR PROYECTO POR INVITACIÓN
 import CompletarProyectoPage from "@/pages/CompletarProyecto/CompletarProyectoPage";
@@ -199,6 +200,7 @@ export default function App() {
               path="visualizaciones"
               element={<VisualizacionesPage />}
             />
+            <Route path="manual" element={<ManualPage />} />
           </Route>
         </Route>
 

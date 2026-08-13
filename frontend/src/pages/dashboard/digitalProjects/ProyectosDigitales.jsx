@@ -19,10 +19,7 @@ import {
 } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 
-import { MagnifyingGlass as SearchIcon } from "@phosphor-icons/react/dist/ssr/MagnifyingGlass";
-import { Plus as PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
 import { DashboardLoader } from "@/components/dashboard/layout/DashboardLoader";
-import { FunnelX as ClearFilterIcon } from "@phosphor-icons/react/dist/ssr/FunnelX";
 import { Link2 } from "lucide-react";
 
 import {
@@ -39,14 +36,18 @@ import {
 
 import { ODS_LIST } from "./odsData";
 import ProyectosTable from "./ProyectosTable";
-import TecnologiasGrid from "./TecnologiasGrid";
+import TecnologiasGrid from "./tecnologia/TecnologiasGrid";
 import ProyectoFormModal from "./ProyectoFormModal";
-import TecnologiaFormModal from "./TecnologiaFormModal";
+import TecnologiaFormModal from "./tecnologia/TecnologiaFormModal";
 import ProjectDetailView from "./ProjectDetailView";
 import VideoPlayerModal from "./VideoPlayerModal";
 import ProyectoDeleteModal from "./ProyectoDeleteModal";
-import TecnologiaDeleteModal from "./TecnologiaDeleteModal";
+import TecnologiaDeleteModal from "./tecnologia/TecnologiaDeleteModal";
 import GenerarInvitacionDialog from "@/components/core/GenerarInvitacionDialog";
+
+import ProyectosDigitalesHeader from "./components/ProyectosDigitalesHeader";
+import ProyectosDigitalesTabs from "./components/ProyectosDigitalesTabs";
+import ProyectosDigitalesFilters from "./components/ProyectosDigitalesFilters";
 
 export default function ProyectosDigitalesPage() {
   const [activeTab, setActiveTab] = useState(0);
@@ -134,7 +135,6 @@ export default function ProyectosDigitalesPage() {
     setFilterOds("");
     setFilterCategoria("");
     setFilterEstado("");
-    // No reseteamos activeTab para no perder la pestaña
   };
 
   const hasActiveFilters = Boolean(searchTerm || filterOds || filterCategoria || filterEstado);
@@ -230,7 +230,7 @@ export default function ProyectosDigitalesPage() {
       formData.append("creado_por", formProyecto.creado_por);
 
       if (formProyecto.categoria) formData.append("categoria", formProyecto.categoria);
-      
+
       if (formProyecto.ods_ids && formProyecto.ods_ids.length > 0) {
         formData.append("ods_ids", JSON.stringify(formProyecto.ods_ids));
       }
@@ -370,314 +370,36 @@ export default function ProyectosDigitalesPage() {
         />
       ) : (
         <>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: { xs: "flex-start", sm: "center" },
-              mb: 4,
-              flexWrap: "wrap",
-              gap: 2
-            }}
-          >
-            <Box>
-              <Typography variant="h4" sx={{ fontWeight: 800, color: "text.primary", mb: 0.5 }}>
-                Gestión de Proyectos Digitales
-              </Typography>
-              <Typography variant="body1" color="text.secondary">
-                Administra proyectos digitales, repositorios, videos, tecnologías y ODS.
-              </Typography>
-            </Box>
+          <ProyectosDigitalesHeader
+            activeTab={activeTab}
+            handleOpenCreateProyecto={handleOpenCreateProyecto}
+            handleOpenCreateTech={handleOpenCreateTech}
+            setOpenInvitacionDialog={setOpenInvitacionDialog}
+          />
 
-            <Stack spacing={1} direction="column" alignItems="stretch" sx={{ minWidth: { xs: "100%", sm: 180 } }}>
-              {activeTab === 0 || activeTab === 2 ? (
-                <Button
-                  variant="contained"
-                  startIcon={<PlusIcon />}
-                  onClick={handleOpenCreateProyecto}
-                  sx={{
-                    borderRadius: "2px",
-                    textTransform: "none",
-                    fontWeight: 600,
-                    px: 3.5,
-                    py: 1,
-                    bgcolor: "#002B49",
-                    color: "#FFFFFF",
-                    boxShadow: "none",
-                    "&:hover": {
-                      bgcolor: "#001e33",
-                      boxShadow: "none"
-                    }
-                  }}
-                >
-                  Nuevo Proyecto Digital
-                </Button>
-              ) : (
-                <Button
-                  variant="contained"
-                  startIcon={<PlusIcon />}
-                  onClick={handleOpenCreateTech}
-                  sx={{
-                    borderRadius: "2px",
-                    textTransform: "none",
-                    fontWeight: 600,
-                    px: 3.5,
-                    py: 1,
-                    bgcolor: "#002B49",
-                    color: "#FFFFFF",
-                    boxShadow: "none",
-                    "&:hover": {
-                      bgcolor: "#001e33",
-                      boxShadow: "none"
-                    }
-                  }}
-                >
-                  Nueva Tecnología
-                </Button>
-              )}
-              <Button
-                variant="outlined"
-                startIcon={<Link2 size={18} />}
-                onClick={() => setOpenInvitacionDialog(true)}
-                sx={{
-                  borderRadius: "2px",
-                  textTransform: "none",
-                  fontWeight: 600,
-                  px: 3.5,
-                  py: 1,
-                  borderColor: "#002B49",
-                  color: "#002B49",
-                  "&:hover": {
-                    bgcolor: "rgba(0, 43, 73, 0.04)",
-                    borderColor: "#002B49"
-                  }
-                }}
-              >
-                Generar enlace
-              </Button>
-            </Stack>
-          </Box>
+          <ProyectosDigitalesTabs
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            proyectosCount={proyectos.length}
+            tecnologiasCount={tecnologias.length}
+            invitacionesCount={proyectosInvitacion.length}
+          />
 
-          <Box sx={{ borderBottom: "1px solid rgba(0, 0, 0, 0.08)", mb: 3.5 }}>
-            <Stack direction="row" spacing={4}>
-              {[
-                { label: `Proyectos Digitales: ${proyectos.length}`, value: 0 },
-                { label: `Catálogo de Tecnologías: ${tecnologias.length}`, value: 1 },
-                { label: `Invitaciones: ${proyectosInvitacion.length}`, value: 2 }
-              ].map((tab) => {
-                const isSelected = activeTab === tab.value;
-                return (
-                  <Box
-                    key={tab.value}
-                    onClick={() => setActiveTab(tab.value)}
-                    sx={{
-                      position: "relative",
-                      pb: 1.5,
-                      cursor: "pointer",
-                      color: isSelected ? "#111827" : "#94A3B8",
-                      fontWeight: isSelected ? 700 : 600,
-                      fontSize: "0.98rem",
-                      transition: "all 0.2s ease",
-                      "&:hover": {
-                        color: "#111827"
-                      },
-                      "&::after": isSelected
-                        ? {
-                          content: '""',
-                          position: "absolute",
-                          bottom: -1,
-                          left: 0,
-                          right: 0,
-                          height: "2.5px",
-                          backgroundColor: "#111827",
-                          borderRadius: "2px 2px 0 0"
-                        }
-                        : {}
-                    }}
-                  >
-                    {tab.label}
-                  </Box>
-                );
-              })}
-            </Stack>
-          </Box>
-
-          {/* Pestaña de Proyectos Digitales (TODOS los proyectos) */}
+          {/* Pestaña de Proyectos Digitales */}
           {(activeTab === 0 || activeTab === 2) && (
-            <Box
-              sx={{
-                mb: 3,
-                display: "flex",
-                flexWrap: "wrap",
-                gap: 2,
-                alignItems: "center"
-              }}
-            >
-                <TextField
-                  size="small"
-                  placeholder="Buscar por título, autor o carrera..."
-                  label="Buscar"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  sx={{
-                    minWidth: 260,
-                    flex: 1,
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "2px",
-                      bgcolor: "#FFFFFF",
-                      "& fieldset": { borderColor: "rgba(0, 0, 0, 0.23)" },
-                      "&:hover fieldset": { borderColor: "rgba(0, 0, 0, 0.4)" },
-                      "&.Mui-focused fieldset": { borderColor: "#002B49" }
-                    },
-                    "& .MuiInputLabel-root.Mui-focused": { color: "#002B49" }
-                  }}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SearchIcon size={20} color="#64748B" />
-                      </InputAdornment>
-                    )
-                  }}
-                />
-
-                <FormControl
-                  size="small"
-                  sx={{
-                    minWidth: 180,
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "2px",
-                      bgcolor: "#FFFFFF",
-                      "& fieldset": { borderColor: "rgba(0, 0, 0, 0.23)" },
-                      "&:hover fieldset": { borderColor: "rgba(0, 0, 0, 0.4)" },
-                      "&.Mui-focused fieldset": { borderColor: "#002B49" }
-                    },
-                    "& .MuiInputLabel-root.Mui-focused": { color: "#002B49" }
-                  }}
-                >
-                  <InputLabel>Filtrar ODS</InputLabel>
-                  <Select
-                    value={filterOds}
-                    label="Filtrar ODS"
-                    onChange={(e) => setFilterOds(e.target.value)}
-                    MenuProps={{
-                      PaperProps: {
-                        sx: {
-                          borderRadius: "6px",
-                          "& .MuiMenuItem-root.Mui-selected": {
-                            bgcolor: "#002B49",
-                            color: "#FFFFFF",
-                            "&:hover": { bgcolor: "#001e33" }
-                          }
-                        }
-                      }
-                    }}
-                  >
-                    <MenuItem value=""><em>Todos los ODS</em></MenuItem>
-                    {ODS_LIST.map((o) => (
-                      <MenuItem key={o.id} value={o.id}>{o.label}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-
-                <FormControl
-                  size="small"
-                  sx={{
-                    minWidth: 170,
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "2px",
-                      bgcolor: "#FFFFFF",
-                      "& fieldset": { borderColor: "rgba(0, 0, 0, 0.23)" },
-                      "&:hover fieldset": { borderColor: "rgba(0, 0, 0, 0.4)" },
-                      "&.Mui-focused fieldset": { borderColor: "#002B49" }
-                    },
-                    "& .MuiInputLabel-root.Mui-focused": { color: "#002B49" }
-                  }}
-                >
-                  <InputLabel>Categorías</InputLabel>
-                  <Select
-                    value={filterCategoria}
-                    label="Categorías"
-                    onChange={(e) => setFilterCategoria(e.target.value)}
-                    MenuProps={{
-                      PaperProps: {
-                        sx: {
-                          borderRadius: "6px",
-                          "& .MuiMenuItem-root.Mui-selected": {
-                            bgcolor: "#002B49",
-                            color: "#FFFFFF",
-                            "&:hover": { bgcolor: "#001e33" }
-                          }
-                        }
-                      }
-                    }}
-                  >
-                    <MenuItem value=""><em>Todas las Categorías</em></MenuItem>
-                    {categorias.map((c) => (
-                      <MenuItem key={c.id} value={c.id}>{c.nombre}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-
-                <FormControl
-                  size="small"
-                  sx={{
-                    minWidth: 140,
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "2px",
-                      bgcolor: "#FFFFFF",
-                      "& fieldset": { borderColor: "rgba(0, 0, 0, 0.23)" },
-                      "&:hover fieldset": { borderColor: "rgba(0, 0, 0, 0.4)" },
-                      "&.Mui-focused fieldset": { borderColor: "#002B49" }
-                    },
-                    "& .MuiInputLabel-root.Mui-focused": { color: "#002B49" }
-                  }}
-                >
-                  <InputLabel>Estado</InputLabel>
-                  <Select
-                    value={filterEstado}
-                    label="Estado"
-                    onChange={(e) => setFilterEstado(e.target.value)}
-                    MenuProps={{
-                      PaperProps: {
-                        sx: {
-                          borderRadius: "6px",
-                          "& .MuiMenuItem-root.Mui-selected": {
-                            bgcolor: "#002B49",
-                            color: "#FFFFFF",
-                            "&:hover": { bgcolor: "#001e33" }
-                          }
-                        }
-                      }
-                    }}
-                  >
-                    <MenuItem value=""><em>Todos</em></MenuItem>
-                    <MenuItem value="PUBLICADO">Publicado</MenuItem>
-                    <MenuItem value="BORRADOR">Borrador</MenuItem>
-                  </Select>
-                </FormControl>
-
-                {hasActiveFilters && (
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    color="inherit"
-                    startIcon={<ClearFilterIcon />}
-                    onClick={handleClearFilters}
-                    sx={{
-                      textTransform: "none",
-                      fontWeight: 600,
-                      borderRadius: "2px",
-                      borderColor: "rgba(0, 0, 0, 0.23)",
-                      color: "#475569",
-                      px: 2,
-                      py: 0.8,
-                      "&:hover": { borderColor: "#002B49", bgcolor: "rgba(0, 43, 73, 0.04)", color: "#002B49" }
-                    }}
-                  >
-                    Limpiar filtros
-                  </Button>
-                )}
-            </Box>
+            <ProyectosDigitalesFilters
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              filterOds={filterOds}
+              setFilterOds={setFilterOds}
+              filterCategoria={filterCategoria}
+              setFilterCategoria={setFilterCategoria}
+              filterEstado={filterEstado}
+              setFilterEstado={setFilterEstado}
+              categorias={categorias}
+              hasActiveFilters={hasActiveFilters}
+              handleClearFilters={handleClearFilters}
+            />
           )}
 
           {activeTab === 0 && (

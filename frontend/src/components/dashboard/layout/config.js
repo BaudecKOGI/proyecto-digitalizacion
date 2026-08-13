@@ -4,7 +4,7 @@ export function getNavItems() {
   let user = {};
   try {
     user = JSON.parse(localStorage.getItem("custom-auth-user") || "{}");
-  } catch (e) {}
+  } catch (e) { }
 
   const isEditor = user.rol === "EDITOR";
 
@@ -19,7 +19,7 @@ export function getNavItems() {
     },
     { key: "editores", title: "Editores", href: paths.dashboard.editores, icon: "users" },
     { key: "categorias", title: "Categorías", href: paths.dashboard.categorias, icon: "tag" },
-    { key: "carreras", title: "Carreras", href: paths.dashboard.carreras, icon: "graduation-cap" }, // NUEVO
+    { key: "carreras", title: "Carreras", href: paths.dashboard.carreras, icon: "graduation-cap" },
     { key: "visualizaciones", title: "Visualizaciones", href: paths.dashboard.visualizaciones, icon: "eye" },
     { key: "perfil", title: "Perfil", href: paths.dashboard.cuenta, icon: "user" },
   ];
@@ -42,7 +42,7 @@ export const navItems = [
   },
   { key: "editores", title: "Editores", href: paths.dashboard.editores, icon: "users" },
   { key: "categorias", title: "Categorías", href: paths.dashboard.categorias, icon: "tag" },
-  { key: "carreras", title: "Carreras", href: paths.dashboard.carreras, icon: "graduation-cap" }, // NUEVO
+  { key: "carreras", title: "Carreras", href: paths.dashboard.carreras, icon: "graduation-cap" },
   { key: "visualizaciones", title: "Visualizaciones", href: paths.dashboard.visualizaciones, icon: "eye" },
   { key: "perfil", title: "Perfil", href: paths.dashboard.cuenta, icon: "user" },
 ];

@@ -29,7 +29,6 @@ export default function Disenos3D() {
   const [categorias, setCategorias] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Pestañas: "3d" (todos) o "invitaciones"
   const [tabValue, setTabValue] = useState("3d");
 
   // Filtros
@@ -210,14 +209,14 @@ export default function Disenos3D() {
       } else if (categorias.length > 0) {
         formData.append("categoria", categorias[0].id);
       }
-      
+
       if (formDiseno.ods_ids && formDiseno.ods_ids.length > 0) {
         formData.append("ods_ids", JSON.stringify(formDiseno.ods_ids));
       }
 
       if (archivoFBX) formData.append("archivo_fbx", archivoFBX);
       if (imagenMiniatura) formData.append("imagen_miniatura", imagenMiniatura);
-      
+
       if (piezasMoviles && Array.isArray(piezasMoviles)) {
         const configuracionJSON = JSON.stringify({ piezas_moviles: piezasMoviles });
         formData.append("configuracion_interactiva", configuracionJSON);

@@ -215,9 +215,7 @@ export default function EditoresPage() {
     }
   };
 
-  // ------------------------------------------------------------
   // EXPORTACIONES
-  // ------------------------------------------------------------
   const handleExportExcel = () => {
     if (editores.length === 0) {
       showSnackbar("No hay editores para exportar", "warning");
@@ -251,7 +249,7 @@ export default function EditoresPage() {
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Editores");
-    XLSX.writeFile(wb, `editores_${new Date().toISOString().slice(0,10)}.xlsx`);
+    XLSX.writeFile(wb, `editores_${new Date().toISOString().slice(0, 10)}.xlsx`);
 
     showSnackbar("Exportación a Excel completada", "success");
     setExportAnchorEl(null);
@@ -301,7 +299,7 @@ export default function EditoresPage() {
       styles: { fontSize: 7, cellPadding: 1.5 },
       headStyles: { fillColor: [0, 43, 73], textColor: 255, fontSize: 8, fontStyle: "bold" },
       columnStyles: {
-        6: { cellWidth: 'auto' } // columna de proyectos más ancha
+        6: { cellWidth: 'auto' }
       },
       didDrawPage: (data) => {
         doc.setFontSize(8);
@@ -309,14 +307,12 @@ export default function EditoresPage() {
       }
     });
 
-    doc.save(`editores_${new Date().toISOString().slice(0,10)}.pdf`);
+    doc.save(`editores_${new Date().toISOString().slice(0, 10)}.pdf`);
     showSnackbar("Exportación a PDF completada", "success");
     setExportAnchorEl(null);
   };
 
-  // ------------------------------------------------------------
   // FILTRADO
-  // ------------------------------------------------------------
   const filteredEditores = React.useMemo(() => {
     return editores.filter((e) => {
       if (statusFilter === "ACTIVE" && !e.is_active) return false;
@@ -328,9 +324,7 @@ export default function EditoresPage() {
     });
   }, [editores, statusFilter, moreFilter]);
 
-  // ------------------------------------------------------------
   // RENDER
-  // ------------------------------------------------------------
   return (
     <Box sx={{ pb: 4, maxWidth: 1360, margin: "0 auto" }}>
       {viewingEditor ? (
@@ -359,9 +353,11 @@ export default function EditoresPage() {
               <Typography variant="h4" sx={{ fontWeight: 800, color: "text.primary", mb: 0.5 }}>
                 Gestión de Editores
               </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                Aquí encontrarás la información de los editores encargados de revisar los proyectos, así como sus estadísticas.
+              </Typography>
             </Box>
 
-            {/* Botón Exportar con menú */}
             <div>
               <Button
                 variant="contained"

@@ -26,7 +26,7 @@ export default function CategoriaDeleteModal({
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: 3,
+          borderRadius: "5px",
           p: 1,
           border: "1px solid",
           borderColor: "divider",
@@ -64,7 +64,7 @@ export default function CategoriaDeleteModal({
           color="error"
           variant="contained"
           disabled={submitting}
-          sx={{ borderRadius: 2, textTransform: "none", fontWeight: 700 }}
+          sx={{ borderRadius: "2px", textTransform: "none", fontWeight: 700 }}
         >
           {submitting ? <CircularProgress size={22} color="inherit" /> : "Sí, eliminar"}
         </Button>

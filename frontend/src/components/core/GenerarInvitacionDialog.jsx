@@ -144,6 +144,17 @@ export default function GenerarInvitacionDialog({ open, onClose, tipo, autorNomb
     })
     : "";
 
+  function handleShareWhatsApp() {
+    const text = `Hola ${resultado?.autor_nombre},\nPor favor completa los datos de tu proyecto ingresando al siguiente enlace:\n\n${link}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+  }
+
+  function handleShareEmail() {
+    const subject = "Enlace para completar tu proyecto - FabLab UC";
+    const body = `Hola ${resultado?.autor_nombre},\n\nPor favor completa los datos de tu proyecto ingresando al siguiente enlace:\n\n${link}\n\nNota: Este enlace vence el ${expiraTexto}.`;
+    window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, "_self");
+  }
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: "6px" } }}>
       <DialogContent sx={{ p: { xs: 3, sm: 4 } }}>
@@ -323,6 +334,41 @@ export default function GenerarInvitacionDialog({ open, onClose, tipo, autorNomb
                   startIcon={copiado ? <Check size={16} /> : <Copy size={16} />}
                 >
                   {copiado ? "Copiado" : "Copiar"}
+                </Button>
+              </Stack>
+
+              <Stack direction="row" spacing={1} sx={{ mt: 1.5 }}>
+                <Button
+                  variant="outlined"
+                  fullWidth
+                  onClick={handleShareWhatsApp}
+                  sx={{
+                    textTransform: "none",
+                    fontWeight: 600,
+                    borderRadius: "2px",
+                    borderColor: "#25D366",
+                    color: "#25D366",
+                    "&:hover": { borderColor: "#128C7E", bgcolor: "rgba(37,211,102,0.04)" }
+                  }}
+                  startIcon={<img src="/assets/icons/whatsapp.png" alt="WhatsApp" style={{ width: 18, height: 18, objectFit: 'contain' }} />}
+                >
+                  WhatsApp
+                </Button>
+                <Button
+                  variant="outlined"
+                  fullWidth
+                  onClick={handleShareEmail}
+                  sx={{
+                    textTransform: "none",
+                    fontWeight: 600,
+                    borderRadius: "2px",
+                    borderColor: "#64748B",
+                    color: "#475569",
+                    "&:hover": { borderColor: "#334155", bgcolor: "rgba(100,116,139,0.04)" }
+                  }}
+                  startIcon={<img src="/assets/icons/email.png" alt="Correo" style={{ width: 18, height: 18, objectFit: 'contain' }} />}
+                >
+                  Correo
                 </Button>
               </Stack>
             </Box>

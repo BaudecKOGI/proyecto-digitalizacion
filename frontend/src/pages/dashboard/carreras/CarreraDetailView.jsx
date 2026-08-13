@@ -1,5 +1,7 @@
 import * as React from "react";
 import { useParams, useNavigate } from "react-router-dom";
+
+
 import {
   Box,
   Typography,
@@ -18,7 +20,7 @@ import { Folder as FolderIcon } from "@phosphor-icons/react/dist/ssr/Folder";
 
 import { fetchProyectos3DAdmin, fetchProyectosSoftwareAdmin } from "@/services/api";
 
-// Helper para números romanos
+// Convierte números a números romanos
 const toRoman = (num) => {
   const romanos = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
   return romanos[num - 1] || num;
@@ -135,13 +137,13 @@ export default function CarreraDetailView() {
                     Ciclo {toRoman(ciclo)}
                   </Typography>
 
-                  <Stack direction="row" spacing={1.5} sx={{ mt: "auto" }}>
+                  <Stack direction={{ xs: "column", lg: "row" }} spacing={1.5} sx={{ mt: "auto" }}>
                     <Button
                       variant="outlined"
                       startIcon={<CubeIcon size={18} />}
                       disabled={!has3D}
                       onClick={() => {
-                        // CORREGIDO: orden /dashboard/carreras/:carrera/:tipo/:ciclo
+                        // Manteniendo el orden por ciclo
                         navigate(`/dashboard/carreras/${encodeURIComponent(carreraNombre)}/3d/${ciclo}`);
                       }}
                       sx={{
@@ -162,7 +164,7 @@ export default function CarreraDetailView() {
                       startIcon={<FolderIcon size={18} />}
                       disabled={!hasSoftware}
                       onClick={() => {
-                        // CORREGIDO: orden /dashboard/carreras/:carrera/:tipo/:ciclo
+                        // Manteniendo el orden por ciclo
                         navigate(`/dashboard/carreras/${encodeURIComponent(carreraNombre)}/software/${ciclo}`);
                       }}
                       sx={{

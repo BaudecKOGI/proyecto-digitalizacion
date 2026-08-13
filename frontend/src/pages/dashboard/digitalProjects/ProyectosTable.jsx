@@ -25,9 +25,6 @@ import {
   useMediaQuery
 } from "@mui/material";
 import { Plus as PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
-import { PencilSimple as EditIcon } from "@phosphor-icons/react/dist/ssr/PencilSimple";
-import { Trash as TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
-import { Eye as EyeIcon } from "@phosphor-icons/react/dist/ssr/Eye";
 import { Code as CodeIcon } from "@phosphor-icons/react/dist/ssr/Code";
 import { Globe as GlobeIcon } from "@phosphor-icons/react/dist/ssr/Globe";
 import { GitBranch as GitIcon } from "@phosphor-icons/react/dist/ssr/GitBranch";
@@ -202,17 +199,17 @@ export default function ProyectosTable({
                 <Button
                   size="small"
                   variant="outlined"
-                  startIcon={<EyeIcon />}
+                  startIcon={<img src="/assets/icons/actions/detail.png" alt="Ver" style={{ width: 16, height: 16, objectFit: 'contain' }} />}
                   onClick={() => onView(p)}
                   sx={{ textTransform: "none", fontWeight: 600, borderRadius: 2 }}
                 >
                   Ver Detalle
                 </Button>
                 <IconButton size="small" onClick={() => onEdit(p)} sx={{ color: "primary.main" }}>
-                  <EditIcon size={18} />
+                  <img src="/assets/icons/actions/pencil.png" alt="Editar" style={{ width: 18, height: 18, objectFit: 'contain' }} />
                 </IconButton>
                 <IconButton size="small" onClick={() => onDelete(p.id)} sx={{ color: "error.main" }}>
-                  <TrashIcon size={18} />
+                  <img src="/assets/icons/actions/delete.png" alt="Eliminar" style={{ width: 18, height: 18, objectFit: 'contain' }} />
                 </IconButton>
               </Stack>
             </Card>
@@ -432,7 +429,7 @@ export default function ProyectosTable({
                         "&:hover": { bgcolor: "rgba(99, 102, 241, 0.2)" }
                       }}
                     >
-                      <EyeIcon size={18} weight="bold" />
+                      <img src="/assets/icons/actions/detail.png" alt="Ver" style={{ width: 18, height: 18, objectFit: 'contain' }} />
                     </IconButton>
                   </Tooltip>
                   <Tooltip title="Editar proyecto">
@@ -441,7 +438,7 @@ export default function ProyectosTable({
                       onClick={() => onEdit(p)}
                       sx={{ color: "text.primary" }}
                     >
-                      <EditIcon size={18} />
+                      <img src="/assets/icons/actions/pencil.png" alt="Editar" style={{ width: 18, height: 18, objectFit: 'contain' }} />
                     </IconButton>
                   </Tooltip>
                   <Tooltip title="Eliminar">
@@ -450,7 +447,7 @@ export default function ProyectosTable({
                       onClick={() => onDelete(p.id)}
                       sx={{ color: "error.main" }}
                     >
-                      <TrashIcon size={18} />
+                      <img src="/assets/icons/actions/delete.png" alt="Eliminar" style={{ width: 18, height: 18, objectFit: 'contain' }} />
                     </IconButton>
                   </Tooltip>
                 </Stack>

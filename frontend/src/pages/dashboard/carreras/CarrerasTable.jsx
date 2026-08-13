@@ -19,11 +19,8 @@ import {
   Avatar
 } from "@mui/material";
 
-import { PencilSimple as EditIcon } from "@phosphor-icons/react/dist/ssr/PencilSimple";
 import { DotsThreeVertical } from "@phosphor-icons/react/dist/ssr/DotsThreeVertical";
 import { DashboardLoader } from "@/components/dashboard/layout/DashboardLoader";
-import { Trash as TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
-import { Eye as EyeIcon } from "@phosphor-icons/react/dist/ssr/Eye";
 import { GraduationCap as CarreraIcon } from "@phosphor-icons/react/dist/ssr/GraduationCap";
 
 function formatCreationDate(dateString) {
@@ -215,7 +212,7 @@ export default function CarrerasTable({
                           "&:hover": { bgcolor: "rgba(16, 185, 129, 0.08)" }
                         }}
                       >
-                        <EyeIcon size={18} />
+                        <img src="/assets/icons/actions/detail.png" alt="Ver" style={{ width: 16, height: 16, objectFit: 'contain' }} />
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="Editar carrera">
@@ -227,7 +224,7 @@ export default function CarrerasTable({
                           "&:hover": { color: "#002B49", bgcolor: "rgba(0, 43, 73, 0.04)" }
                         }}
                       >
-                        <EditIcon size={18} />
+                        <img src="/assets/icons/actions/pencil.png" alt="Editar" style={{ width: 16, height: 16, objectFit: 'contain' }} />
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="Eliminar carrera">
@@ -239,7 +236,7 @@ export default function CarrerasTable({
                           "&:hover": { color: "#EF4444", bgcolor: "rgba(239, 68, 68, 0.08)" }
                         }}
                       >
-                        <TrashIcon size={18} />
+                        <img src="/assets/icons/actions/delete.png" alt="Eliminar" style={{ width: 16, height: 16, objectFit: 'contain' }} />
                       </IconButton>
                     </Tooltip>
                   </Stack>

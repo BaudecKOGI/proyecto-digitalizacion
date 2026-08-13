@@ -15,8 +15,6 @@ import {
   CircularProgress
 } from "@mui/material";
 import { ArrowLeft as BackIcon } from "@phosphor-icons/react/dist/ssr/ArrowLeft";
-import { PencilSimple as EditIcon } from "@phosphor-icons/react/dist/ssr/PencilSimple";
-import { Trash as TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
 import { Cube as CubeIcon } from "@phosphor-icons/react/dist/ssr/Cube";
 import { Maximize2 } from "lucide-react";
 import { getODSById } from "@/pages/dashboard/digitalProjects/odsData";
@@ -163,7 +161,7 @@ export default function Diseno3DDetailView({ diseno: propDiseno, onBack, onEdit,
           <Button
             variant="outlined"
             color="primary"
-            startIcon={<EditIcon />}
+            startIcon={<img src="/assets/icons/actions/pencil.png" alt="Editar" style={{ width: 16, height: 16, objectFit: 'contain' }} />}
             onClick={handleEdit}
             sx={{ textTransform: "none", fontWeight: 700, borderRadius: 1.5 }}
           >
@@ -172,7 +170,7 @@ export default function Diseno3DDetailView({ diseno: propDiseno, onBack, onEdit,
           <Button
             variant="outlined"
             color="error"
-            startIcon={<TrashIcon />}
+            startIcon={<img src="/assets/icons/actions/delete.png" alt="Eliminar" style={{ width: 16, height: 16, objectFit: 'contain' }} />}
             onClick={handleDelete}
             sx={{ textTransform: "none", fontWeight: 700, borderRadius: 1.5 }}
           >
